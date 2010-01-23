@@ -16,6 +16,10 @@
 (deftest node_readlines
   (is (= (count (node-readlines test-fn-node)) 2)))
 
+(deftest let_bind
+  (is (= (find-bindings '(defn myfn [a] (let [a 1] (+ 1 a)))
+                    '(+ 1 a))
+         '[a])))
 
 (use-fixtures :once fixture)
 

@@ -7,6 +7,9 @@
 (defn arg-occurences [f-node extracted-node]
   (vec (filter #(not= % nil) (find-occurences (fn-args f-node) extracted-node))))
 
+(defn new-fn [name args body]
+  (conj '() body args name 'defn))
+
 (defn extract-method [fn-string extract-string new-name]
   "Extracts node out of root-node and replaces it with a
 function call to the extracted method. Only works on single arity root functions"
@@ -23,5 +26,3 @@ function call to the extracted method. Only works on single arity root functions
       (str (fun-call new-fun))
       fn-string))))
 
-(defn new-fn [name args body]
-  (conj '() body args name 'defn))

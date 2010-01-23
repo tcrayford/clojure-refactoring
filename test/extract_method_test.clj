@@ -20,11 +20,26 @@
 
 (deftest extract_method
   (is (= helper
-         end-src))
-  (is (=
-       (extract-method f-string
+         end-src)))
+
+(deftest removes_unused_args
+  (is (= (extract-method f-string
                        extract-string
                        "add-numbers")
        (str "(defn add-numbers [s] " extract-string ")
 
 (defn add [s a] (add-numbers s))"))))
+
+
+(deftest uses_variables_from_let
+  (is (= (extract-method
+          "(defn add [s]
+(let [a 1] (+ a 1)))" "(+ a 1)" "add-number")
+"(defn add-number [a] (+ a 1)
+
+(defn add [s]
+(let [a 1] (add-number a)))")))
+
+
+
+

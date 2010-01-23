@@ -1,5 +1,6 @@
 (ns clojure_refactoring.core
-  (use [clojure.contrib str-utils duck-streams seq-utils pprint]))
+  (:use [clojure.contrib str-utils duck-streams seq-utils pprint] clojure.walk)
+  (:require [clojure.zip :as z] [clojure.contrib.zip-filter :as zf]))
 
 (defn fn-args [node]
   "Returns (hopefully) the arglist for a function without variable arity
@@ -21,8 +22,23 @@ TODO: doesn't handle destructuring"
                  (or (find-occurences arg-set sub-node))
                  (arg-set sub-node))))))
 
+(defn let-node? [node]
+  (= 'let (first node)))
 
+ (defn find-bindings [node expr]
+   "Returns any let bindings above expr in node"
+   (for [sub-node node]
+     (if (seq? sub-node)
+       (if (and (let-node? node) (rec-contains? node expr))
+         (nth node 1)
+         (find-bindings sub-node expr)))))
 
-
-
-
+(defn rec-contains? [coll obj]
+  "True if coll contains obj at some level of nesting"
+  (some #(= % true)
+        (flatten (for [sub-node coll]
+                   (if (= sub-node obj)
+                     true
+                     (if (seq? sub-node)
+                       (rec-contains? sub-node obj)
+                       false))))))
