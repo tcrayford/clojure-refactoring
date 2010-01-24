@@ -81,3 +81,6 @@ For nested bindings, only contains the lowest value"
             (find-bindings (rest node) expr bnd-syms))))
           (set)
           (vec))))
+
+(defn add [s]
+  (+ s 1))

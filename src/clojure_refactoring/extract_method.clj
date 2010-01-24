@@ -6,9 +6,10 @@
   (conj (for [arg (fn-args f-node)] arg) (nth f-node 1)))
 
 (defn arg-occurences [f-node extracted-node]
-  "Finds the occurrences of bindings from f-node in the extracted node"
+  "Finds the occurrences of bindings from f-node in the extracted node.
+Works for binding forms in core/*binding-forms*"
   (vec (filter #(not= % nil)
-               (find-occurences (fn-args f-node)
+               (find-occurences (find-bindings f-node extracted-node)
                                 extracted-node))))
 
 (defn new-fn [name args body]
@@ -35,3 +36,11 @@ function call to the extracted method. Only works on single arity root functions
           (escaped-re-pattern extract-string)
           (str (fun-call new-fun))
           fn-string)))))
+
+(defn add [s]
+  (let [a 1] ))
+
+
+(extract-method "(defn add [s]
+  (let [a 1] (+ a 1)))
+"  "(+ a 1)"  "foo")

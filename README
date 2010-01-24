@@ -1,14 +1,15 @@
 # clojure-refactoring
 
-FIXME: write description
+The clojure side of clojure-refactoring.
+Provides several automated refactorings of clojure code. These are relatively rigorous, but can't account for scope, so use with a test suite.
 
 ## Usage
 
-FIXME: write
+
 
 ## Installation
 
-FIXME: write
+TODO: setup a clojars project for this
 
 ## License
 
