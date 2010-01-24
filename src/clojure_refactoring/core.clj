@@ -2,7 +2,8 @@
   (:use [clojure.contrib str-utils duck-streams seq-utils pprint] clojure.walk)
   (:require [clojure.zip :as z] [clojure.contrib.zip-filter :as zf]))
 
-
+(defn is-defn? [node]
+  (= (first node) 'defn))
 
 (defn fn-args [node]
   "Returns (hopefully) the arglist for a function without variable arity
@@ -21,23 +22,35 @@ TODO: doesn't handle destructuring"
                  (or (find-occurences arg-set sub-node))
                  (arg-set sub-node))))))
 
-(def *binding-forms* #{'let 'fn 'binding 'for 'doseq 'dotimes})
+(def *binding-forms* #{'let 'fn 'binding 'for 'doseq 'dotimes 'defn})
 
 (defn binding-node? [node]
   (if (*binding-forms* (first node)) true false))
+
+(defn evens [coll]
+  "Returns the even items of a collection"
+  (let [idxd (indexed coll)]
+    (->> idxd
+         (filter #(even? (first %)))
+         (map #(last %))
+         (vec))))
 
 (defn binding-form [node]
   "Returns a vector of bindings iff the node is a binding node"
   (if (binding-node? node) (fn-args node)))
 
+(defn bound-symbols [node]
+  (if (is-defn? node)
+    (binding-form node)
+    (evens (binding-form node))))
 
 (defn rec-occurrences [coll obj]
   (flatten (for [sub-node coll]
-                   (if (= sub-node obj)
-                     true
-                     (if (seq? sub-node)
-                       (rec-occurrences sub-node obj)
-                       false)))))
+             (if (= sub-node obj)
+               true
+               (if (seq? sub-node)
+                 (rec-occurrences sub-node obj)
+                 false)))))
 
 (defn rec-contains? [coll obj]
   "True if coll contains obj at some level of nesting"
@@ -46,21 +59,25 @@ TODO: doesn't handle destructuring"
 
 (defn last-binding-form? [node]
   "Returns true if there are no binding nodes inside node"
-  (if (and (binding-node? node)
-           (= (count
-               (filter #(not= % false) (rec-occurrences node 'let))) 1))
-    true
-    (rec-contains? node 'let)))
+  (and (binding-node? node)
+       (not
+        (some #(= % true)
+         (for [sym *binding-forms*]
+           (rec-contains? (rest node) sym))))))
 
-(defn find-bindings [node expr]
+(defn find-bindings
   "Returns any let bindings above expr in node
 For nested bindings, only contains the lowest value"
-  (vec
-   (filter #(if (not= % nil) %)
-           (flatten (for [sub-node node]
-                      (if (seq? sub-node)
-                        (if (and (binding-node? node)
-                                 (rec-contains? node expr)
-                                 (last-binding-form? node))
-                          (binding-form node)
-                          (find-bindings sub-node expr))))))))
+  ([node expr] (find-bindings node expr []))
+  ([node expr bnd-syms]
+     (->> (if (last-binding-form? node)
+        (into bnd-syms (bound-symbols node))
+        (if (binding-node? node)
+          (find-bindings (rest node)
+                         expr
+                         (into bnd-syms (bound-symbols node)))
+          (if (seq? (first node))
+            (find-bindings (first node) expr bnd-syms)
+            (find-bindings (rest node) expr bnd-syms))))
+          (set)
+          (vec))))

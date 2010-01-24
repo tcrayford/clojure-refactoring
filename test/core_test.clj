@@ -15,17 +15,41 @@
 (deftest fn_args
   (is (= (fn-args test-fn-node) ['msg])))
 
+(deftest is_defn?
+  (is (= (is-defn? '(defn foo [] 1)) true)))
+
 (deftest let_bind
   (is (= (find-bindings '(defn myfn [a] (let [a 1] (+ 1 a)))
                     '(+ 1 a))
-         '[a 1])))
+         '[a])))
+
+(deftest binding_form
+  (is (= (binding-form '(let [b 2] b)) '[b 2]))
+  (is (= (binding-form '(defn foo [a] a)) '[a])))
+
+(deftest bound_symbols
+  (is (= (bound-symbols '(let [b 2] b)) '[b]))
+  (is (= (bound-symbols '(defn foo [a b] (+ a b))) '[a b])))
+
+(deftest rec_contains?
+  (is (= (rec-contains? '(let [a 1] (let [b 2] (+ a b))) '(+ a b)) true))
+  (is (= (rec-contains? '(let [a 1] (+ a 2)) '(+ a 2)) true)))
 
 (deftest binding_node?
-  (is (= (binding-node? '(let [a 1] a)) true)))
+  (is (= (binding-node? '(let [a 1] a)) true))
+  (is (= (binding-node? '(defn myfn [a] (+ 1 a))) true))
+  (is (= (binding-node? '(let [a 1] (let [b 2] (+ a b)))) true))
+  (is (= (binding-node? (nth '(let [a 1] (let [b 2] (+ a b))) 2)) true)))
 
-(deftest no_other_binding_forms
-  (is (= (no-other-binding-forms '(let [a 1] a)) false))
-  (is (= (no-other-binding-forms '(+ 1 2)) nil)))
+(deftest last_binding_form?
+  (is (= (last-binding-form? '(let [a 1] a)) true))
+  (is (= (last-binding-form? '(+ 1 2)) false))
+  (is (= (last-binding-form? '(let [a 1] (fn [z] (+ z a)))) false))
+  (is (= (last-binding-form? '(let [a 1 (let [b 2] (+ a b))])))))
 
 (deftest find_bindings
-  (is (= (find-bindings '(defn myfn [a] (+ 1 a)) '(+ 1 a)) '[a])))
+  (is (= (find-bindings '(defn myfn [a] (+ 1 a)) '(+ 1 a)) '[a]))
+  (is (= (find-bindings '(let [a 1] a) 'a) '[a])))
+
+(deftest nested_binding
+  (is (= (find-bindings '(let [a 1] (let [b 2] (+ a b))) '(+ a b)) '[a b])))
