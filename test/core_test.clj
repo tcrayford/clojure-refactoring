@@ -10,6 +10,8 @@
 (def test-fn-node (read-string test-fn-string))
 (f))
 
+(use-fixtures :once fixture)
+
 (deftest fn_args
   (is (= (fn-args test-fn-node) ['msg])))
 
@@ -25,5 +27,5 @@
   (is (= (no-other-binding-forms '(let [a 1] a)) false))
   (is (= (no-other-binding-forms '(+ 1 2)) nil)))
 
-(use-fixtures :once fixture)
-
+(deftest find_bindings
+  (is (= (find-bindings '(defn myfn [a] (+ 1 a)) '(+ 1 a)) '[a])))

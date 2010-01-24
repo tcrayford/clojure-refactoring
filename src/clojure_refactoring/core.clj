@@ -9,8 +9,8 @@
 TODO: make this work with variable arity"
   (find-first #(vector? %) node))
 
-(defn pr-code [node]
-  (with-pprint-dispatch *code-dispatch* (pprint node)))
+(defn format-code [node]
+  (with-out-str (with-pprint-dispatch *code-dispatch* (pprint node))))
 
 (defn find-occurences [args node]
   "Looks for any occurence of each element of args in the node
@@ -21,10 +21,15 @@ TODO: doesn't handle destructuring"
                  (or (find-occurences arg-set sub-node))
                  (arg-set sub-node))))))
 
-(def *binding-forms* #{'let 'fn 'binding})
+(def *binding-forms* #{'let 'fn 'binding 'for 'doseq 'dotimes})
 
 (defn binding-node? [node]
   (if (*binding-forms* (first node)) true false))
+
+(defn binding-form [node]
+  "Returns a vector of bindings iff the node is a binding node"
+  (if (binding-node? node) (fn-args node)))
+
 
 (defn rec-occurrences [coll obj]
   (flatten (for [sub-node coll]
@@ -47,11 +52,9 @@ TODO: doesn't handle destructuring"
     true
     (rec-contains? node 'let)))
 
-
-
 (defn find-bindings [node expr]
   "Returns any let bindings above expr in node
-For nested bindings, only contains the top value"
+For nested bindings, only contains the lowest value"
   (vec
    (filter #(if (not= % nil) %)
            (flatten (for [sub-node node]
@@ -59,5 +62,5 @@ For nested bindings, only contains the top value"
                         (if (and (binding-node? node)
                                  (rec-contains? node expr)
                                  (last-binding-form? node))
-                          (nth node 1)
+                          (binding-form node)
                           (find-bindings sub-node expr))))))))
