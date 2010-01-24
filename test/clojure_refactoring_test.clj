@@ -13,13 +13,17 @@
 (deftest fn_args
   (is (= (fn-args test-fn-node) ['msg])))
 
-(deftest node_readlines
-  (is (= (count (node-readlines test-fn-node)) 2)))
-
 (deftest let_bind
   (is (= (find-bindings '(defn myfn [a] (let [a 1] (+ 1 a)))
                     '(+ 1 a))
-         '[a])))
+         '[a 1])))
+
+(deftest binding_node?
+  (is (= (binding-node? '(let [a 1] a)) true)))
+
+(deftest no_other_binding_forms
+  (is (= (no-other-binding-forms '(let [a 1] a)) false))
+  (is (= (no-other-binding-forms '(+ 1 2)) nil)))
 
 (use-fixtures :once fixture)
 
