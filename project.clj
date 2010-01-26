@@ -1,6 +1,6 @@
-(defproject leiningen "1.0.0-SNAPSHOT"
-  :description "FIXME: write"
+(defproject org.tcrayford.clojure_refactoring "0.0.1"
+  :description "Clojure side of a refactoring tool"
   :dependencies [[org.clojure/clojure "1.1.0-alpha-SNAPSHOT"]
-                 [org.clojure/clojure-contrib "1.0-SNAPSHOT"]]
-
-  :dev-dependencies [[leiningen/lein-swank "1.0.0-SNAPSHOT"]])
+                 [org.clojure/clojure-contrib "1.0-SNAPSHOT"]
+                 [leiningen/lein-swank "1.0.0-SNAPSHOT"]]
+  :dev-dependencies [[lein-clojars "0.5.0-SNAPSHOT"]])
