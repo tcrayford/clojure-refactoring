@@ -3,7 +3,6 @@
 
 (defn fixture [f]
   (def test-fn-string
-
        "(defn valid-message? [msg]
   (partial every? #(and (:user msg) (:text msg) (:id msg))))")
 

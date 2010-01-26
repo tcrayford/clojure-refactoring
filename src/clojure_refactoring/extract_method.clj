@@ -20,7 +20,7 @@ Works for binding forms in core/*binding-forms*"
    (java.util.regex.Pattern/quote s)))
 
 (defn extract-method [fn-string extract-string new-name]
-  "Extracts node out of root-node and replaces it with a
+  "Extracts extract-string out of fn-string and replaces it with a
 function call to the extracted method. Only works on single arity root functions"
   (let [function-node (read-string fn-string)
         extract-node (read-string extract-string)]
@@ -36,11 +36,3 @@ function call to the extracted method. Only works on single arity root functions
           (escaped-re-pattern extract-string)
           (str (fun-call new-fun))
           fn-string)))))
-
-(defn add [s]
-  (let [a 1] ))
-
-
-(extract-method "(defn add [s]
-  (let [a 1] (+ a 1)))
-"  "(+ a 1)"  "foo")
