@@ -8,6 +8,8 @@
 (defn format-code [node]
   (with-out-str (with-pprint-dispatch *code-dispatch* (pprint node))))
 
+(with-out-str (with-pprint-dispatch *code-dispatch* (pprint '(+ 1 2))))
+
 (defn find-occurences [args node]
   "Looks for any occurence of each element of args in the node
 TODO: doesn't handle destructuring"
