@@ -4,7 +4,7 @@
 (defn fixture [f]
   (def start-src "(reduce + (map #(Integer. %) s))")
   (def end-src "(->> s (map #(Integer. %)) (reduce +))\n")
-(f))
+  (f))
 
 (use-fixtures :once fixture #(time (%)))
 
@@ -14,3 +14,25 @@
 
 (deftest thread_first
   (is (= (thread-first "(+ (* c 1.8) 32)") "(-> c (* 1.8) (+ 32))\n")))
+
+(deftest thread_unthread
+  (is (= (thread-unthread
+
+          "(->>
+    sym
+    (rec-contains? (rest node))
+    (for [sym *binding-forms*])
+    (some #(= % true))
+    (not))")
+         "(not\n  (some\n    #(= % true)\n    (for [sym *binding-forms*] (rec-contains? (rest node) sym))))\n"))
+(is (= (thread-unthread
+
+          "(->>
+    1
+    (rec-contains? (rest node))
+    (for [sym *binding-forms*])
+    (some #(= % true))
+    (not))")
+         "(not\n  (some\n    #(= % true)\n    (for [sym *binding-forms*] (rec-contains? (rest node) 1))))\n"))
+
+  )

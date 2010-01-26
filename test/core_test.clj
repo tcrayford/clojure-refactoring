@@ -48,7 +48,8 @@
 
 (deftest find_bindings
   (is (= (find-bindings '(defn myfn [a] (+ 1 a)) '(+ 1 a)) '[a]))
-  (is (= (find-bindings '(let [a 1] a) 'a) '[a])))
+  (is (= (find-bindings '(let [a 1] a) 'a) '[a]))
+  (is (= (find-bindings '(defn add [s] (if (.contains s "//") "3" s)) '(if (.contains s "//") "3" s)) '[s])))
 
 (deftest nested_binding
   (is (= (find-bindings '(let [a 1] (let [b 2] (+ a b))) '(+ a b)) '[a b])))

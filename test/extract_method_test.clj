@@ -62,3 +62,10 @@
 (defn add [s]
 (for [x (split-string s)] (Integer. x)))"
 )))
+
+(deftest no_duplicated_bindings
+  (is (= (extract-method
+          "(defn a [s] (if (.contains s \",\") 1 s))"
+          "(if (.contains s \",\") 1 s)"
+          "b")
+"(defn b [s] (if (.contains s \",\") 1 s))\n\n(defn a [s] (b s))")))

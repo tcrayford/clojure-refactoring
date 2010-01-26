@@ -6,9 +6,8 @@
   (= (first node) 'defn))
 
 (defn format-code [node]
-  (with-out-str (with-pprint-dispatch *code-dispatch* (pprint node))))
-
-(with-out-str (with-pprint-dispatch *code-dispatch* (pprint '(+ 1 2))))
+  (with-out-str (with-pprint-dispatch *code-dispatch*
+                  (pprint node))))
 
 (defn find-occurences [args node]
   "Looks for any occurence of each element of args in the node
@@ -44,9 +43,11 @@ TODO: doesn't handle destructuring"
     (fn-args node)))
 
 (defn bound-symbols [node]
-  (if (is-defn? node)
-    (binding-form node)
-    (evens (binding-form node))))
+  (->> (if (is-defn? node)
+         (binding-form node)
+         (evens (binding-form node)))
+       (set)
+       (vec)))
 
 (defn rec-occurrences [coll obj]
   (flatten (for [sub-node coll]
@@ -64,10 +65,12 @@ TODO: doesn't handle destructuring"
 (defn last-binding-form? [node]
   "Returns true if there are no binding nodes inside node"
   (and (binding-node? node)
-       (not
-        (some #(= % true)
-              (for [sym *binding-forms*]
-                (rec-contains? (rest node) sym))))))
+       (->>
+        sym
+        (rec-contains? (rest node))
+        (for [sym *binding-forms*])
+        (some #(= % true))
+        (not))))
 
 (defn find-bindings
   "Returns any let bindings above expr in node"

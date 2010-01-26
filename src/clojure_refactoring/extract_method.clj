@@ -3,14 +3,18 @@
 
 (defn fun-call [f-node]
   "Won't work for multiple arity functions"
-  (conj (for [arg (fn-args f-node)] arg) (nth f-node 1)))
+  (conj (for [arg (fn-args f-node)] arg)
+        (nth f-node 1)))
 
 (defn arg-occurences [f-node extracted-node]
   "Finds the occurrences of bindings from f-node in the extracted node.
 Works for binding forms in core/*binding-forms*"
-  (vec (filter #(not= % nil)
-               (find-occurences (find-bindings f-node extracted-node)
-                                extracted-node))))
+  (->>
+   extracted-node
+   (find-occurences (find-bindings f-node extracted-node))
+   (filter #(not= % nil))
+   (set)
+   (vec)))
 
 (defn new-fn [name args body]
   (conj '() body args (symbol name) 'defn))
@@ -23,16 +27,16 @@ Works for binding forms in core/*binding-forms*"
   "Extracts extract-string out of fn-string and replaces it with a
 function call to the extracted method. Only works on single arity root functions"
   (let [function-node (read-string fn-string)
-        extract-node (read-string extract-string)]
-      (let [args (arg-occurences function-node
-                                 extract-node)
-            new-fun (new-fn new-name
-                            args
-                            extract-node)]
-        (str
-         (format-code new-fun)
-         "\n"
-         (re-gsub
-          (escaped-re-pattern extract-string)
-          (str (fun-call new-fun))
-          fn-string)))))
+        extract-node (read-string extract-string)
+        args (arg-occurences function-node
+                             extract-node)
+        new-fun (new-fn new-name
+                        args
+                        extract-node)]
+    (str
+     (format-code new-fun)
+     "\n"
+     (re-gsub
+      (escaped-re-pattern extract-string)
+      (str (fun-call new-fun))
+      fn-string))))
