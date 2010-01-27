@@ -1,17 +1,15 @@
-clojure-refactoring
----
-
-Provides several automated refactorings of clojure code. These are
-relatively rigorous, but use with a test suite and some manual
-checking (at this stage).
+Provides several automated refactorings of clojure code. 
+Use with a test suite and some manual
+checking.
 
 Available refactorings
 ----------------------
 
 Thread-last - threads the current expression via ->>
+
 Thread-first - threads the current expression via ->
-Unthread - unthreads the current expression.
-TODO: this only works with ->>
+
+Unthread - unthreads the current expression. TODO: this only works with ->>
 
 Extract-fn - extracts the current expression and replaces it with a
 call to it.
@@ -47,6 +45,9 @@ For example (inside project.clj)
     :dev-dependencies [[leiningen/lein-swank "1.0.0-SNAPSHOT"]
                        [clojure_refactoring "0.1.1"]]
 
+Known bugs
+---
+- Breaks if there are any \n newlines inside refactored code.
 
 License
 ---
