@@ -1,3 +1,5 @@
 pom-generated.xml
 Manifest.txt
-clojure-refactoring.jar
+clojure_refactoring.jar
+classes/
+lib/
