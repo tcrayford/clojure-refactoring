@@ -7,8 +7,12 @@ checking (at this stage).
 
 Available refactorings
 ----------------------
+
 Thread-last - threads the current expression via ->>
 Thread-first - threads the current expression via ->
+Unthread - unthreads the current expression.
+TODO: this only works with ->>
+
 Extract-fn - extracts the current expression and replaces it with a
 call to it.
 Extract global - defines the current expression as a global var for
@@ -16,7 +20,7 @@ this namespace (using def).
 
 Emacs dependancies
 ---
-Slime and a running clojure connection. Paredit, and thing at point.
+Slime, a running clojure connection, paredit, and thing at point.
 
 Usage
 ---
@@ -24,7 +28,7 @@ Usage
 Bind a key to clojure-refactoring-ido, and make sure you select
 what you want to operate on first.
 
-eg:
+Example keybinding:
     (global-set-key (kbd "s-e") 'clojure-refactoring-ido)
 
 Eval the file clojure-refactoring-mode.el inside emacs.
