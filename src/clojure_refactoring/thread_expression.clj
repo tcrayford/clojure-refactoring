@@ -39,7 +39,7 @@
     (list (apply conj inner (reverse-seq (first outer))))))
 
 (defn unthread-last [code]
-  "Unthread an expression threaded with ->>. Fails if the first argument to ->> is a symbol"
+  "Unthread an expression threaded with ->>."
   (loop [node (read-string code) new-node '()]
     (if (= (first node) '->>)
       (recur (rest node) '())
@@ -47,6 +47,21 @@
         (first new-node)
         (recur (rest node)
                (wrap new-node node))))))
+
+(defn unthread-first [code]
+  (loop [node (read-string code) new-node '()]
+    (if (= (first node) '->)
+      (recur (rest node) '())
+      (if (= (count node) 0)
+        (first new-node)
+        (recur (rest node)
+               (wrap new-node node))))))
+
+(eval (unthread-first
+       (format-code '(-> 1
+                         (/ 32)
+                         (* 1.8 2 3)
+                         (+ 42)))))
 
 (defn thread-unthread [code]
   "Takes an expression starting with ->> or -> and unthreads it"
