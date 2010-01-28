@@ -17,14 +17,11 @@
 
 (deftest thread_unthread
   (is (= (thread-unthread
-
           "(->>
     sym
-    (rec-contains? (rest node))
-    (for [sym *binding-forms*])
     (some #(= % true))
     (not))")
-         "(not\n  (some\n    #(= % true)\n    (for [sym *binding-forms*] (rec-contains? (rest node) sym))))\n"))
+         "(not (some #(= % true) sym))\n"))
 (is (= (thread-unthread
 
           "(->>
@@ -33,6 +30,17 @@
     (for [sym *binding-forms*])
     (some #(= % true))
     (not))")
-         "(not\n  (some\n    #(= % true)\n    (for [sym *binding-forms*] (rec-contains? (rest node) 1))))\n"))
+"(not\n  (some\n    #(= % true)\n    (for [sym *binding-forms*] (rec-contains? (rest node) 1))))\n"
 
-  )
+
+
+         ))
+
+)
+
+
+
+;; (not  (some    #(= % true)    (for [sym *binding-forms*] (rec-contains? (rest node) 1 ()))))
+
+
+;; (not  (some    #(= % true)    (for [sym *binding-forms*] (rec-contains? (rest node) 1))))

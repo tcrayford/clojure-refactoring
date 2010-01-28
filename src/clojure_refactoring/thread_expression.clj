@@ -34,9 +34,11 @@
 
 (defn wrap [inner outer]
   "Wraps the inner collection in the outer one."
-  (if (not (seq? (first outer)))
-    (apply conj inner (reverse-seq (first outer)))
-    (list (apply conj inner (reverse-seq (first outer))))))
+  (if (not (seq? outer))
+    (apply conj inner (reverse-seq outer))
+    (list (apply conj inner (reverse-seq outer)))))
+
+
 
 (defn unthread-last [code]
   "Unthread an expression threaded with ->>."
@@ -46,7 +48,7 @@
       (if (= (count node) 0)
         (first new-node)
         (recur (rest node)
-               (wrap new-node node))))))
+               (wrap new-node (first node)))))))
 
 (defn unthread-first [code]
   (loop [node (read-string code) new-node '()]
@@ -57,11 +59,7 @@
         (recur (rest node)
                (wrap new-node node))))))
 
-(eval (unthread-first
-       (format-code '(-> 1
-                         (/ 32)
-                         (* 1.8 2 3)
-                         (+ 42)))))
+
 
 (defn thread-unthread [code]
   "Takes an expression starting with ->> or -> and unthreads it"
@@ -69,10 +67,3 @@
    (if (.contains code "->>")
      (unthread-last code)
      (Exception. "No threading expressions found"))))
-
-(thread-unthread
- (format-code '(->> sym
-                    (rec-contains? (rest node))
-                    (for [sym *binding-forms*])
-                    (some #(= % true))
-                    (not))))
