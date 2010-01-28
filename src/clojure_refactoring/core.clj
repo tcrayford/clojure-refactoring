@@ -52,7 +52,6 @@ TODO: doesn't handle destructuring"
      (binding-form node)
      (evens (binding-form node)))))
 
-
 (defn rec-contains? [coll obj]
   "True if coll contains obj at some level of nesting"
   (some #(= % true)
@@ -90,4 +89,5 @@ TODO: doesn't handle destructuring"
           (if (seq? (first node))
             (find-bindings (first node) expr bnd-syms)
             (find-bindings (rest node) expr bnd-syms)))))))
+
 
