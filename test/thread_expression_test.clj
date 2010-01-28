@@ -30,17 +30,4 @@
     (for [sym *binding-forms*])
     (some #(= % true))
     (not))")
-"(not\n  (some\n    #(= % true)\n    (for [sym *binding-forms*] (rec-contains? (rest node) 1))))\n"
-
-
-
-         ))
-
-)
-
-
-
-;; (not  (some    #(= % true)    (for [sym *binding-forms*] (rec-contains? (rest node) 1 ()))))
-
-
-;; (not  (some    #(= % true)    (for [sym *binding-forms*] (rec-contains? (rest node) 1))))
+"(not\n  (some\n    #(= % true)\n    (for [sym *binding-forms*] (rec-contains? (rest node) 1))))\n")))

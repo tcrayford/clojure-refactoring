@@ -35,32 +35,33 @@ TODO: doesn't handle destructuring"
        (map #(last %))
        (vec)))
 
-(defn fn-args [node] (find-first #(vector? %) node))
+(defn fn-args [node]
+  (find-first #(vector? %) node))
 
 (defn binding-form [node]
   "Returns a vector of bindings iff the node is a binding node. Won't work with multiple arity defns"
   (if (binding-node? node)
     (fn-args node)))
 
-(defn bound-symbols [node]
-  (->> (if (is-defn? node)
-         (binding-form node)
-         (evens (binding-form node)))
-       (set)
-       (vec)))
+(defn unique-vec [v]
+  (vec (set v)))
 
-(defn rec-occurrences [coll obj]
-  (flatten (for [sub-node coll]
-             (if (= sub-node obj)
-               true
-               (if (seq? sub-node)
-                 (rec-occurrences sub-node obj)
-                 false)))))
+(defn bound-symbols [node]
+  (unique-vec
+   (if (is-defn? node)
+     (binding-form node)
+     (evens (binding-form node)))))
+
 
 (defn rec-contains? [coll obj]
   "True if coll contains obj at some level of nesting"
   (some #(= % true)
-        (rec-occurrences coll obj)))
+        (flatten (for [sub-node coll]
+                   (if (= sub-node obj)
+                     true
+                     (if (seq? sub-node)
+                       (rec-find sub-node obj)
+                       false))))))
 
 (defn last-binding-form? [node]
   "Returns true if there are no binding nodes inside node"
@@ -72,18 +73,21 @@ TODO: doesn't handle destructuring"
         (some #(= % true))
         (not))))
 
+(defn add-binding-form [node bnd-syms]
+  (into bnd-syms (bound-symbols node)))
+
 (defn find-bindings
   "Returns any let bindings above expr in node"
   ([node expr] (find-bindings node expr []))
   ([node expr bnd-syms]
-     (->> (if (last-binding-form? node)
-            (into bnd-syms (bound-symbols node))
-            (if (binding-node? node)
-              (find-bindings (rest node)
-                             expr
-                             (into bnd-syms (bound-symbols node)))
-              (if (seq? (first node))
-                (find-bindings (first node) expr bnd-syms)
-                (find-bindings (rest node) expr bnd-syms))))
-          (set)
-          (vec))))
+     (unique-vec
+      (if (last-binding-form? node)
+        (add-binding-form node bnd-syms)
+        (if (binding-node? node)
+          (find-bindings (rest node)
+                         expr
+                         (add-binding-form node bnd-syms))
+          (if (seq? (first node))
+            (find-bindings (first node) expr bnd-syms)
+            (find-bindings (rest node) expr bnd-syms)))))))
+
