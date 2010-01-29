@@ -1,6 +1,5 @@
 (ns clojure_refactoring.core
-  (:use [clojure.contrib str-utils duck-streams seq-utils pprint] clojure.walk)
-  (:require [clojure.zip :as z] [clojure.contrib.zip-filter :as zf]))
+  (:use [clojure.contrib str-utils duck-streams seq-utils pprint] clojure.walk))
 
 (defn is-defn? [node]
   (= (first node) 'defn))
