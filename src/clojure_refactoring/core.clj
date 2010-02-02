@@ -10,7 +10,7 @@
 
 (defn find-occurences [args node]
   "Looks for any occurence of each element of args in the node
-TODO: doesn't handle destructuring"
+TODO: doesn't handle destructuring properly"
   (flatten (loop [arg-set (set args) node node]
              (for [sub-node node]
                (if (seq? sub-node)
@@ -58,7 +58,7 @@ TODO: doesn't handle destructuring"
                    (if (= sub-node obj)
                      true
                      (if (seq? sub-node)
-                       (rec-find sub-node obj)
+                       (rec-contains? sub-node obj)
                        false))))))
 
 (defn last-binding-form? [node]

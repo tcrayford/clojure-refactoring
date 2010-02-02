@@ -32,38 +32,30 @@
 (defn reverse-seq [coll]
   (if (seq? coll)  (reverse coll) (list coll)))
 
-(defn wrap [inner outer]
+(defn wrap [inner [outer]]
   "Wraps the inner collection in the outer one."
   (if (not (seq? outer))
     (apply conj inner (reverse-seq outer))
     (list (apply conj inner (reverse-seq outer)))))
 
-
-
-(defn unthread-last [code]
+(defn- unthread-last [code]
   "Unthread an expression threaded with ->>."
-  (loop [node (read-string code) new-node '()]
-    (if (= (first node) '->>)
-      (recur (rest node) '())
-      (if (= (count node) 0)
-        (first new-node)
-        (recur (rest node)
-               (wrap new-node (first node)))))))
+  (loop [[_ & node] (read-string code) new-node '()]
+    (if (= (count node) 0)
+      (first new-node)
+      (recur (rest node)
+             (wrap new-node node)))))
 
-(defn unthread-first [code]
-  (loop [node (read-string code) new-node '()]
-    (if (= (first node) '->)
-      (recur (rest node) '())
-      (if (= (count node) 0)
-        (first new-node)
-        (recur (rest node)
-               (wrap new-node node))))))
-
-
+(defn- unthread-first [code]
+  (loop [[_ & node] (read-string code) new-node '()]
+    (if (= (count node) 0)
+      new-node
+      (recur (rest node)
+             (concat (list (first (first node)) new-node) (drop 1 (first node)))))))
 
 (defn thread-unthread [code]
   "Takes an expression starting with ->> or -> and unthreads it"
   (format-code
-   (if (.contains code "->>")
-     (unthread-last code)
-     (Exception. "No threading expressions found"))))
+   (cond (.contains code "->>") (unthread-last code)
+         (.contains code "->") (unthread-first code)
+         :else (Exception. "No threading expressions found"))))

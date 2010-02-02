@@ -15,13 +15,12 @@
 (deftest thread_first
   (is (= (thread-first "(+ (* c 1.8) 32)") "(-> c (* 1.8) (+ 32))\n")))
 
-(deftest thread_unthread
+(deftest thread_unthread_last
   (is (= (thread-unthread
           "(->>
     sym
-    (some #(= % true))
-    (not))")
-         "(not (some #(= % true) sym))\n"))
+    (/ 1)")
+         "(/ 1 sym)\n"))
 (is (= (thread-unthread
 
           "(->>
@@ -31,3 +30,9 @@
     (some #(= % true))
     (not))")
 "(not\n  (some\n    #(= % true)\n    (for [sym *binding-forms*] (rec-contains? (rest node) 1))))\n")))
+
+(deftest thread_unthread_last
+  (is (= (thread-unthread
+          "(-> 1
+(/ 2))")
+         "(/ 1 2)")))
