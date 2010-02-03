@@ -13,15 +13,23 @@ Works for binding forms in core/*binding-forms*"
    extracted-node
    (find-occurences (find-bindings f-node extracted-node))
    (filter #(not= % nil))
-   (set)
-   (vec)))
+   (unique-vec)))
 
 (defn new-fn [name args body]
   (conj '() body args (symbol name) 'defn))
 
-(defn escaped-re-pattern [s]
+(defn quote-re [s]
   (re-pattern
    (java.util.regex.Pattern/quote s)))
+
+(defn format-output [extract-string fn-string new-fun]
+  (str
+    (format-code new-fun)
+    "\n"
+    (re-gsub
+      (quote-re extract-string)
+      (str (fun-call new-fun))
+      fn-string)))
 
 (defn extract-method [fn-string extract-string new-name]
   "Extracts extract-string out of fn-string and replaces it with a
@@ -33,10 +41,5 @@ function call to the extracted method. Only works on single arity root functions
         new-fun (new-fn new-name
                         args
                         extract-node)]
-    (str
-     (format-code new-fun)
-     "\n"
-     (re-gsub
-      (escaped-re-pattern extract-string)
-      (str (fun-call new-fun))
-      fn-string))))
+    (format-output extract-string fn-string new-fun)))
+
