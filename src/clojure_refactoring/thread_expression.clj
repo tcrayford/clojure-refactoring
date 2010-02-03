@@ -27,27 +27,27 @@
               (second node))))
          '->)))
 
-(def expression-threaders '#{->> ->})
+(def expression-threaders '#{->> -> clojure.core/->> clojure.core/->})
 
-(defn reverse-seq [coll]
-  (if (seq? coll)  (reverse coll) (list coll)))
+(defn extract-threaded [coll]
+  (if (and (seq? coll)
+           (expression-threaders (first coll)))
+    (macroexpand-1 coll)
+    coll))
 
-(defn wrap [inner [outer]]
-  "Wraps the inner collection in the outer one."
-  (if (not (seq? outer))
-    (apply conj inner (reverse-seq outer))
-    (list (apply conj inner (reverse-seq outer)))))
-
-(defn- unthread-last [code]
+(defn- unthread-last [node]
   "Unthread an expression threaded with ->>."
-  (loop [[_ & node] (read-string code) new-node '()]
-    (if (= (count node) 0)
-      (first new-node)
-      (recur (rest node)
-             (wrap new-node node)))))
+  (if (some #(rec-contains? node %) expression-threaders)
+    (recur
+     (postwalk
+      extract-threaded
+      node))
+    node))
 
-(defn- unthread-first [code]
-  (loop [[_ & node] (read-string code) new-node '()]
+
+
+(defn- unthread-first [node]
+  (loop [node node new-node '()]
     (if (= (count node) 0)
       new-node
       (recur (rest node)
@@ -56,6 +56,10 @@
 (defn thread-unthread [code]
   "Takes an expression starting with ->> or -> and unthreads it"
   (format-code
-   (cond (.contains code "->>") (unthread-last code)
-         (.contains code "->") (unthread-first code)
-         :else (Exception. "No threading expressions found"))))
+   (loop [node (read-string code)]
+     (if (some #(rec-contains? node %) expression-threaders)
+    (recur
+     (postwalk
+      extract-threaded
+      node))
+    node))))
