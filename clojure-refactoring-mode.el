@@ -29,6 +29,8 @@
 ;; Boston, MA 02110-1301, USA.
 
 ;;; Code:
+
+(require 'thingatpt)
 (defvar clojure-refactoring-mode-hook '()
   "Hooks to be run when loading clojure refactoring mode")
 
@@ -126,7 +128,8 @@
   (message "enabled refactoring"))
 
 ;;;###autoload
-(add-to-list 'auto-mode-alist '("\\.clj$" . clojure-refactoring-mode))
+
+
 
 (provide 'clojure-refactoring-mode)
 ;;; clojure-refactoring-mode.el ends here

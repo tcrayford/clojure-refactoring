@@ -44,8 +44,6 @@
       node))
     node))
 
-
-
 (defn- unthread-first [node]
   (loop [node node new-node '()]
     (if (= (count node) 0)
