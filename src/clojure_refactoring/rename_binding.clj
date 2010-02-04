@@ -3,11 +3,7 @@
 
 (defn rename-binding [code old-name new-name]
   (format-code
-   (let [node (read-string code)
-         [old new] (map symbol [old-name new-name])]
-     (postwalk
-      (fn [x]
-        (if (= x old)
-          new
-          x))
+   (let [node (read-string code)]
+     (postwalk-replace
+      (hash-map (symbol old-name) (symbol new-name))
       node))))
