@@ -51,7 +51,7 @@
      (buffer-string))))
 
 (setq clojure-refactoring-refactorings-list
-      (list "extract-fn" "thread-last" "extract-global" "thread-first" "unthread"))
+      (list "extract-fn" "thread-last" "extract-global" "thread-first" "unthread" "rename-binding"))
 
 (defun clojure-refactoring-ido ()
   (interactive)
@@ -113,6 +113,17 @@
 (defun clojure-refactoring-unthread ()
   (interactive)
   (clojure-refactoring-thread-expr "unthread"))
+
+(defun clojure-refactoring-rename-binding ()
+  (interactive)
+  (let ((old-name (read-from-minibuffer "Current name: "))
+        (new-name (read-from-minibuffer "New name: "))
+        (body (get-sexp)))
+    (save-excursion
+      (set-clojure-refactoring-temp
+       (concat "(require 'clojure_refactoring.rename_binding :reload-all) (ns clojure_refactoring.rename_binding) (rename-binding \"" body "\" \"" old-name "\" \"" new-name "\")"))
+       (insert (read clojure-refactoring-temp))
+       (cleanup-buffer))))
 
 (defun clojure-refactoring-extract-global ()
   (let ((var-name (read-from-minibuffer "Variable name: "))

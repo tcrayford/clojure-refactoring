@@ -16,6 +16,8 @@ call to it.
 Extract global - defines the current expression as a global var for
 this namespace (using def).
 
+Rename-binding - select a block, then replace all instances of
+old-name with new-name.
 Emacs dependancies
 ---
 Slime, a running clojure connection, paredit, and thing at point.

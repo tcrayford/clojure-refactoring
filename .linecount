@@ -22,3 +22,12 @@ test     197 total
 905125b added thingatp to clojure-refactoring mode. Removed unneeded unthread-first defn
 code     271 total
 test     197 total
+e71608f added rename_binding
+code     214 total
+test     177 total
+a329255 added rename_binding
+code     213 total
+test     177 total
+e318452 added rename_binding
+code     213 total
+test     177 total
