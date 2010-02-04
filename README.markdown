@@ -1,4 +1,4 @@
-Provides several automated refactorings of clojure code. 
+Provides several automated refactorings of clojure code.
 Use with a test suite and some manual
 checking.
 
@@ -44,6 +44,12 @@ Add a dev-dependancies to your lein/swank enabled project, then run
 For example (inside project.clj)
     :dev-dependencies [[leiningen/lein-swank "1.0.0-SNAPSHOT"]
                        [clojure_refactoring "0.1.1"]]
+
+Hacking Philosophy
+--------------------
+- Wherever possible, have a reverse of each refactoring.
+- Refactoring should be quick
+- Refactoring names should correspond to ones from OO languages.
 
 Known bugs
 ---
