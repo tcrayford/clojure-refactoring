@@ -1,0 +1,24 @@
+1920c0e cleaned up core a bit
+code       3 src/clojure_refactoring.clj
+test     157 total
+32abb15 added linecount
+code       3 src/clojure_refactoring.clj
+test     158 total
+a8aa845 removed zip utils from requires, as unused
+code     202 total
+test     158 total
+e88496a refactored threading
+code     194 total
+test     163 total
+a2d5afb extracted method out of extract-method
+code     198 total
+test     163 total
+20a7705 Unthreading expressions now work
+code     202 total
+test     163 total
+fbe14bd reworked readme
+code     201 total
+test     197 total
+905125b added thingatp to clojure-refactoring mode. Removed unneeded unthread-first defn
+code     271 total
+test     197 total
