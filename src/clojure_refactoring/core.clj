@@ -1,5 +1,6 @@
 (ns clojure_refactoring.core
-  (:use [clojure.contrib str-utils duck-streams seq-utils pprint] clojure.walk))
+  (:use [clojure.contrib str-utils duck-streams seq-utils pprint] clojure.walk)
+  (:import clojure.lang.Named))
 
 (defn is-defn? [node]
   (= (first node) 'defn))
@@ -16,6 +17,7 @@ TODO: doesn't handle destructuring properly"
                (if (seq? sub-node)
                  (or (find-occurences arg-set sub-node))
                  (arg-set sub-node))))))
+
 
 (defmacro if-true [expr]
   "Always returns true or false, depending on the value of its body"
@@ -89,4 +91,18 @@ TODO: doesn't handle destructuring properly"
             (find-bindings (first node) expr bnd-syms)
             (find-bindings (rest node) expr bnd-syms)))))))
 
+;; Taken from compojure.
+(defn map-str
+  "Map a function to a collection, then concatenate the results into a
+  string."
+  [func coll]
+  (apply str (map func coll)))
 
+(defn str*
+  "A version of str that prefers the names of Named objects.
+  e.g (str \"Hello \" :World)  => \"Hello :World\"
+      (str* \"Hello \" :World) => \"Hello World\""
+  [& args]
+  (map-str
+    #(if (instance? Named %) (name %) (str %))
+    args))
