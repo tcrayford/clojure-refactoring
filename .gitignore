@@ -4,3 +4,4 @@ clojure_refactoring.jar
 pom.xml
 classes/
 lib/
+/.linecount
