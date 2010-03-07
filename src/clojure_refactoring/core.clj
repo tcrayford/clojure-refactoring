@@ -18,7 +18,6 @@ TODO: doesn't handle destructuring properly"
                  (or (find-occurences arg-set sub-node))
                  (arg-set sub-node))))))
 
-
 (defmacro if-true [expr]
   "Always returns true or false, depending on the value of its body"
   `(if ~expr true false))
@@ -27,7 +26,7 @@ TODO: doesn't handle destructuring properly"
      #{'let 'fn 'binding 'for 'doseq 'dotimes 'defn 'loop})
 
 (defn binding-node? [node]
-  (if-true (*binding-forms* (first node))))
+  (*binding-forms* (first node)))
 
 (defn evens [coll]
   "Returns the even items of a collection"

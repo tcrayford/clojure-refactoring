@@ -35,14 +35,14 @@
   (is (= (rec-contains? '(let [a 1] (+ a 2)) '(+ a 2)) true)))
 
 (deftest binding_node?
-  (is (= (binding-node? '(let [a 1] a)) true))
-  (is (= (binding-node? '(defn myfn [a] (+ 1 a))) true))
-  (is (= (binding-node? '(let [a 1] (let [b 2] (+ a b)))) true))
-  (is (= (binding-node? (nth '(let [a 1] (let [b 2] (+ a b))) 2)) true)))
+  (is (= (binding-node? '(let [a 1] a)) 'let))
+  (is (= (binding-node? '(defn myfn [a] (+ 1 a))) 'defn))
+  (is (= (binding-node? '(let [a 1] (let [b 2] (+ a b)))) 'let))
+  (is (= (binding-node? (nth '(let [a 1] (let [b 2] (+ a b))) 2)) 'let)))
 
 (deftest last_binding_form?
   (is (= (last-binding-form? '(let [a 1] a)) true))
-  (is (= (last-binding-form? '(+ 1 2)) false))
+  (is (= (last-binding-form? '(+ 1 2)) nil))
   (is (= (last-binding-form? '(let [a 1] (fn [z] (+ z a)))) false))
   (is (= (last-binding-form? '(let [a 1 (let [b 2] (+ a b))])))))
 

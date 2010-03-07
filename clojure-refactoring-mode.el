@@ -136,6 +136,7 @@
     (insert var-name)))
 
 (defun clojure-refactoring-mode ()
+  (clojure-mode)
   (message "enabled refactoring"))
 
 ;;;###autoload
