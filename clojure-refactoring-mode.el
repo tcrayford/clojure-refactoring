@@ -51,7 +51,7 @@
      (buffer-string))))
 
 (setq clojure-refactoring-refactorings-list
-      (list "extract-fn" "thread-last" "extract-global" "thread-first" "unthread" "rename-binding"))
+      (list "extract-fn" "thread-last" "extract-global" "thread-first" "unthread" "rename-binding" "extract-local"))
 
 (defun clojure-refactoring-ido ()
   (interactive)
@@ -122,8 +122,8 @@
     (save-excursion
       (set-clojure-refactoring-temp
        (concat "(require 'clojure_refactoring.rename_binding :reload-all) (ns clojure_refactoring.rename_binding) (rename-binding \"" body "\" \"" old-name "\" \"" new-name "\")"))
-       (insert (read clojure-refactoring-temp))
-       (cleanup-buffer))))
+      (insert (read clojure-refactoring-temp))
+      (cleanup-buffer))))
 
 (defun clojure-refactoring-extract-global ()
   (let ((var-name (read-from-minibuffer "Variable name: "))
@@ -134,6 +134,17 @@
       (insert "(def " var-name body ")")
       (reindent-then-newline-and-indent))
     (insert var-name)))
+
+(defun clojure-refactoring-extract-local ()
+  (let ((var-name (read-from-minibuffer "Variable name: "))
+        (defn (escape-string-literals (slime-defun-at-point)))
+        (body (get-sexp)))
+    (save-excursion
+      (set-clojure-refactoring-temp
+       (concat "(require 'clojure_refactoring.local_binding) (ns clojure_refactoring.local_binding) (local-wrap \"" defn "\" \"" body "\" \"" var-name "\")"))
+      (beginning-of-defun)
+      (forward-kill-sexp)
+      (insert (read clojure-refactoring-temp)))))
 
 (defun clojure-refactoring-mode ()
   (clojure-mode)
