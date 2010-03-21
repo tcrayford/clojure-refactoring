@@ -5,19 +5,23 @@ checking.
 Available refactorings
 ----------------------
 
-Thread-last - threads the current expression via ->>
+Thread-last - threads the current expression via `->>`
 
-Thread-first - threads the current expression via ->
+Thread-first - threads the current expression via `->`
 
-Unthread - unthreads the current expression. TODO: this only works with ->>
+Unthread - unthreads the current expression. TODO: this only works with `->>`
 
 Extract-fn - extracts the current expression and replaces it with a
 call to it.
 Extract global - defines the current expression as a global var for
-this namespace (using def).
+this namespace (using `def`).
 
 Rename-binding - select a block, then replace all instances of
 old-name with new-name.
+
+Extract local - defines the current expression as a local variable for
+the current function definition.
+
 Emacs dependancies
 ---
 Slime, a running clojure connection, paredit, and thing at point.
@@ -45,7 +49,7 @@ Add a dev-dependancies to your lein/swank enabled project, then run
 
 For example (inside project.clj)
     :dev-dependencies [[leiningen/lein-swank "1.0.0-SNAPSHOT"]
-                       [clojure_refactoring "0.1.1"]]
+                       [clojure_refactoring "0.1.3"]]
 
 Hacking Philosophy
 --------------------
