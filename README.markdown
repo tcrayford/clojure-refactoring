@@ -13,6 +13,7 @@ Unthread - unthreads the current expression. TODO: this only works with `->>`
 
 Extract-fn - extracts the current expression and replaces it with a
 call to it.
+
 Extract global - defines the current expression as a global var for
 this namespace (using `def`).
 
@@ -21,6 +22,10 @@ old-name with new-name.
 
 Extract local - defines the current expression as a local variable for
 the current function definition.
+
+Destructure map - Replaces calls to keywords on a particular map with
+a destructuring for that map in the args. Only works on top-level defn
+forms with one type of arity.
 
 Emacs dependancies
 ---
@@ -55,7 +60,9 @@ Hacking Philosophy
 --------------------
 - Wherever possible, have a reverse of each refactoring.
 - Refactoring should be quick
-- Refactoring names should correspond to ones from OO languages.
+- Refactoring names should correspond to known refactorings from OO.
+- Write a functional test for each refactoring (takes in a string and
+outputs the correct string).
 
 Known bugs
 ---

@@ -51,7 +51,7 @@
      (buffer-string))))
 
 (setq clojure-refactoring-refactorings-list
-      (list "extract-fn" "thread-last" "extract-global" "thread-first" "unthread" "rename-binding" "extract-local"))
+      (list "extract-fn" "thread-last" "extract-global" "thread-first" "unthread" "rename-binding" "extract-local" "destructure-map"))
 
 (defun clojure-refactoring-ido ()
   (interactive)
@@ -144,6 +144,14 @@
        (concat "(require 'clojure_refactoring.local_binding) (ns clojure_refactoring.local_binding) (local-wrap \"" defn "\" \"" body "\" \"" var-name "\")"))
       (beginning-of-defun)
       (forward-kill-sexp)
+      (insert (read clojure-refactoring-temp)))))
+
+(defun clojure-refactoring-destructure-map ()
+  (let ((var-name (read-from-minibuffer "Map name: "))
+        (defn (get-sexp)))
+    (save-excursion
+      (set-clojure-refactoring-temp
+       (concat "(require 'clojure_refactoring.destructuring) (ns clojure_refactoring.destructuring) (destructure-map \"" defn "\" \"" var-name "\")"))
       (insert (read clojure-refactoring-temp)))))
 
 (defun clojure-refactoring-mode ()
