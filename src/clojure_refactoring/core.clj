@@ -3,9 +3,11 @@
   (:import clojure.lang.Named))
 
 (defn is-defn? [node]
+  "Returns true if the current node is a function definition"
   (= (first node) 'defn))
 
 (defn format-code [node]
+  "Prints code roughly how a human would format it"
   (with-out-str (with-pprint-dispatch *code-dispatch*
                   (pprint node))))
 
@@ -22,11 +24,12 @@ TODO: doesn't handle destructuring properly"
   "Always returns true or false, depending on the value of its body"
   `(if ~expr true false))
 
-(def *binding-forms*
+(def binding-forms
      #{'let 'fn 'binding 'for 'doseq 'dotimes 'defn 'loop})
 
 (defn binding-node? [node]
-  (*binding-forms* (first node)))
+  "Checks if a node is a binding node"
+  (binding-forms (first node)))
 
 (defn evens [coll]
   "Returns the even items of a collection"
@@ -36,6 +39,7 @@ TODO: doesn't handle destructuring properly"
        (vec)))
 
 (defn fn-args [node]
+  "Returns the function arguments from a top-level defn node"
   (find-first #(vector? %) node))
 
 (defn binding-form [node]
@@ -43,39 +47,46 @@ TODO: doesn't handle destructuring properly"
   (if (binding-node? node)
     (fn-args node)))
 
-(defn unique-vec [v]
-  (vec (set v)))
+(defn unique-vec [coll]
+  "Strips all duplicates from coll and forces it into a vector"
+  (vec (apply sorted-set coll)))
+
 
 (defn bound-symbols [node]
+  "Returns a vector of the bound symbols inside node"
   (unique-vec
    (if (is-defn? node)
      (binding-form node)
      (evens (binding-form node)))))
 
+(defn some-true? [coll]
+  "Returns true if anything in the collection is true"
+  (some #(= % true) coll))
+
 (defn rec-contains? [coll obj]
   "True if coll contains obj at some level of nesting"
-  (some #(= % true)
-        (flatten (for [sub-node coll]
-                   (if (= sub-node obj)
-                     true
-                     (if (seq? sub-node)
-                       (rec-contains? sub-node obj)
-                       false))))))
+  (some-true?
+        (flatten
+         (postwalk
+          (fn [node]
+            (if (= node obj)
+              true
+              (if (= node true) false node)))
+          coll))))
 
 (defn last-binding-form? [node]
   "Returns true if there are no binding nodes inside node"
   (and (binding-node? node)
-       (->>
-        sym
-        (rec-contains? (rest node))
-        (for [sym *binding-forms*])
-        (some #(= % true))
-        (not))))
+       (not
+        (some-true?
+         (for [sym binding-forms]
+           (rec-contains? (rest node) sym))))))
 
 (defn add-binding-form [node bnd-syms]
+  "Returns a new binding form from the root node's binding form with"
   (into bnd-syms (bound-symbols node)))
 
-(defn find-bindings
+(defn find-bindings-above-node
   "Returns any let bindings above expr in node"
   ([node expr] (find-bindings node expr []))
   ([node expr bnd-syms]
@@ -83,12 +94,12 @@ TODO: doesn't handle destructuring properly"
       (if (last-binding-form? node)
         (add-binding-form node bnd-syms)
         (if (binding-node? node)
-          (find-bindings (rest node)
+          (find-bindings-above-node (rest node)
                          expr
                          (add-binding-form node bnd-syms))
           (if (seq? (first node))
-            (find-bindings (first node) expr bnd-syms)
-            (find-bindings (rest node) expr bnd-syms)))))))
+            (find-bindings-above-node (first node) expr bnd-syms)
+            (find-bindings-above-node (rest node) expr bnd-syms)))))))
 
 ;; Taken from compojure.
 (defn map-str
@@ -103,5 +114,5 @@ TODO: doesn't handle destructuring properly"
       (str* \"Hello \" :World) => \"Hello World\""
   [& args]
   (map-str
-    #(if (instance? Named %) (name %) (str %))
-    args))
+   #(if (instance? Named %) (name %) (str %))
+   args))

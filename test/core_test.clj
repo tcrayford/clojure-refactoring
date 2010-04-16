@@ -32,7 +32,10 @@
 
 (deftest rec_contains?
   (is (= (rec-contains? '(let [a 1] (let [b 2] (+ a b))) '(+ a b)) true))
-  (is (= (rec-contains? '(let [a 1] (+ a 2)) '(+ a 2)) true)))
+  (is (= (rec-contains? '(let [a 1] (+ a 2)) '(+ a 2)) true))
+  (is (= (rec-contains? '(let [a 1] (if (= b a) true 0)) '(= b 12)) nil))
+  (is (= (rec-contains? '(let [a 1] (if (= b a) true 0)) 'true) true)))
+
 
 (deftest binding_node?
   (is (= (binding-node? '(let [a 1] a)) 'let))
@@ -52,4 +55,4 @@
   (is (= (find-bindings '(defn add [s] (if (.contains s "//") "3" s)) '(if (.contains s "//") "3" s)) '[s])))
 
 (deftest nested_binding
-  (is (= (find-bindings '(let [a 1] (let [b 2] (+ a b))) '(+ a b)) '[a b])))
+  (is (= (find-bindings-above-node '(let [a 1] (let [b 2] (+ a b))) '(+ a b)) '[a b])))
