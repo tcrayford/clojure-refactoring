@@ -76,7 +76,6 @@
   (forward-sexp)
   (backward-kill-sexp))
 
-
 ;; FIXME: this will break if there's an escaped \" in any of the code
 ;; it reads.
 ;; FIXME: breaks if a newline is in a string
@@ -129,11 +128,13 @@
   (let ((var-name (read-from-minibuffer "Variable name: "))
         (body (delete-and-extract-region (mark t) (point))))
     (save-excursion
-      (clj-point-after-ns)
+      (beginning-of-buffer)
+      (forward-sexp)
       (paredit-mode 0)
       (insert "(def " var-name body ")")
       (reindent-then-newline-and-indent))
     (insert var-name)))
+
 
 (defun clojure-refactoring-extract-local ()
   (let ((var-name (read-from-minibuffer "Variable name: "))

@@ -6,7 +6,6 @@
   (find-first list? defn-form))
 
 (defn add-to-binding [binding-node value var-name]
-  ""
   (conj binding-node var-name value))
 
 (defn is-node-the-binding-form? [top-level node]
