@@ -88,7 +88,7 @@ TODO: doesn't handle destructuring properly"
 
 (defn find-bindings-above-node
   "Returns any let bindings above expr in node"
-  ([node expr] (find-bindings node expr []))
+  ([node expr] (find-bindings-above-node node expr []))
   ([node expr bnd-syms]
      (unique-vec
       (if (last-binding-form? node)
