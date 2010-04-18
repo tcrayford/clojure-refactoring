@@ -50,4 +50,3 @@ function call to the extracted method. Only works on single arity root functions
                               args
                               extract-node)]
     (format-output extract-string fn-string new-fun)))
-

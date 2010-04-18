@@ -60,10 +60,12 @@ if this node is contained in lookups"
 (defn add-binding-map [lookups root-node]
   "Takes a set of lookups and a function node, and
 adds a binding map made from the lookups to the root node"
-  (map #(if (= % (fn-args root-node))
-          (destructured-binding-vec
-           (fn-args root-node)
-           (lookups->binding-map lookups)) %) root-node))
+  (let [args (fn-args root-node)]
+    (map
+      #(if (= % args)
+        (destructured-binding-vec args (lookups->binding-map lookups))
+        %)
+      root-node)))
 
 (defn destructure-map [fn-code name]
   "Destructures all calls to map called name inside a function node"
