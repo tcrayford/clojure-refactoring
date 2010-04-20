@@ -18,7 +18,7 @@
   (is (= (is-defn? '(defn foo [] 1)) true)))
 
 (deftest let_bind
-  (is (= (find-bindings '(defn myfn [a] (let [a 1] (+ 1 a)))
+  (is (= (find-bindings-above-node '(defn myfn [a] (let [a 1] (+ 1 a)))
                     '(+ 1 a))
          '[a])))
 
@@ -50,9 +50,9 @@
   (is (= (last-binding-form? '(let [a 1 (let [b 2] (+ a b))])))))
 
 (deftest find_bindings
-  (is (= (find-bindings '(defn myfn [a] (+ 1 a)) '(+ 1 a)) '[a]))
-  (is (= (find-bindings '(let [a 1] a) 'a) '[a]))
-  (is (= (find-bindings '(defn add [s] (if (.contains s "//") "3" s)) '(if (.contains s "//") "3" s)) '[s])))
+  (is (= (find-bindings-above-node '(defn myfn [a] (+ 1 a)) '(+ 1 a)) '[a]))
+  (is (= (find-bindings-above-node '(let [a 1] a) 'a) '[a]))
+  (is (= (find-bindings-above-node '(defn add [s] (if (.contains s "//") "3" s)) '(if (.contains s "//") "3" s)) '[s])))
 
 (deftest nested_binding
   (is (= (find-bindings-above-node '(let [a 1] (let [b 2] (+ a b))) '(+ a b)) '[a b])))

@@ -1,5 +1,9 @@
 (ns clojure_refactoring.core
-  (:use [clojure.contrib str-utils duck-streams seq-utils pprint] clojure.walk)
+  (:use [clojure.contrib str-utils
+         duck-streams
+         seq-utils
+         pprint])
+  (:use clojure.walk)
   (:import clojure.lang.Named))
 
 (defn is-defn? [node]
@@ -66,13 +70,13 @@ TODO: doesn't handle destructuring properly"
 (defn rec-contains? [coll obj]
   "True if coll contains obj at some level of nesting"
   (some-true?
-        (flatten
-         (postwalk
-          (fn [node]
-            (if (= node obj)
-              true
-              (if (= node true) false node)))
-          coll))))
+   (flatten
+    (postwalk
+     (fn [node]
+       (if (= node obj)
+         true
+         (if (= node true) false node)))
+     coll))))
 
 (defn last-binding-form? [node]
   "Returns true if there are no binding nodes inside node"
@@ -95,8 +99,8 @@ TODO: doesn't handle destructuring properly"
         (add-binding-form node bnd-syms)
         (if (binding-node? node)
           (find-bindings-above-node (rest node)
-                         expr
-                         (add-binding-form node bnd-syms))
+                                    expr
+                                    (add-binding-form node bnd-syms))
           (if (seq? (first node))
             (find-bindings-above-node (first node) expr bnd-syms)
             (find-bindings-above-node (rest node) expr bnd-syms)))))))

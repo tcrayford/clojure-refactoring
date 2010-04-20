@@ -51,7 +51,7 @@
      (buffer-string))))
 
 (setq clojure-refactoring-refactorings-list
-      (list "extract-fn" "thread-last" "extract-global" "thread-first" "unthread" "rename-binding" "extract-local" "destructure-map"))
+      (list "extract-fn" "thread-last" "extract-global" "thread-first" "unthread" "rename-binding" "extract-local" "destructure-map" "rename-fn"))
 
 (defun clojure-refactoring-ido ()
   (interactive)
@@ -91,7 +91,8 @@
                defn "\"  \"" body "\"  \"" fn-name "\")"))
       (beginning-of-defun)
       (forward-kill-sexp)
-      (insert (read clojure-refactoring-temp)))))
+      (insert  (read clojure-refactoring-temp)))))
+
 
 (defun clojure-refactoring-thread-expr (str)
   (let ((body (get-sexp)))
@@ -124,6 +125,17 @@
       (insert (read clojure-refactoring-temp))
       (cleanup-buffer))))
 
+(defun clojure-refactoring-rename-fn ()
+  (interactive)
+  (let ((old-name (read-from-minibuffer "Current name: "))
+        (new-name (read-from-minibuffer "New name: "))
+        (body (get-sexp)))
+    (save-excursion
+      (set-clojure-refactoring-temp
+       (concat "(require 'clojure_refactoring.rename_fn :reload-all) (ns clojure_refactoring.rename_fn) (rename-fn \"" body "\" \"" old-name "\" \"" new-name "\")"))
+      (read clojure-refactoring-temp)
+      (cleanup-buffer))))
+
 (defun clojure-refactoring-extract-global ()
   (let ((var-name (read-from-minibuffer "Variable name: "))
         (body (delete-and-extract-region (mark t) (point))))
@@ -147,9 +159,12 @@
       (forward-kill-sexp)
       (insert (read clojure-refactoring-temp)))))
 
+(set-clojure-refactoring-temp
+ "\\n")
+
 (defun clojure-refactoring-destructure-map ()
   (let ((var-name (read-from-minibuffer "Map name: "))
-        (defn (get-sexp)))
+        (defn (escape-string-literals (slime-defun-at-point))))
     (save-excursion
       (set-clojure-refactoring-temp
        (concat "(require 'clojure_refactoring.destructuring) (ns clojure_refactoring.destructuring) (destructure-map \"" defn "\" \"" var-name "\")"))
@@ -160,8 +175,6 @@
   (message "enabled refactoring"))
 
 ;;;###autoload
-
-
 
 (provide 'clojure-refactoring-mode)
 ;;; clojure-refactoring-mode.el ends here
