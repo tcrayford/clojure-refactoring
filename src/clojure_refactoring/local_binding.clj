@@ -9,7 +9,7 @@
   (conj binding-node var-name value))
 
 (defn is-node-the-binding-form? [top-level node]
-  (= node (binding-form top-level)))
+  (= node (extract-binding-form top-level)))
 
 (defn modify-existing-let-block [form value var-name]
   (postwalk

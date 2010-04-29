@@ -1,36 +1,14 @@
 (ns extract_method_test
   (:use clojure_refactoring.extract_method clojure_refactoring.core clojure.test clojure.contrib.str-utils))
 
-(defn fixture [f]
-  (def start-src
-       "(defn add [s] (reduce + (map #(Integer. %) s)))")
-  (def end-src
-       "(defn add-numbers [s] (reduce + (map #(Integer. %) s)))
+(deftest fn_name
+  (is (= (fn-name '(defn a [c] c)) 'a)))
 
-(defn add [s] (add-numbers s))")
-(def extract-string "(reduce + (map #(Integer. %) s))")
-(def helper (extract-method start-src
-                         extract-string
-                         "add-numbers"))
-(def f-string (str "(defn add [s a] " extract-string ")"))
-(f))
+(deftest fn_call
+  (is (= (fn-call '(defn a [b] (+ 1 2))) '(a b))))
 
 
-(use-fixtures :once fixture)
-
-(deftest extract_method
-  (is (= helper
-         end-src)))
-
-(deftest removes_unused_args
-  (is (= (extract-method f-string
-                       extract-string
-                       "add-numbers")
-       (str "(defn add-numbers [s] " extract-string ")
-
-(defn add [s a] (add-numbers s))"))))
-
-
+;; Acceptance level testing below
 (deftest uses_variables_from_let
   (is (= (extract-method
           "(defn add [s]

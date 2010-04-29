@@ -11,9 +11,10 @@
   (= (first node) 'defn))
 
 (defn format-code [node]
-  "Prints code roughly how a human would format it"
-  (with-out-str (with-pprint-dispatch *code-dispatch*
-                  (pprint node))))
+  "Outputs code roughly how a human would format it."
+  (with-out-str
+    (with-pprint-dispatch *code-dispatch*
+      (pprint node))))
 
 (defn find-occurences [args node]
   "Looks for any occurence of each element of args in the node
@@ -24,10 +25,6 @@ TODO: doesn't handle destructuring properly"
                  (or (find-occurences arg-set sub-node))
                  (arg-set sub-node))))))
 
-(defmacro if-true [expr]
-  "Always returns true or false, depending on the value of its body"
-  `(if ~expr true false))
-
 (def binding-forms
      #{'let 'fn 'binding 'for 'doseq 'dotimes 'defn 'loop})
 
@@ -37,16 +34,13 @@ TODO: doesn't handle destructuring properly"
 
 (defn evens [coll]
   "Returns the even items of a collection"
-  (->> (indexed coll)
-       (filter #(even? (first %)))
-       (map #(last %))
-       (vec)))
+  (take-nth 2 coll))
 
 (defn fn-args [node]
   "Returns the function arguments from a top-level defn node"
   (find-first #(vector? %) node))
 
-(defn binding-form [node]
+(defn extract-binding-form [node]
   "Returns a vector of bindings iff the node is a binding node. Won't work with multiple arity defns"
   (if (binding-node? node)
     (fn-args node)))
@@ -55,13 +49,11 @@ TODO: doesn't handle destructuring properly"
   "Strips all duplicates from coll and forces it into a vector"
   (vec (apply sorted-set coll)))
 
-
 (defn bound-symbols [node]
   "Returns a vector of the bound symbols inside node"
-  (unique-vec
-   (if (is-defn? node)
-     (binding-form node)
-     (evens (binding-form node)))))
+  (if (is-defn? node)
+    (binding-form node)
+    (evens (binding-form node))))
 
 (defn some-true? [coll]
   "Returns true if anything in the collection is true"
