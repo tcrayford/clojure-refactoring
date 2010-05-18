@@ -33,7 +33,7 @@ TODO: doesn't handle destructuring properly"
   (binding-forms (first node)))
 
 (defn evens [coll]
-  "Returns the even items of a collection"
+  "Returns every other item of coll"
   (take-nth 2 coll))
 
 (defn fn-args [node]
@@ -52,23 +52,32 @@ TODO: doesn't handle destructuring properly"
 (defn bound-symbols [node]
   "Returns a vector of the bound symbols inside node"
   (if (is-defn? node)
-    (binding-form node)
-    (evens (binding-form node))))
+    (extract-binding-form node)
+    (evens (extract-binding-form node))))
 
 (defn some-true? [coll]
   "Returns true if anything in the collection is true"
-  (some #(= % true) coll))
+  (some #{true} coll))
 
-(defn rec-contains? [coll obj]
-  "True if coll contains obj at some level of nesting"
+(defn rec-matches? [f coll]
+  "True if the result of applying f on any sub-element of coll is true"
   (some-true?
    (flatten
     (postwalk
-     (fn [node]
-       (if (= node obj)
-         true
-         (if (= node true) false node)))
-     coll))))
+     f coll))))
+
+(defn rec-contains? [coll obj]
+  "True if coll contains obj at some level of nesting"
+  (rec-matches?
+   (fn [node]
+     (if (= node obj)
+       true
+       (if (= node true)
+         ;; Otherwise any coll containing true
+         ;; would return true, even if it didn't actually contain
+         ;; obj
+         false node)))
+   coll))
 
 (defn last-binding-form? [node]
   "Returns true if there are no binding nodes inside node"
@@ -79,36 +88,33 @@ TODO: doesn't handle destructuring properly"
            (rec-contains? (rest node) sym))))))
 
 (defn add-binding-form [node bnd-syms]
-  "Returns a new binding form from the root node's binding form with"
+  "Returns a new binding form from the root node's binding form"
   (into bnd-syms (bound-symbols node)))
 
+(defn contains-binding-nodes? [node]
+  (some #{true} (map #(rec-contains? node %) binding-forms)))
+
+(defn more-than-one [pred coll]
+  "True if more than one item of coll matches pred"
+  (if (seq? coll)
+    (< 1 (count (filter pred coll)))))
+
 (defn find-bindings-above-node
-  "Returns any let bindings above expr in node"
+  "Returns all binding forms above expr in node."
   ([node expr] (find-bindings-above-node node expr []))
   ([node expr bnd-syms]
      (unique-vec
-      (if (last-binding-form? node)
-        (add-binding-form node bnd-syms)
-        (if (binding-node? node)
-          (find-bindings-above-node (rest node)
-                                    expr
-                                    (add-binding-form node bnd-syms))
-          (if (seq? (first node))
-            (find-bindings-above-node (first node) expr bnd-syms)
-            (find-bindings-above-node (rest node) expr bnd-syms)))))))
-
-;; Taken from compojure.
-(defn map-str
-  "Map a function to a collection, then concatenate the results into a
-  string."
-  [func coll]
-  (apply str (map func coll)))
-
-(defn str*
-  "A version of str that prefers the names of Named objects.
-  e.g (str \"Hello \" :World)  => \"Hello :World\"
-      (str* \"Hello \" :World) => \"Hello World\""
-  [& args]
-  (map-str
-   #(if (instance? Named %) (name %) (str %))
-   args))
+      (flatten
+       (if (more-than-one seq? node)
+         (map #(find-bindings-above-node % expr bnd-syms)
+              (filter #(and (seq? %)
+                            (rec-contains? % expr)) node))
+         (if (last-binding-form? node)
+           (add-binding-form node bnd-syms)
+           (if (binding-node? node)
+             (find-bindings-above-node (rest node)
+                                       expr
+                                       (add-binding-form node bnd-syms))
+             (if (seq? (first node))
+               (find-bindings-above-node (first node) expr bnd-syms)
+               (find-bindings-above-node (rest node) expr bnd-syms)))))))))

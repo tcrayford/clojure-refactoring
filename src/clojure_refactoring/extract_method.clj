@@ -5,7 +5,7 @@
 
 (defn fn-call [fn-node]
   "Returns a function call to a function
-using the names in the functions arguments.
+using the names in the function's arguments.
 TODO: Won't work for multiple arity functions"
   (conj (for [arg (fn-args fn-node)] arg) (fn-name fn-node)))
 

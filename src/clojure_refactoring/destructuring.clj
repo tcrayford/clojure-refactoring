@@ -14,7 +14,7 @@
 
 (defn key->sym [kw]
   "Turns a keyword into a symbol"
-  (symbol (str* kw)))
+  (symbol (name kw)))
 
 (defn find-lookups [root-node]
   "Returns all the map lookups in a node as a set of seqs"

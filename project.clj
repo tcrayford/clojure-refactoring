@@ -1,6 +1,6 @@
-(defproject clojure_refactoring "0.1.4"
+(defproject clojure_refactoring "0.1.5"
   :description "Clojure side of a refactoring tool"
-  :dependencies [[org.clojure/clojure "1.1.0-alpha-SNAPSHOT"]
-                 [org.clojure/clojure-contrib "1.0-SNAPSHOT"]
-                 [leiningen/lein-swank "1.0.0-SNAPSHOT"]]
-  :dev-dependencies [[lein-clojars "0.5.0-SNAPSHOT"]])
+  :dependencies [[leiningen/lein-swank "1.2.0-SNAPSHOT"]]
+  :dev-dependencies [[lein-clojars "0.5.0-SNAPSHOT"]
+                     [org.clojure/clojure "1.2.0-master-SNAPSHOT"]
+                     [org.clojure/clojure-contrib "1.2.0-SNAPSHOT"]])
