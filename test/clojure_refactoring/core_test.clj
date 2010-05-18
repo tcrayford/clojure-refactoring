@@ -1,4 +1,4 @@
-(ns clojure_refactoring_test
+(ns clojure_refactoring.core-test
   (:use clojure_refactoring.core clojure.test))
 
 (defn fixture [f]

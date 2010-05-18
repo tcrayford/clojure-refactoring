@@ -1,4 +1,4 @@
-(ns thread_expression_test
+(ns clojure_refactoring.thread-expression-test
   (:use clojure_refactoring.thread_expression clojure_refactoring.core clojure.test clojure.contrib.str-utils))
 
 (defn fixture [f]

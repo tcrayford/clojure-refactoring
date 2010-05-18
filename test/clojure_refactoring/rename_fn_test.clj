@@ -1,4 +1,4 @@
-(ns rename_fn_test
+(ns clojure_refactoring.rename-fn-test
   (:use clojure.test)
   (:use clojure.contrib.mock)
   (:use clojure_refactoring.rename_fn))

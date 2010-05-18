@@ -1,4 +1,4 @@
-(ns extract_method_test
+(ns clojure_refactoring.extract-method-test
   (:use clojure_refactoring.extract_method clojure_refactoring.core clojure.test clojure.contrib.str-utils))
 
 (deftest fn_name

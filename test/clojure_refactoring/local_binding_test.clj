@@ -1,4 +1,4 @@
-(ns local_binding_test
+(ns clojure_refactoring.local-binding-test
   (:use clojure.test)
   (:use clojure_refactoring.local_binding :reload))
 

@@ -1,4 +1,4 @@
-(ns rename_binding_test
+(ns clojure_refactoring.rename-binding-test
   (:use clojure_refactoring.rename_binding clojure_refactoring.core clojure.test clojure.contrib.str-utils))
 
 (use-fixtures :once #(time (%)))

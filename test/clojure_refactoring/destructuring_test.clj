@@ -1,4 +1,4 @@
-(ns destructuring_test
+(ns clojure_refactoring.destructuring-test
   (:use clojure_refactoring.destructuring clojure.test))
 
 (deftest is_map_lookup?
