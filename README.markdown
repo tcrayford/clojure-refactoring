@@ -53,8 +53,8 @@ Add a dev-dependancies to your lein/swank enabled project, then run
 `lein deps`
 
 For example (inside project.clj)
-    :dev-dependencies [[leiningen/lein-swank "1.0.0-SNAPSHOT"]
-                       [clojure_refactoring "0.1.3"]]
+    :dev-dependencies [[swank-clojure "1.2.0"]
+                       [clojure-refactoring "0.1.5"]]
 
 Hacking Philosophy
 --------------------
