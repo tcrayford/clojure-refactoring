@@ -170,11 +170,21 @@
        (concat "(require 'clojure_refactoring.destructuring) (ns clojure_refactoring.destructuring) (destructure-map \"" defn "\" \"" var-name "\")"))
       (insert (read clojure-refactoring-temp)))))
 
-(defun clojure-refactoring-mode ()
-  (clojure-mode)
-  (message "enabled refactoring"))
+(defvar clojure-refactoring-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-c C-r") 'clojure-refactoring-ido)
+    map)
+  "Keymap for Clojure refactoring mode.")
 
 ;;;###autoload
+(define-minor-mode clojure-refactoring-mode
+  "A minor mode for a clojure refactoring tool"
+  (when (slime-connected-p)
+    (run-hooks 'slime-connected-hook)))
+
+(progn (defun clojure-refactoring-enable ()
+         (clojure-umbrella-mode t))
+       (add-hook 'clojure-mode-hook 'clojure-refactoring-enable))
 
 (provide 'clojure-refactoring-mode)
 ;;; clojure-refactoring-mode.el ends here
