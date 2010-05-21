@@ -1,7 +1,7 @@
 (ns clojure-refactoring.rename-fn-test
   (:use clojure.test)
   (:use clojure.contrib.mock)
-  (:use clojure-refactoring.rename-fn))
+  (:use clojure-refactoring.rename-fn :reload))
 
 (deftest renames-basic-function-call
   (is (= (rename-fn "(defn a [b] (+ b 1))" "a" "c") "(defn c [b] (+ b 1))"))

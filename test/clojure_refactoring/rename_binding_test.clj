@@ -1,5 +1,6 @@
 (ns clojure-refactoring.rename-binding-test
-  (:use clojure-refactoring.rename-binding clojure-refactoring.core clojure.test clojure.contrib.str-utils))
+  (:use clojure-refactoring.rename-binding clojure-refactoring.core :reload)
+  (:use clojure.test clojure.contrib.str-utils))
 
 (use-fixtures :once #(time (%)))
 

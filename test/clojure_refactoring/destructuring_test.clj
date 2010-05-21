@@ -1,5 +1,6 @@
 (ns clojure-refactoring.destructuring-test
-  (:use clojure-refactoring.destructuring clojure.test))
+  (:use clojure-refactoring.destructuring :reload)
+  (:use clojure.test))
 
 (deftest is_map_lookup?
   (is (= (is-map-lookup? '(:foo a)) true))
