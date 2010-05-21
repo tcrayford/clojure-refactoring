@@ -1,5 +1,5 @@
-(ns clojure_refactoring.thread-expression-test
-  (:use clojure_refactoring.thread_expression clojure_refactoring.core clojure.test clojure.contrib.str-utils))
+(ns clojure-refactoring.thread-expression-test
+  (:use clojure-refactoring.thread-expression clojure-refactoring.core clojure.test clojure.contrib.str-utils))
 
 (defn fixture [f]
   (def start-src "(reduce + (map #(Integer. %) s))")

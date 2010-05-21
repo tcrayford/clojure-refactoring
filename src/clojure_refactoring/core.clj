@@ -1,4 +1,4 @@
-(ns clojure_refactoring.core
+(ns clojure-refactoring.core
   (:use [clojure.contrib str-utils
          duck-streams
          seq-utils

@@ -1,4 +1,4 @@
-(ns clojure_refactoring.rename_fn
+(ns clojure-refactoring.rename-fn
   (:use clojure.walk))
 
 (defn rename-fn [fn-string old-name-as-string new-name-as-string]

@@ -1,5 +1,5 @@
-(ns clojure_refactoring.extract-method-test
-  (:use clojure_refactoring.extract_method clojure_refactoring.core clojure.test clojure.contrib.str-utils))
+(ns clojure-refactoring.extract-method-test
+  (:use clojure-refactoring.extract-method clojure-refactoring.core clojure.test clojure.contrib.str-utils))
 
 (deftest fn_name
   (is (= (fn-name '(defn a [c] c)) 'a)))

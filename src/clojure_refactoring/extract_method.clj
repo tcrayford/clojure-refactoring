@@ -1,5 +1,5 @@
-(ns clojure_refactoring.extract_method
-  (:use clojure_refactoring.core [clojure.contrib str-utils seq-utils]))
+(ns clojure-refactoring.extract-method
+  (:use clojure-refactoring.core [clojure.contrib str-utils seq-utils]))
 
 (defn fn-name [fn-node] (nth fn-node 1))
 

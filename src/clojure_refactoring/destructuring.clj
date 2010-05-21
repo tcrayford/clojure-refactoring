@@ -1,5 +1,5 @@
-(ns clojure_refactoring.destructuring
-  (:use [clojure.contrib str-utils duck-streams seq-utils pprint] clojure.walk clojure_refactoring.core))
+(ns clojure-refactoring.destructuring
+  (:use [clojure.contrib str-utils duck-streams seq-utils pprint] clojure.walk clojure-refactoring.core))
 
 (defn count= [seq n]
   "Checks if the count of seq is equal to n"

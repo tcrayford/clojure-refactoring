@@ -1,6 +1,6 @@
-(ns clojure_refactoring.local-binding-test
+(ns clojure-refactoring.local-binding-test
   (:use clojure.test)
-  (:use clojure_refactoring.local_binding :reload))
+  (:use clojure-refactoring.local-binding :reload))
 
 (deftest wraps_code_as_local
   (is (= (local-wrap "(defn a [b] (+ b (/ b 1)))"

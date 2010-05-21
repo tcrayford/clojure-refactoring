@@ -1,5 +1,5 @@
-(ns clojure_refactoring.core-test
-  (:use clojure_refactoring.core clojure.test))
+(ns clojure-refactoring.core-test
+  (:use clojure-refactoring.core clojure.test))
 
 (defn fixture [f]
   (def test-fn-string
