@@ -87,18 +87,17 @@
         (body (get-sexp)))
     (save-excursion
       (set-clojure-refactoring-temp
-       (concat "(require 'clojure_refactoring.extract_method) (ns clojure_refactoring.extract_method) (extract-method \""
+       (concat "(require 'clojure-refactoring.extract-method) (ns clojure-refactoring.extract-method) (extract-method \""
                defn "\"  \"" body "\"  \"" fn-name "\")"))
       (beginning-of-defun)
       (forward-kill-sexp)
-      (insert  (read clojure-refactoring-temp)))))
-
+      (insert (read clojure-refactoring-temp)))))
 
 (defun clojure-refactoring-thread-expr (str)
   (let ((body (get-sexp)))
     (save-excursion
       (set-clojure-refactoring-temp
-       (concat "(require 'clojure_refactoring.thread_expression :reload-all) (ns clojure_refactoring.thread_expression) (thread-" str " \"" body"\")"))
+       (concat "(require 'clojure-refactoring.thread-expression :reload-all) (ns clojure-refactoring.thread-expression) (thread-" str " \"" body"\")"))
       (cleanup-buffer)
       (insert (read clojure-refactoring-temp)))))
 
@@ -121,7 +120,7 @@
         (body (get-sexp)))
     (save-excursion
       (set-clojure-refactoring-temp
-       (concat "(require 'clojure_refactoring.rename_binding :reload-all) (ns clojure_refactoring.rename_binding) (rename-binding \"" body "\" \"" old-name "\" \"" new-name "\")"))
+       (concat "(require 'clojure-refactoring.rename-binding :reload-all) (ns clojure-refactoring.rename-binding) (rename-binding \"" body "\" \"" old-name "\" \"" new-name "\")"))
       (insert (read clojure-refactoring-temp))
       (cleanup-buffer))))
 
@@ -132,7 +131,7 @@
         (body (get-sexp)))
     (save-excursion
       (set-clojure-refactoring-temp
-       (concat "(require 'clojure_refactoring.rename_fn :reload-all) (ns clojure_refactoring.rename_fn) (rename-fn \"" body "\" \"" old-name "\" \"" new-name "\")"))
+       (concat "(require 'clojure-refactoring.rename-fn :reload-all) (ns clojure-refactoring.rename-fn) (rename-fn \"" body "\" \"" old-name "\" \"" new-name "\")"))
       (read clojure-refactoring-temp)
       (cleanup-buffer))))
 
@@ -154,7 +153,7 @@
         (body (get-sexp)))
     (save-excursion
       (set-clojure-refactoring-temp
-       (concat "(require 'clojure_refactoring.local_binding) (ns clojure_refactoring.local_binding) (local-wrap \"" defn "\" \"" body "\" \"" var-name "\")"))
+       (concat "(require 'clojure-refactoring.local-binding) (ns clojure-refactoring.local-binding) (local-wrap \"" defn "\" \"" body "\" \"" var-name "\")"))
       (beginning-of-defun)
       (forward-kill-sexp)
       (insert (read clojure-refactoring-temp)))))
@@ -167,7 +166,7 @@
         (defn (escape-string-literals (slime-defun-at-point))))
     (save-excursion
       (set-clojure-refactoring-temp
-       (concat "(require 'clojure_refactoring.destructuring) (ns clojure_refactoring.destructuring) (destructure-map \"" defn "\" \"" var-name "\")"))
+       (concat "(require 'clojure-refactoring.destructuring) (ns clojure-refactoring.destructuring) (destructure-map \"" defn "\" \"" var-name "\")"))
       (insert (read clojure-refactoring-temp)))))
 
 (defvar clojure-refactoring-mode-map
