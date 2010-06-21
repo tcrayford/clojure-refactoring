@@ -1,12 +1,8 @@
 (ns clojure-refactoring.core
-  (:use [clojure.contrib str-utils
-         duck-streams
-         pprint])
+  (:use [clojure.contrib str-utils pprint])
+  (:use [clojure.contrib.seq-utils :only (find-first)])
   (:use clojure.walk)
   (:import clojure.lang.Named))
-
-(defn find-first [f coll]
-  (first (filter f coll)))
 
 (defn is-defn? [node]
   "Returns true if the current node is a function definition"

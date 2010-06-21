@@ -1,5 +1,7 @@
 (ns clojure-refactoring.rename-binding
-  (:use clojure-refactoring.core clojure.walk [clojure.contrib str-utils]))
+  (:use clojure-refactoring.core
+        clojure.walk
+        [clojure.contrib str-utils]))
 
 (defn rename-binding [code old-name new-name]
   (format-code
