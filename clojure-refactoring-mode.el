@@ -158,9 +158,6 @@
       (forward-kill-sexp)
       (insert (read clojure-refactoring-temp)))))
 
-(set-clojure-refactoring-temp
- "\\n")
-
 (defun clojure-refactoring-destructure-map ()
   (let ((var-name (read-from-minibuffer "Map name: "))
         (defn (escape-string-literals (slime-defun-at-point))))

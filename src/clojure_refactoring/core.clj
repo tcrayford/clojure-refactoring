@@ -1,7 +1,6 @@
 (ns clojure-refactoring.core
   (:use [clojure.contrib str-utils
          duck-streams
-         seq-utils
          pprint])
   (:use clojure.walk)
   (:import clojure.lang.Named))

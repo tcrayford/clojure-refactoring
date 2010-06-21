@@ -1,5 +1,7 @@
 (ns clojure-refactoring.thread-expression
-  (:use clojure-refactoring.core clojure.walk [clojure.contrib str-utils seq-utils]))
+  (:use clojure-refactoring.core
+        clojure.walk
+        [clojure.contrib str-utils]))
 
 ;; TODO: more robust error checking. If we can't thread a function
 ;; throw an exception instead of trying it anyway

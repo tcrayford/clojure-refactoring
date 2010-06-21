@@ -1,5 +1,5 @@
 (ns clojure-refactoring.local-binding
-  (:use clojure.walk clojure-refactoring.core clojure.contrib.seq-utils))
+  (:use clojure.walk clojure-refactoring.core))
 
 (defn get-function-definition [defn-form]
   "Gets the function body out of a defn form"
