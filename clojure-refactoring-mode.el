@@ -179,7 +179,7 @@
     (run-hooks 'slime-connected-hook)))
 
 (progn (defun clojure-refactoring-enable ()
-         (clojure-umbrella-mode t))
+         (clojure-refactoring-mode t))
        (add-hook 'clojure-mode-hook 'clojure-refactoring-enable))
 
 (provide 'clojure-refactoring-mode)
