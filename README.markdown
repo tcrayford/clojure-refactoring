@@ -9,7 +9,7 @@ Thread-last - threads the current expression via `->>`
 
 Thread-first - threads the current expression via `->`
 
-Unthread - unthreads the current expression. TODO: this only works with `->>`
+Unthread - unthreads the current expression.
 
 Extract-fn - extracts the current expression and replaces it with a
 call to it.
