@@ -7,8 +7,9 @@
        "(defn valid-message? [msg]
   (partial every? #(and (:user msg) (:text msg) (:id msg))))")
 
-(def test-fn-node (read-string test-fn-string))
-(f))
+  (def test-fn-node
+       (read-string test-fn-string))
+  (f))
 
 (use-fixtures :once fixture)
 
@@ -31,11 +32,10 @@
   (is (= (bound-symbols '(defn foo [a b] (+ a b))) '[a b])))
 
 (deftest rec_contains?
-  (is (= (rec-contains? '(let [a 1] (let [b 2] (+ a b))) '(+ a b)) true))
-  (is (= (rec-contains? '(let [a 1] (+ a 2)) '(+ a 2)) true))
-  (is (= (rec-contains? '(let [a 1] (if (= b a) true 0)) '(= b 12)) nil))
-  (is (= (rec-contains? '(let [a 1] (if (= b a) true 0)) 'true) true)))
-
+  (is  (rec-contains? '(let [a 1] (let [b 2] (+ a b))) '(+ a b)) true)
+  (is  (rec-contains? '(let [a 1] (+ a 2)) '(+ a 2)) true)
+  (is (not (rec-contains? '(let [a 1] (if (= b a) true 0)) '(= b 12))))
+  (is  (rec-contains? '(let [a 1] (if (= b a) true 0)) 'true) true))
 
 (deftest binding_node?
   (is (= (binding-node? '(let [a 1] a)) 'let))
@@ -44,14 +44,14 @@
   (is (= (binding-node? (nth '(let [a 1] (let [b 2] (+ a b))) 2)) 'let)))
 
 (deftest last_binding_form?
-  (is (= (last-binding-form? '(let [a 1] a)) true))
-  (is (= (last-binding-form? '(+ 1 2)) nil))
-  (is (= (last-binding-form? '(let [a 1] (fn [z] (+ z a)))) false))
-  (is (= (last-binding-form? '(let [a 1 (let [b 2] (+ a b))])) false)))
+  (is  (last-binding-form? '(let [a 1] a)))
+  (is (not (last-binding-form? '(+ 1 2))))
+  (is (not (last-binding-form? '(let [a 1] (fn [z] (+ z a))))))
+  (is (not (last-binding-form? '(let [a 1 (let [b 2] (+ a b))])))))
 
 (deftest let_bind
   (is (= (find-bindings-above-node '(defn myfn [a] (let [a 1] (+ 1 a)))
-                    '(+ 1 a))
+                                   '(+ 1 a))
          '[a])))
 
 (deftest find_bindings

@@ -66,22 +66,13 @@ TODO: doesn't handle destructuring properly"
 
 (defn rec-contains? [coll obj]
   "True if coll contains obj at some level of nesting"
-  (rec-matches?
-   (fn [node]
-     (if (= node obj)
-       true
-       (if (= node true)
-         ;; Otherwise any coll containing true
-         ;; would return true, even if it didn't actually contain
-         ;; obj
-         false node)))
-   coll))
+  (some #{obj} (tree-seq sequential? seq coll)))
 
 (defn last-binding-form? [node]
   "Returns true if there are no binding nodes inside node"
   (and (binding-node? node)
        (not
-        (some-true?
+        (some identity
          (for [sym binding-forms]
            (rec-contains? (rest node) sym))))))
 
