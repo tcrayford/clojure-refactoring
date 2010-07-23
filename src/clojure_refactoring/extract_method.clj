@@ -1,5 +1,6 @@
 (ns clojure-refactoring.extract-method
   (:use clojure-refactoring.core
+        clojure-refactoring.find-bindings-above-node
         [clojure.contrib str-utils]))
 
 (defn fn-name [fn-node] (nth fn-node 1))
