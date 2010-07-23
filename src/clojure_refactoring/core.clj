@@ -23,6 +23,9 @@ TODO: doesn't handle destructuring properly"
                  (or (find-occurences arg-set sub-node))
                  (arg-set sub-node))))))
 
+(defn sub-nodes [tree]
+  (tree-seq sequential? seq tree))
+
 (def binding-forms
      #{'let 'fn 'binding 'for 'doseq 'dotimes 'defn 'loop})
 
@@ -59,22 +62,19 @@ TODO: doesn't handle destructuring properly"
 
 (defn rec-matches? [f coll]
   "True if the result of applying f on any sub-element of coll is true"
-  (some-true?
-   (flatten
-    (postwalk
-     f coll))))
+  (filter f (sub-nodes coll)))
 
 (defn rec-contains? [coll obj]
   "True if coll contains obj at some level of nesting"
-  (some #{obj} (tree-seq sequential? seq coll)))
+  (some #{obj} (sub-nodes coll)))
 
 (defn last-binding-form? [node]
   "Returns true if there are no binding nodes inside node"
   (and (binding-node? node)
        (not
         (some identity
-         (for [sym binding-forms]
-           (rec-contains? (rest node) sym))))))
+              (for [sym binding-forms]
+                (rec-contains? (rest node) sym))))))
 
 (defn add-binding-form [node bnd-syms]
   "Returns a new binding form from the root node's binding form"
