@@ -5,7 +5,6 @@
 
 ;; TODO: more robust error checking. If we can't thread a function
 ;; throw an exception instead of trying it anyway
-
 (defn thread-last [code]
   (format-code
    (conj (loop [node (read-string code) new-node '()]
@@ -31,9 +30,11 @@
 
 (def expression-threaders '#{->> -> clojure.core/->> clojure.core/->})
 
+(defn threaded? [node]
+  (and (seq? node) (expression-threaders (first node))))
+
 (defn extract-threaded [coll]
-  (if (and (seq? coll)
-           (expression-threaders (first coll)))
+  (if (threaded? coll)
     (macroexpand-1 coll)
     coll))
 
@@ -45,13 +46,6 @@
       extract-threaded
       node))
     node))
-
-(defn- unthread-first [node]
-  (loop [node node new-node '()]
-    (if (= (count node) 0)
-      new-node
-      (recur (rest node)
-             (concat (list (first (first node)) new-node) (drop 1 (first node)))))))
 
 (defn thread-unthread [code]
   "Takes an expression starting with ->> or -> and unthreads it"
