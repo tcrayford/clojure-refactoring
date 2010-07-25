@@ -3,6 +3,15 @@
         clojure-refactoring.find-bindings-above-node
         [clojure.contrib str-utils]))
 
+(defn find-occurences [args node]
+  "Looks for any occurence of each element of args in the node
+TODO: doesn't handle destructuring properly"
+  (flatten (loop [arg-set (set args) node node]
+             (for [sub-node node]
+               (if (seq? sub-node)
+                 (find-occurences arg-set sub-node)
+                 (arg-set sub-node))))))
+
 (defn fn-name [fn-node] (nth fn-node 1))
 
 (defn fn-call [fn-node]

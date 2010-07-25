@@ -14,15 +14,6 @@
     (with-pprint-dispatch *code-dispatch*
       (pprint node))))
 
-(defn find-occurences [args node]
-  "Looks for any occurence of each element of args in the node
-TODO: doesn't handle destructuring properly"
-  (flatten (loop [arg-set (set args) node node]
-             (for [sub-node node]
-               (if (seq? sub-node)
-                 (or (find-occurences arg-set sub-node))
-                 (arg-set sub-node))))))
-
 (defn sub-nodes [tree]
   (tree-seq sequential? seq tree))
 

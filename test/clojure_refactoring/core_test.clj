@@ -19,7 +19,6 @@
 (deftest is_defn?
   (is (is-defn? '(defn foo [] 1))))
 
-
 (deftest binding_form
   (is (= (extract-binding-form '(let [b 2] b)) '[b 2]))
   (is (= (extract-binding-form '(defn foo [a] a)) '[a])))
