@@ -43,8 +43,7 @@ TODO: doesn't handle destructuring properly"
 
 (defn extract-binding-form [node]
   "Returns a vector of bindings iff the node is a binding node. Won't work with multiple arity defns"
-  (if (binding-node? node)
-    (fn-args node)))
+  (fn-args node))
 
 (defn unique-vec [coll]
   "Strips all duplicates from coll and forces it into a vector"
@@ -85,5 +84,4 @@ TODO: doesn't handle destructuring properly"
 
 (defn more-than-one [pred coll]
   "True if more than one item of coll matches pred"
-  (if (seq? coll)
-    (< 1 (count (filter pred coll)))))
+  (< 1 (count (filter pred coll))))
