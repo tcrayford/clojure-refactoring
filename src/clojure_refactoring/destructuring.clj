@@ -22,13 +22,16 @@
   "Returns all the map lookups in a node as a set of seqs"
   (loop [node root-node accum #{}]
     (let [current-node (first node)]
-      (if (count= node 0)
-        accum
-        (if (is-map-lookup? current-node)
-          (recur (rest node) (conj accum current-node))
-          (if (seq? current-node)
-            (recur current-node accum)
-            (recur (rest node) accum)))))))
+      (cond (count= node 0)
+            accum
+
+            (is-map-lookup? current-node)
+            (recur (rest node) (conj accum current-node))
+
+            :else
+            (if (seq? current-node)
+              (recur current-node accum)
+              (recur (rest node) accum))))))
 
 (defn lookup->canoninical-form [lookup]
   "Forces a lookup of the form (map :key) into (:key map)
@@ -37,15 +40,12 @@ TODO: this needs a better name"
 
 (defn lookups->binding-map [lookups]
   "Converts #{(:a a) (:b a)} to {a {a :a b :a}}"
-  (loop [l lookups binding-map {}]
-    (if (empty? l)
-      binding-map
-      (let [lookup (first l)
-            [key m] (lookup->canoninical-form lookup)]
-        (recur
-         (rest l)
-         (assoc binding-map m
-                (assoc (get binding-map m {}) (key->sym key) key)))))))
+  (reduce
+   (fn [binding-map lookup]
+     (let [[key m] (lookup->canoninical-form lookup)]
+          (assoc binding-map m
+                 (assoc (get binding-map m {}) (key->sym key) key))))
+   {} lookups))
 
 (defn destructured-binding-vec [old-vec binding-map]
   "Replaces each key in the binding map found in old-vec with the value
@@ -64,10 +64,10 @@ if this node is contained in lookups"
 adds a binding map made from the lookups to the root node"
   (let [args (fn-args root-node)]
     (map
-      #(if (= % args)
+     #(if (= % args)
         (destructured-binding-vec args (lookups->binding-map lookups))
         %)
-      root-node)))
+     root-node)))
 
 (defn destructure-map [fn-code name]
   "Destructures all calls to map called name inside a function node"
