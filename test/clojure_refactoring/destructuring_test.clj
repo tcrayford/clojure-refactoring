@@ -3,9 +3,9 @@
   (:use clojure.test))
 
 (deftest is_map_lookup?
-  (is (= (is-map-lookup? '(:foo a)) true))
-  (is (= (is-map-lookup? '(a (:foo b))) false))
-  (is (= (is-map-lookup? '(b :foo)) true)))
+  (is (is-map-lookup? '(:foo a)))
+  (is (is-map-lookup? '(a (:foo b))))
+  (is (is-map-lookup? '(b :foo))))
 
 (deftest find_lookups
   (is (= (find-lookups '(a (:foo b))) '#{(:foo b)}))
@@ -16,6 +16,8 @@
   (is (= (lookups->binding-map '#{(:a a) (:b a)}) '{a {a :a b :b}}))
   (is (= (lookups->binding-map '#{(a :a) (a :b)}) '{a {a :a b :b}})))
 
+
+;;Integration level tests below here.
  (deftest destructure_map_test
    (is (= (destructure-map "(defn a [b] (:foo b))" "b")
           "(defn a [{foo :foo}] foo)\n"))

@@ -17,7 +17,7 @@
   (is (= (fn-args test-fn-node) ['msg])))
 
 (deftest is_defn?
-  (is (= (is-defn? '(defn foo [] 1)) true)))
+  (is (is-defn? '(defn foo [] 1))))
 
 
 (deftest binding_form
@@ -32,10 +32,10 @@
   (is (= (bound-symbols '(defn foo [a b] (+ a b))) '[a b])))
 
 (deftest rec_contains?
-  (is  (rec-contains? '(let [a 1] (let [b 2] (+ a b))) '(+ a b)) true)
+  (is  (rec-contains? '(let [a 1] (let [b 2] (+ a b))) '(+ a b)))
   (is  (rec-contains? '(let [a 1] (+ a 2)) '(+ a 2)) true)
   (is (not (rec-contains? '(let [a 1] (if (= b a) true 0)) '(= b 12))))
-  (is  (rec-contains? '(let [a 1] (if (= b a) true 0)) 'true) true))
+  (is  (rec-contains? '(let [a 1] (if (= b a) true 0)) 'true)))
 
 (deftest binding_node?
   (is (= (binding-node? '(let [a 1] a)) 'let))
@@ -44,7 +44,7 @@
   (is (= (binding-node? (nth '(let [a 1] (let [b 2] (+ a b))) 2)) 'let)))
 
 (deftest last_binding_form?
-  (is  (last-binding-form? '(let [a 1] a)))
+  (is (last-binding-form? '(let [a 1] a)))
   (is (not (last-binding-form? '(+ 1 2))))
   (is (not (last-binding-form? '(let [a 1] (fn [z] (+ z a))))))
   (is (not (last-binding-form? '(let [a 1 (let [b 2] (+ a b))])))))
