@@ -7,11 +7,11 @@
   "Checks if the count of seq is equal to n"
   (= (count seq) n))
 
-(defn is-map-lookup?
-  "Returns true if node is a map lookup"
+(defn map-lookup?
+  "Returns true if node is a map lookup using keywords"
   ([node]
      (and (seq? node)
-          (or (keyword? (first node)) (keyword? (second node)))
+          (count= (filter keyword? node) 1)
           (= (count node) 2))))
 
 (defn key->sym [kw]
@@ -23,28 +23,31 @@
   (loop [node root-node accum #{}]
     (let [current-node (first node)]
       (cond (count= node 0)
-            accum
+              accum
 
-            (is-map-lookup? current-node)
-            (recur (rest node) (conj accum current-node))
+            (map-lookup? current-node)
+              (recur (rest node) (conj accum current-node))
+
+            (seq? current-node)
+              (recur current-node accum)
 
             :else
-            (if (seq? current-node)
-              (recur current-node accum)
-              (recur (rest node) accum))))))
+              (recur (rest node) accum)))))
 
 (defn lookup->canoninical-form [lookup]
   "Forces a lookup of the form (map :key) into (:key map)
 TODO: this needs a better name"
-  (if (keyword? (first lookup)) lookup (reverse lookup)))
+  (if (keyword? (first lookup))
+    lookup
+    (reverse lookup)))
 
 (defn lookups->binding-map [lookups]
   "Converts #{(:a a) (:b a)} to {a {a :a b :a}}"
   (reduce
    (fn [binding-map lookup]
      (let [[key m] (lookup->canoninical-form lookup)]
-          (assoc binding-map m
-                 (assoc (get binding-map m {}) (key->sym key) key))))
+       (assoc binding-map m
+              (assoc (get binding-map m {}) (key->sym key) key))))
    {} lookups))
 
 (defn destructured-binding-vec [old-vec binding-map]

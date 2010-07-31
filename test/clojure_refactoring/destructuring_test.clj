@@ -3,9 +3,11 @@
   (:use clojure.test))
 
 (deftest is_map_lookup?
-  (is (is-map-lookup? '(:foo a)))
-  (is (is-map-lookup? '(a (:foo b))))
-  (is (is-map-lookup? '(b :foo))))
+  (is (map-lookup? '(:foo a)))
+  (is (not (map-lookup? '(a (:foo b)))))
+  (is (map-lookup? '(b :foo)))
+  (is (not (map-lookup? '(:foo :bar))))
+  (is (not (map-lookup? '(:foo a :bar b)))))
 
 (deftest find_lookups
   (is (= (find-lookups '(a (:foo b))) '#{(:foo b)}))
