@@ -5,3 +5,4 @@ pom.xml
 classes/
 lib/
 /.linecount
+errors.markdown
