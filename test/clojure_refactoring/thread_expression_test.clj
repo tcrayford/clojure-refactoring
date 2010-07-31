@@ -2,16 +2,31 @@
   (:use clojure-refactoring.thread-expression :reload)
   (:use clojure-refactoring.core clojure.test clojure.contrib.str-utils))
 
-(defn fixture [f]
-  (def start-src "(reduce + (map #(Integer. %) s))")
-  (def end-src "(->> s (map #(Integer. %)) (reduce +))\n")
-  (f))
+(deftest but_second
+  (is (= (but-second [1 2 3]) [1 3])))
 
-(use-fixtures :once fixture #(time (%)))
+(deftest threaded?_test
+  (is (threaded? '(->> foo bar arr)))
+  (is (threaded? '(-> foo bar arr)))
+  (is (not (threaded? '(arr barr arr))))
+  (is (not (threaded? :atom))))
+
+(deftest threading-fns-from-type-test
+  (is (= (threading-fns-from-type '->)
+         {:position-f second
+          :all-but-position-f but-second}))
+  (is (= (threading-fns-from-type '->>)
+         {:position-f last
+          :all-but-position-f butlast})))
+
+(use-fixtures :once #(time (%)))
+
+;; Integration level tests below here
+(def start-src "(reduce + (map #(Integer. %) s))")
+(def end-src "(->> s (map #(Integer. %)) (reduce +))\n")
 
 (deftest thread_last
   (is (= (thread-last start-src) end-src)))
-
 
 (deftest thread_first
   (is (= (thread-first "(+ (* c 1.8) 32)") "(-> c (* 1.8) (+ 32))\n")))

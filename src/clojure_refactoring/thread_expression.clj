@@ -3,30 +3,42 @@
         clojure.walk
         [clojure.contrib str-utils]))
 
+(defn but-second [coll]
+  (conj (drop 2 coll) (first coll)))
+
+(defn threading-fns-from-type [type]
+  "Returns functions to be used by thread-with-type
+based on what type of threading is going to be"
+  ({'-> {:position-f second
+         :all-but-position-f but-second}
+    '->> {:position-f last
+          :all-but-position-f butlast}} type))
+
 ;; TODO: more robust error checking. If we can't thread a function
 ;; throw an exception instead of trying it anyway
-(defn thread-last [code]
-  (format-code
-   (conj (loop [node (read-string code) new-node '()]
-           (if (list? (last node))
-             (recur (last node) (conj new-node (butlast node)))
-             (conj
-              (conj new-node (butlast node))
-              (last node))))
-         '->>)))
+(defn thread-with-type [thread-type code]
+  (loop [node (read-string code) new-node '()]
+    (let [{:keys [position-f all-but-position-f]}
+          (threading-fns-from-type thread-type)]
+      (if (list? (position-f node))
+        (recur
+          (position-f node)
+          (conj new-node (all-but-position-f node)))
+        (conj
+          (conj new-node (all-but-position-f node))
+          (position-f node))))))
 
-(defn- butsecond [coll]
-  (conj (rest (rest coll)) (first coll)))
-
-(defn thread-first [code]
+(defn construct-threaded [thread-type code]
   (format-code
-   (conj (loop [node (read-string code) new-node '()]
-           (if (list? (second node))
-             (recur (second node) (conj new-node (butsecond node)))
-             (conj
-              (conj new-node (butsecond node))
-              (second node))))
-         '->)))
+   (conj
+    (thread-with-type thread-type code)
+    thread-type)))
+
+(def thread-last
+     (partial construct-threaded '->>))
+
+(def thread-first
+     (partial construct-threaded '->))
 
 (def expression-threaders '#{->> -> clojure.core/->> clojure.core/->})
 
@@ -38,22 +50,13 @@
     (macroexpand-1 coll)
     coll))
 
-(defn- unthread-last [node]
-  "Unthread an expression threaded with ->>."
-  (if (some #(rec-contains? node %) expression-threaders)
-    (recur
-     (postwalk
-      extract-threaded
-      node))
-    node))
-
 (defn thread-unthread [code]
   "Takes an expression starting with ->> or -> and unthreads it"
   (format-code
    (loop [node (read-string code)]
      (if (some #(rec-contains? node %) expression-threaders)
-    (recur
-     (postwalk
-      extract-threaded
-      node))
-    node))))
+       (recur
+        (postwalk
+         extract-threaded
+         node))
+       node))))
