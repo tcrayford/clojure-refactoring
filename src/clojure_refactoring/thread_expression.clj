@@ -4,7 +4,8 @@
         [clojure.contrib str-utils]))
 
 (defn but-second [coll]
-  (conj (drop 2 coll) (first coll)))
+  (->> (first coll)
+       (conj (drop 2 coll))))
 
 (defn threading-fns-from-type [type]
   "Returns functions to be used by thread-with-type
@@ -14,19 +15,22 @@ based on what type of threading is going to be"
     '->> {:position-f last
           :all-but-position-f butlast}} type))
 
+(defn finish-threading [node new-node thread-type]
+  (let [{:keys [position-f all-but-position-f]}
+        (threading-fns-from-type thread-type)]
+    `(~(position-f node) ~(all-but-position-f node) ~@new-node)))
+
 ;; TODO: more robust error checking. If we can't thread a function
 ;; throw an exception instead of trying it anyway
 (defn thread-with-type [thread-type code]
-  (loop [node (read-string code) new-node '()]
-    (let [{:keys [position-f all-but-position-f]}
-          (threading-fns-from-type thread-type)]
+  (let [{:keys [position-f all-but-position-f]}
+        (threading-fns-from-type thread-type)]
+    (loop [node (read-string code) new-node '()]
       (if (list? (position-f node))
         (recur
-          (position-f node)
-          (conj new-node (all-but-position-f node)))
-        (conj
-          (conj new-node (all-but-position-f node))
-          (position-f node))))))
+         (position-f node)
+         (conj new-node (all-but-position-f node)))
+        (finish-threading node new-node thread-type)))))
 
 (defn construct-threaded [thread-type code]
   (format-code

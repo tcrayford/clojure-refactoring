@@ -2,6 +2,8 @@
   (:use clojure-refactoring.thread-expression :reload)
   (:use clojure-refactoring.core clojure.test clojure.contrib.str-utils))
 
+(use-fixtures :once #(time (%)))
+
 (deftest but_second
   (is (= (but-second [1 2 3]) [1 3])))
 
@@ -19,9 +21,14 @@
          {:position-f last
           :all-but-position-f butlast})))
 
-(use-fixtures :once #(time (%)))
+(deftest finish_threading
+  (is (= (finish-threading '(x y z) '(a b c) '->>)
+         '(z (x y) a b c)))
+  (is (= (finish-threading '(x y z) '(a b c) '->)
+         '(y (x z) a b c))))
 
 ;; Integration level tests below here
+
 (def start-src "(reduce + (map #(Integer. %) s))")
 (def end-src "(->> s (map #(Integer. %)) (reduce +))\n")
 
