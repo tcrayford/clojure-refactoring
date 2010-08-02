@@ -4,9 +4,9 @@
   (:use clojure.walk)
   (:import clojure.lang.Named))
 
-(defn is-defn? [node]
+(defn defn? [[sym]]
   "Returns true if the current node is a function definition"
-  (= (first node) 'defn))
+  (= sym 'defn))
 
 (defn format-code [node]
   "Outputs code roughly how a human would format it."
@@ -18,11 +18,11 @@
   (tree-seq sequential? seq tree))
 
 (def binding-forms
-     #{'let 'fn 'binding 'for 'doseq 'dotimes 'defn 'loop})
+     #{'let 'fn 'binding 'for 'doseq 'dotimes 'defn 'loop 'defmacro})
 
-(defn binding-node? [node]
+(defn binding-node? [[node-type]]
   "Checks if a node is a binding node"
-  (binding-forms (first node)))
+  (binding-forms node-type))
 
 (defn evens [coll]
   "Returns every other item of coll"
@@ -42,7 +42,7 @@
 
 (defn bound-symbols [node]
   "Returns a vector of the bound symbols inside node"
-  (if (is-defn? node)
+  (if (defn? node)
     (extract-binding-form node)
     (evens (extract-binding-form node))))
 
@@ -66,13 +66,3 @@
               (for [sym binding-forms]
                 (rec-contains? (rest node) sym))))))
 
-(defn add-binding-form [node bnd-syms]
-  "Returns a new binding form from the root node's binding form"
-  (into bnd-syms (bound-symbols node)))
-
-(defn contains-binding-nodes? [node]
-  (some #{true} (map #(rec-contains? node %) binding-forms)))
-
-(defn more-than-one [pred coll]
-  "True if more than one item of coll matches pred"
-  (< 1 (count (filter pred coll))))

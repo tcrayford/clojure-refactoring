@@ -17,7 +17,7 @@
   (is (= (fn-args test-fn-node) ['msg])))
 
 (deftest is_defn?
-  (is (is-defn? '(defn foo [] 1))))
+  (is (defn? '(defn foo [] 1))))
 
 (deftest binding_form
   (is (= (extract-binding-form '(let [b 2] b)) '[b 2]))
