@@ -51,7 +51,7 @@
      (buffer-string))))
 
 (setq clojure-refactoring-refactorings-list
-      (list "extract-fn" "thread-last" "extract-global" "thread-first" "unthread" "rename-binding" "extract-local" "destructure-map" "rename-fn"))
+      (list "extract-fn" "thread-last" "extract-global" "thread-first" "unthread" "extract-local" "destructure-map" "rename"))
 
 (defun clojure-refactoring-ido ()
   (interactive)
@@ -113,23 +113,7 @@
   (interactive)
   (clojure-refactoring-thread-expr "unthread"))
 
-(defun clojure-refactoring-rename-binding ()
-  (interactive)
-  (let ((old-name (read-from-minibuffer "Current name: "))
-        (new-name (read-from-minibuffer "New name: "))
-        (body (get-sexp)))
-    (save-excursion
-      (set-clojure-refactoring-temp
-       (concat "(require 'clojure-refactoring.rename-binding) (ns clojure-refactoring.rename-binding) (rename-binding \"" body "\" \"" old-name "\" \"" new-name "\")"))
-      (insert (read clojure-refactoring-temp))
-      (cleanup-buffer))))
-
-(defun clojure-refactoring-test-foo ()
-  (interactive)
-  (insert (read clojure-refactoring-temp)))
-
-
-(defun clojure-refactoring-rename-fn ()
+(defun clojure-refactoring-rename ()
   (interactive)
   (let ((old-name (symbol-at-point))
         (new-name (read-from-minibuffer "New name: ")))
@@ -140,7 +124,7 @@
       (message (format "old %s" old-name))
       (message (format "body %s" body))
       (set-clojure-refactoring-temp
-       (format "(require 'clojure-refactoring.rename-fn) (clojure-refactoring.rename-fn/rename-fn \"%s\" \"%s\" \"%s\")"
+       (format "(require 'clojure-refactoring.rename) (clojure-refactoring.rename/rename \"%s\" \"%s\" \"%s\")"
                body old-name new-name))
        (insert (read clojure-refactoring-temp)))))
 
