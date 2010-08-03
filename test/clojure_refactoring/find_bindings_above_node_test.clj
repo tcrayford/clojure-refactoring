@@ -36,4 +36,10 @@
     (is (= (find-bindings-above-node
             '(let [{:keys [a b]} {:a 1 :b 2}] (+ a b))
             '(+ a b))
-           '[a b]))))
+           '[a b])))
+  (testing "regex in find-bindings"
+    (is (=
+         (find-bindings-above-node
+          '(defn add [s] (for [x (re-split #"," s)] (Integer. x)))
+          '(re-split #"," s))
+         '[s x]))))

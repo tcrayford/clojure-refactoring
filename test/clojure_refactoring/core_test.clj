@@ -34,7 +34,9 @@
   (is  (rec-contains? '(let [a 1] (let [b 2] (+ a b))) '(+ a b)))
   (is  (rec-contains? '(let [a 1] (+ a 2)) '(+ a 2)) true)
   (is (not (rec-contains? '(let [a 1] (if (= b a) true 0)) '(= b 12))))
-  (is  (rec-contains? '(let [a 1] (if (= b a) true 0)) 'true)))
+  (is  (rec-contains? '(let [a 1] (if (= b a) true 0)) 'true))
+  (is (rec-contains? '(defn what [s] (re-split #"," s))
+                     '(re-split #"," s))))
 
 (deftest binding_node?
   (is (= (binding-node? '(let [a 1] a)) 'let))

@@ -54,9 +54,27 @@
   "True if the result of applying f on any sub-element of coll is true"
   (filter f (sub-nodes coll)))
 
+(defn regex? [obj]
+  (= (class obj) java.util.regex.Pattern))
+
+(defn replace-regex [coll]
+  "Returns a copy of coll with all regex replaced by the string given by calling toString on them"
+  (postwalk
+   (fn [node]
+     (if (regex? node)
+       (.toString node)
+       node))
+   coll))
+
+(defn maybe-replace-regex [obj]
+  (if (seq? obj)
+    (replace-regex obj)
+    obj))
+
 (defn rec-contains? [coll obj]
   "True if coll contains obj at some level of nesting"
-  (some #{obj} (sub-nodes coll)))
+  (some #{(maybe-replace-regex obj)}
+        (sub-nodes (maybe-replace-regex coll))))
 
 (defn last-binding-form? [node]
   "Returns true if there are no binding nodes inside node"
