@@ -97,7 +97,7 @@
   (let ((body (get-sexp)))
     (save-excursion
       (set-clojure-refactoring-temp
-       (concat "(require 'clojure-refactoring.thread-expression :reload-all) (ns clojure-refactoring.thread-expression) (thread-" str " \"" body"\")"))
+       (concat "(require 'clojure-refactoring.thread-expression) (ns clojure-refactoring.thread-expression) (thread-" str " \"" body"\")"))
       (cleanup-buffer)
       (insert (read clojure-refactoring-temp)))))
 
@@ -120,7 +120,7 @@
         (body (get-sexp)))
     (save-excursion
       (set-clojure-refactoring-temp
-       (concat "(require 'clojure-refactoring.rename-binding :reload-all) (ns clojure-refactoring.rename-binding) (rename-binding \"" body "\" \"" old-name "\" \"" new-name "\")"))
+       (concat "(require 'clojure-refactoring.rename-binding) (ns clojure-refactoring.rename-binding) (rename-binding \"" body "\" \"" old-name "\" \"" new-name "\")"))
       (insert (read clojure-refactoring-temp))
       (cleanup-buffer))))
 
@@ -131,7 +131,7 @@
         (body (get-sexp)))
     (save-excursion
       (set-clojure-refactoring-temp
-       (concat "(require 'clojure-refactoring.rename-fn :reload-all) (ns clojure-refactoring.rename-fn) (rename-fn \"" body "\" \"" old-name "\" \"" new-name "\")"))
+       (concat "(require 'clojure-refactoring.rename-fn) (ns clojure-refactoring.rename-fn) (rename-fn \"" body "\" \"" old-name "\" \"" new-name "\")"))
       (read clojure-refactoring-temp)
       (cleanup-buffer))))
 
