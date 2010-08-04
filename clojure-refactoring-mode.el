@@ -115,19 +115,19 @@
 
 (defun clojure-refactoring-rename ()
   (interactive)
-  (let ((old-name (read-from-minibuffer "Old name: "
-                                        (symbol-name (symbol-at-point))))
-        (new-name (read-from-minibuffer "New name: ")))
-    (beginning-of-defun)
-    (mark-sexp)
-    (let ((body (get-sexp)))
-      (let ((expr (format "(require 'clojure-refactoring.rename) (ns clojure-refactoring.rename) (rename '%s '%s '%s)"
-                          body old-name new-name)))
-        (set-clojure-refactoring-temp
-         expr)
-        (message (read clojure-refactoring-temp))
-        (insert (read clojure-refactoring-temp))))))
-
+  (save-excursion
+    (let ((old-name (read-from-minibuffer "Old name: "
+                                          (symbol-name (symbol-at-point))))
+          (new-name (read-from-minibuffer "New name: ")))
+      (beginning-of-defun)
+      (mark-sexp)
+      (let ((body (buffer-substring-no-properties (mark t) (point))))
+        (forward-kill-sexp)
+        (let ((expr (format "(require 'clojure-refactoring.rename) (ns clojure-refactoring.rename) (rename '%s '%s '%s)"
+                            body old-name new-name)))
+          (set-clojure-refactoring-temp
+           expr)))))
+  (insert (read clojure-refactoring-temp)))
 
 (defun clojure-refactoring-extract-global ()
   (let ((var-name (read-from-minibuffer "Variable name: "))
