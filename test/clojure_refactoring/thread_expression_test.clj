@@ -30,13 +30,13 @@
 ;; Integration level tests below here
 
 (def start-src "(reduce + (map #(Integer. %) s))")
-(def end-src "(->> s (map #(Integer. %)) (reduce +))\n")
+(def end-src "(->> (map #(Integer. %) s) (reduce +))\n")
 
 (deftest thread_last
   (is (= (thread-last start-src) end-src)))
 
 (deftest thread_first
-  (is (= (thread-first "(+ (* c 1.8) 32)") "(-> c (* 1.8) (+ 32))\n")))
+  (is (= (thread-first "(+ (* c 1.8) 32)") "(-> (* c 1.8) (+ 32))\n")))
 
 (deftest thread_unthread_last
   (is (= ( thread-unthread

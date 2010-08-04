@@ -22,21 +22,22 @@ based on what type of threading is going to be"
 
 ;; TODO: more robust error checking. If we can't thread a function
 ;; throw an exception instead of trying it anyway
+(defn not-last-threading-node? [node position-f]
+  (and (list? (position-f node))
+       (list? (position-f (position-f node)))))
+
 (defn thread-with-type [thread-type code]
   (let [{:keys [position-f all-but-position-f]}
         (threading-fns-from-type thread-type)]
     (loop [node (read-string code) new-node '()]
-      (if (list? (position-f node))
-        (recur
-         (position-f node)
-         (conj new-node (all-but-position-f node)))
+      (if (not-last-threading-node? node position-f)
+        (recur (position-f node)
+               (conj new-node (all-but-position-f node)))
         (finish-threading node new-node thread-type)))))
 
 (defn construct-threaded [thread-type code]
   (format-code
-   (conj
-    (thread-with-type thread-type code)
-    thread-type)))
+   `(~thread-type ~@(thread-with-type thread-type code))))
 
 (def thread-last
      (partial construct-threaded '->>))
@@ -49,18 +50,22 @@ based on what type of threading is going to be"
 (defn threaded? [node]
   (and (seq? node) (expression-threaders (first node))))
 
-(defn extract-threaded [coll]
+(defn expand-threaded [coll]
   (if (threaded? coll)
     (macroexpand-1 coll)
     coll))
+
+(defn expand-all-threaded [node]
+  (postwalk expand-threaded node))
+
+(defn any-threaded? [node]
+  (some #(rec-contains? node %) expression-threaders))
 
 (defn thread-unthread [code]
   "Takes an expression starting with ->> or -> and unthreads it"
   (format-code
    (loop [node (read-string code)]
-     (if (some #(rec-contains? node %) expression-threaders)
+     (if (any-threaded? node)
        (recur
-        (postwalk
-         extract-threaded
-         node))
+        (expand-all-threaded node))
        node))))

@@ -7,32 +7,21 @@
   "Checks if the count of seq is equal to n"
   (= (count seq) n))
 
-(defn map-lookup?
+(defn map-lookup? [node]
   "Returns true if node is a map lookup using keywords"
-  ([node]
-     (and (seq? node)
-          (count= (filter keyword? node) 1)
-          (= (count node) 2))))
+  (and (seq? node)
+       (count= (filter keyword? node) 1)
+       (= (count node) 2)))
 
 (defn key->sym [kw]
   "Turns a keyword into a symbol"
   (symbol (name kw)))
 
-(defn find-lookups [root-node]
+(defn find-lookups [node]
   "Returns all the map lookups in a node as a set of seqs"
-  (loop [node root-node accum #{}]
-    (let [current-node (first node)]
-      (cond (count= node 0)
-              accum
-
-            (map-lookup? current-node)
-              (recur (rest node) (conj accum current-node))
-
-            (seq? current-node)
-              (recur current-node accum)
-
-            :else
-              (recur (rest node) accum)))))
+  (->> (sub-nodes node)
+       (filter map-lookup?)
+       set))
 
 (defn lookup->canoninical-form [lookup]
   "Forces a lookup of the form (map :key) into (:key map)

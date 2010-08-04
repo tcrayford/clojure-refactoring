@@ -57,14 +57,17 @@
 (defn regex? [obj]
   (= (class obj) java.util.regex.Pattern))
 
+(defn replace-with-string [node]
+  (if (regex? node)
+    (.toString node)
+    node))
+
 (defn replace-regex [coll]
   "Returns a copy of coll with all regex replaced by the string given by calling toString on them"
   (postwalk
-   (fn [node]
-     (if (regex? node)
-       (.toString node)
-       node))
+   replace-with-string
    coll))
+
 
 (defn maybe-replace-regex [obj]
   (if (seq? obj)
@@ -76,11 +79,12 @@
   (some #{(maybe-replace-regex obj)}
         (sub-nodes (maybe-replace-regex coll))))
 
+(defn contains-binding-nodes? [node]
+  (some identity
+        (for [sym binding-forms] (rec-contains? (rest node) sym))))
+
 (defn last-binding-form? [node]
   "Returns true if there are no binding nodes inside node"
   (and (binding-node? node)
        (not
-        (some identity
-              (for [sym binding-forms]
-                (rec-contains? (rest node) sym))))))
-
+        (contains-binding-nodes? node))))
