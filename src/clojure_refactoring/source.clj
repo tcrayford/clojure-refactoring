@@ -102,3 +102,8 @@ Example: (get-source-from-var 'filter)"
          (all-vars)
          (map #(does-var-call-fn % sym))
          (filter #(identity %)))))
+
+(defn source-for-vars-who-call [var]
+  (map (comp read-string get-source-from-cache) ;; TODO: duplicating this, can we do
+       ;; better?
+   (all-vars-who-call var)))
