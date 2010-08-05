@@ -51,7 +51,7 @@
      (buffer-string))))
 
 (setq clojure-refactoring-refactorings-list
-      (list "extract-fn" "thread-last" "extract-global" "thread-first" "unthread" "extract-local" "destructure-map" "rename"))
+      (list "extract-fn" "thread-last" "extract-global" "thread-first" "unthread" "extract-local" "destructure-map" "rename" "global-rename"))
 
 (defun clojure-refactoring-ido ()
   (interactive)
@@ -129,6 +129,19 @@
            expr)))))
   (insert (read clojure-refactoring-temp)))
 
+(defun clojure-refactoring-global-rename ()
+  (interactive)
+  (save-excursion
+    (let ((old-name (read-from-minibuffer "Old name: "
+                                          (symbol-name (symbol-at-point))))
+          (new-name (read-from-minibuffer "New name: ")))
+      (let ((expr (format "(require 'clojure-refactoring.rename) (ns clojure-refactoring.rename) (global-rename (find-var '%s/%s) '%s)"
+                          (slime-current-package) old-name new-name)))
+        (set-clojure-refactoring-temp
+         expr))))
+  (clojure-refactoring-process-global-replacements (read clojure-refactoring-temp)))
+
+(slime-current-package)
 (defun clojure-refactoring-extract-global ()
   (let ((var-name (read-from-minibuffer "Variable name: "))
         (body (delete-and-extract-region (mark t) (point))))
@@ -139,7 +152,6 @@
       (insert "(def " var-name body ")")
       (reindent-then-newline-and-indent))
     (insert var-name)))
-
 
 (defun clojure-refactoring-extract-local ()
   (let ((var-name (read-from-minibuffer "Variable name: "))
@@ -159,6 +171,25 @@
       (set-clojure-refactoring-temp
        (concat "(require 'clojure-refactoring.destructuring) (ns clojure-refactoring.destructuring) (destructure-map \"" defn "\" \"" var-name "\")"))
       (insert (read clojure-refactoring-temp)))))
+
+(defun get-from-alist (key alist)
+  (car (cdr (assoc key alist))))
+
+(defun clojure-refactoring-process-global-replace (replace)
+  (if (get-from-alist :new-source replace)
+      (save-excursion
+        (progn
+          (find-file (get-from-alist :file replace))
+          (goto-char (point-min))
+          (forward-line (1- (get-from-alist :line replace)))
+          (beginning-of-line)
+          (forward-kill-sexp)
+          (insert (get-from-alist :new-source replace))
+          (save-current-buffer)))))
+
+(defun clojure-refactoring-process-global-replacements (replacements)
+  (save-window-excursion
+    (mapcar #'clojure-refactoring-process-global-replace replacements)))
 
 (defvar clojure-refactoring-mode-map
   (let ((map (make-sparse-keymap)))

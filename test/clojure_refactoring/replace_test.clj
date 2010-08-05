@@ -21,32 +21,28 @@
   (testing "pairs"
     (is (= (map-to-alist {:a 1}) '((:a 1))))))
 
-(defn replace-test-map []
+(defn replacement-map-for-tests []
   (build-replacement-map #'a replace-test-fn))
 
 (deftest build_replacement_map
   (testing "it has the right attributes"
     (expect [get-source-from-cache (times 1 (returns "(+ a 1)"))]
-            (let [m (replace-test-map)]
-              (is (:file m))
-              (is (:var-name m))
-              (is (:line m))
-              (is (:new-source m)))))
+      (let [m (replacement-map-for-tests)]
+        (is (:file m))
+        (is (:var-name m))
+        (is (:line m))
+        (is (:new-source m)))))
   (testing "populates the attributes correctly"
     (expect [get-source-from-cache (times 1 (returns "(+ a 1)"))]
-            (is (=
-                 (:new-source (replace-test-map))
-                 'a)))
+      (is (= (:new-source (replacement-map-for-tests)) "a")))
     (expect [get-source-from-cache (returns "(+ a 1)")
-             file-from-var (times 1 (returns "foo"))]
-            (is (=
-                 (:file (replace-test-map))
-                 "foo")))
-    (expect [get-source-from-cache (returns "(+ a 1)")
-             line-from-var (returns 1)]
-            (is (=
-                 (:line (replace-test-map))
-                 1)))))
+       slime-file-from-var (times 1 (returns "foo"))]
+      (is (= (:file (replacement-map-for-tests)) "foo")))
+    (expect [get-source-from-cache
+       (returns "(+ a 1)")
+       line-from-var
+       (returns 1)]
+      (is (= (:line (replacement-map-for-tests)) 1)))))
 
 (deftest replace_all_who_call ;;TODO: better tests
   (expect [all-vars-who-call (returns [#'a])
