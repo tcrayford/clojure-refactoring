@@ -50,6 +50,8 @@
                 (format-code
                  (f (read-string (get-source-from-cache v)))))})
 
+(defn replace-all [vars f]
+  (map #(map-to-alist (build-replacement-map % f)) vars))
+
 (defn replace-all-who-call [v f]
-  (map #(map-to-alist (build-replacement-map % f))
-       (all-vars-who-call v)))
+  (replace-all (all-vars-who-call v) f))
