@@ -72,7 +72,8 @@ Example: (get-source-from-var 'filter)"
         false))))
 
 (defn does-ns-refer-to-var? [ns v]
-  (= (ns-resolve ns (.sym v)) v))
+  (when v
+   (= (ns-resolve ns (.sym v)) v)))
 
 (defn require-and-return [ns]
   (do (require (ns-name ns) :reload)

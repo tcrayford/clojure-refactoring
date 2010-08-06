@@ -4,6 +4,8 @@
   (:use clojure-refactoring.core)
   (:use clojure.test clojure.contrib.mock))
 
+(def a nil) ;; used to test does-ns-refer-to-var? below.
+
 (defn proxy-file [time]
   (proxy [java.io.File] ["~/"] (lastModified [] time)))
 
@@ -54,3 +56,22 @@
              require-and-return (returns 'a)
              does-ns-refer-to-var? (returns false)]
             (is (empty? (all-ns-that-refer-to 'a))))))
+
+(deftest does_ns_refer_to_var
+  (let [this-ns (find-ns 'clojure-refactoring.source-test)]
+    (is (does-ns-refer-to-var? this-ns #'a))
+    (testing "same named var in another ns"
+      (is (not (does-ns-refer-to-var?
+                this-ns
+                (find-var 'clojure-refactoring.replace-test/a)))))
+    (testing "var named something that doesn't exist in the current ns"
+      (is (not (does-ns-refer-to-var?
+                this-ns
+                (find-var 'clojure-refactoring.replace/line-from-var)))))
+    (testing "non existent var"
+      (is (not (does-ns-refer-to-var?
+                this-ns
+                (find-var 'clojure-refactoring.source-test/boo)))))))
+
+
+
