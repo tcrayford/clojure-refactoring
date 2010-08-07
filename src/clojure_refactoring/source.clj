@@ -75,6 +75,9 @@ Example: (get-source-from-var 'filter)"
   (when v
    (= (ns-resolve ns (.sym v)) v)))
 
+(defn reload-all-user-ns []
+  (map #(require (ns-name %) :reload) (find-ns-in-user-dir)))
+
 (defn require-and-return [ns]
   (do (require (ns-name ns) :reload)
       ns))
@@ -98,6 +101,7 @@ Example: (get-source-from-var 'filter)"
   (reset! source-cache {}))
 
 (defn all-vars-who-call [var]
+  {:pre [(not (nil? var))]}
   (let [sym (.sym var)]
     (->> (all-ns-that-refer-to var)
          (all-vars)

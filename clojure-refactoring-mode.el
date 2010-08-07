@@ -58,7 +58,6 @@
   (let ((refactoring (ido-completing-read "Refactoring: " clojure-refactoring-refactorings-list nil t)))
     (funcall (intern (concat "clojure-refactoring-" refactoring)))))
 
-
 (defun get-sexp ()
   (if mark-active
       (escape-string-literals (delete-and-extract-region (mark) (point)))
@@ -113,11 +112,14 @@
   (interactive)
   (clojure-refactoring-thread-expr "unthread"))
 
+(defun clojure-refactoring-read-symbol-at-point ()
+  (read-from-minibuffer "Old name: "
+                        (symbol-name (symbol-at-point))))
+
 (defun clojure-refactoring-rename ()
   (interactive)
   (save-excursion
-    (let ((old-name (read-from-minibuffer "Old name: "
-                                          (symbol-name (symbol-at-point))))
+    (let ((old-name (clojure-refactoring-read-symbol-at-point))
           (new-name (read-from-minibuffer "New name: ")))
       (beginning-of-defun)
       (mark-sexp)
@@ -129,19 +131,22 @@
            expr)))))
   (insert (read clojure-refactoring-temp)))
 
+(defun clojure-refactoring-reload-all-user-ns ()
+  (clojure-refactoring-eval-sync "(require 'clojure-refactoring.source)(clojure-refactoring.source/reload-all-user-ns)"))
+
 (defun clojure-refactoring-global-rename ()
   (interactive)
+  (clojure-refactoring-reload-all-user-ns)
   (save-excursion
-    (let ((old-name (read-from-minibuffer "Old name: "
-                                          (symbol-name (symbol-at-point))))
+    (let ((old-name (clojure-refactoring-read-symbol-at-point))
           (new-name (read-from-minibuffer "New name: ")))
       (let ((expr (format "(require 'clojure-refactoring.rename) (ns clojure-refactoring.rename) (global-rename (find-var '%s/%s) '%s)"
                           (slime-current-package) old-name new-name)))
         (set-clojure-refactoring-temp
          expr))))
-  (clojure-refactoring-process-global-replacements (read clojure-refactoring-temp)))
+  (clojure-refactoring-process-global-replacements (read clojure-refactoring-temp))
+  (clojure-refactoring-reload-all-user-ns))
 
-(slime-current-package)
 (defun clojure-refactoring-extract-global ()
   (let ((var-name (read-from-minibuffer "Variable name: "))
         (body (delete-and-extract-region (mark t) (point))))
@@ -150,8 +155,11 @@
       (forward-sexp)
       (paredit-mode 0)
       (insert "(def " var-name body ")")
-      (reindent-then-newline-and-indent))
+      (reindent-then-newline-and-indent)
+      (paredit-mode 1))
     (insert var-name)))
+
+
 
 (defun clojure-refactoring-extract-local ()
   (let ((var-name (read-from-minibuffer "Variable name: "))
@@ -179,7 +187,10 @@
   (if (get-from-alist :new-source replace)
       (save-excursion
         (progn
-          (find-file (get-from-alist :file replace))
+          (if (string= (file-truename (buffer-file-name))
+                       (file-truename (get-from-alist :file replace)))
+              nil
+            (find-file (get-from-alist :file replace)))
           (goto-char (point-min))
           (forward-line (1- (get-from-alist :line replace)))
           (beginning-of-line)
