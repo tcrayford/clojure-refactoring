@@ -31,6 +31,7 @@
 ;;; Code:
 
 (require 'thingatpt)
+(require 'cl)
 (defvar clojure-refactoring-mode-hook '()
   "Hooks to be run when loading clojure refactoring mode")
 
@@ -66,39 +67,68 @@
       (forward-kill-sexp)
       out)))
 
-(defun set-clojure-refactoring-temp (str)
-  (setq clojure-refactoring-temp
-        (car (cdr (clojure-refactoring-eval-sync str)))))
+(defun clojure-refactoring-call (s)
+  (car (cdr (clojure-refactoring-eval-sync s))))
 
 (defun forward-kill-sexp ()
   (interactive)
   (forward-sexp)
   (backward-kill-sexp))
 
+;;formatting
+(defun clojure-refactoring-wrap-as-string (s)
+  (format "\"%s\"" s))
+
+(defun clojure-refactoring-format-clojure-call (ns name &rest args)
+  (concat
+   (concat (format "(require 'clojure-refactoring.%s)(clojure-refactoring.%s/%s "
+                   ns ns name) (mapconcat 'identity args " ")) ")"))
+
+(defun clojure-refactoring-format-call-with-string-args (ns name &rest args)
+  (apply 'clojure-refactoring-format-clojure-call ns name (mapcar #'clojure-refactoring-wrap-as-string args)))
+
+(defun clojure-refactoring-call-with-string-args (&rest args)
+  (clojure-refactoring-call
+   (apply 'clojure-refactoring-format-call-with-string-args args)))
+
+(defun clojure-refactoring-quote (s)
+  (format "'%s" s))
+
+(defun clojure-refactoring-format-call-with-quoted-args (ns name &rest args)
+  (apply 'clojure-refactoring-format-clojure-call ns name (mapcar #'clojure-refactoring-quote args)))
+
+(defun clojure-refactoring-call-with-quoted-args (&rest args)
+  (clojure-refactoring-call
+   (apply 'clojure-refactoring-format-call-with-quoted-args args)))
+
+(defun clojure-refactoring-insert-sexp (s)
+  (insert (read s)))
+
 ;; FIXME: this will break if there's an escaped \" in any of the code
 ;; it reads.
-;; FIXME: breaks if a newline is in a string
 (defun clojure-refactoring-extract-fn ()
   "Extracts a function."
   (interactive)
-  (let ((fn-name  (read-from-minibuffer "Function name: "))
+  (let ((fn-name (read-from-minibuffer "Function name: "))
         (defn (escape-string-literals (slime-defun-at-point)))
         (body (get-sexp)))
     (save-excursion
-      (set-clojure-refactoring-temp
-       (concat "(require 'clojure-refactoring.extract-method) (ns clojure-refactoring.extract-method) (extract-method \""
-               defn "\"  \"" body "\"  \"" fn-name "\")"))
       (beginning-of-defun)
       (forward-kill-sexp)
-      (insert (read clojure-refactoring-temp)))))
+      (clojure-refactoring-insert-sexp
+       (clojure-refactoring-call-with-string-args
+        "extract-method" "extract-method"
+        defn body fn-name)))))
 
 (defun clojure-refactoring-thread-expr (str)
   (let ((body (get-sexp)))
     (save-excursion
-      (set-clojure-refactoring-temp
-       (concat "(require 'clojure-refactoring.thread-expression) (ns clojure-refactoring.thread-expression) (thread-" str " \"" body"\")"))
       (cleanup-buffer)
-      (insert (read clojure-refactoring-temp)))))
+      (clojure-refactoring-insert-sexp
+       (clojure-refactoring-call-with-string-args
+        "thread-expression"
+        (format "thread-%s" str)
+        body)))))
 
 (defun clojure-refactoring-thread-last ()
   (interactive)
@@ -125,11 +155,13 @@
       (mark-sexp)
       (let ((body (buffer-substring-no-properties (mark t) (point))))
         (forward-kill-sexp)
-        (let ((expr (format "(require 'clojure-refactoring.rename) (ns clojure-refactoring.rename) (rename '%s '%s '%s)"
-                            body old-name new-name)))
-          (set-clojure-refactoring-temp
-           expr)))))
-  (insert (read clojure-refactoring-temp)))
+        (clojure-refactoring-insert-sexp
+         (clojure-refactoring-call-with-quoted-args
+          "rename"
+          "rename"
+          body
+          old-name
+          new-name))))))
 
 (defun clojure-refactoring-reload-all-user-ns ()
   (clojure-refactoring-eval-sync "(require 'clojure-refactoring.source)(clojure-refactoring.source/reload-all-user-ns)"))
@@ -142,9 +174,9 @@
           (new-name (read-from-minibuffer "New name: ")))
       (let ((expr (format "(require 'clojure-refactoring.rename) (ns clojure-refactoring.rename) (global-rename (find-var '%s/%s) '%s)"
                           (slime-current-package) old-name new-name)))
-        (set-clojure-refactoring-temp
-         expr))))
-  (clojure-refactoring-process-global-replacements (read clojure-refactoring-temp))
+        (clojure-refactoring-process-global-replacements
+         (read (clojure-refactoring-call
+                expr))))))
   (clojure-refactoring-reload-all-user-ns))
 
 (defun clojure-refactoring-extract-global ()
@@ -159,26 +191,31 @@
       (paredit-mode 1))
     (insert var-name)))
 
-
-
 (defun clojure-refactoring-extract-local ()
   (let ((var-name (read-from-minibuffer "Variable name: "))
         (defn (escape-string-literals (slime-defun-at-point)))
         (body (get-sexp)))
     (save-excursion
-      (set-clojure-refactoring-temp
-       (concat "(require 'clojure-refactoring.local-binding) (ns clojure-refactoring.local-binding) (local-wrap \"" defn "\" \"" body "\" \"" var-name "\")"))
       (beginning-of-defun)
       (forward-kill-sexp)
-      (insert (read clojure-refactoring-temp)))))
+      (clojure-refactoring-insert-sexp
+       (clojure-refactoring-call-with-string-args
+        "local-binding"
+        "local-wrap"
+        defn
+        body
+        var-name)))))
 
 (defun clojure-refactoring-destructure-map ()
   (let ((var-name (read-from-minibuffer "Map name: "))
         (defn (escape-string-literals (slime-defun-at-point))))
     (save-excursion
-      (set-clojure-refactoring-temp
-       (concat "(require 'clojure-refactoring.destructuring) (ns clojure-refactoring.destructuring) (destructure-map \"" defn "\" \"" var-name "\")"))
-      (insert (read clojure-refactoring-temp)))))
+      (clojure-refactoring-insert-sexp
+       (clojure-refactoring-call-with-string-args
+        "destructuring"
+        "destructure-map"
+        defn
+        var-name)))))
 
 (defun get-from-alist (key alist)
   (car (cdr (assoc key alist))))
