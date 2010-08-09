@@ -6,12 +6,6 @@
            (java.util.zip ZipFile)
            (clojure.lang LineNumberingPushbackReader)))
 
-(defn renaming-fn [old-var new-sym]
-  (fn [node]
-    (postwalk-replace
-     {(.sym old-var) new-sym}
-     node)))
-
 (defn map-to-alist [m]
   (map (fn [[k v]] (list k v)) m))
 
@@ -31,5 +25,5 @@
 (defn replace-vars [vars f]
   (map #(map-to-alist (build-replacement-map % f)) vars))
 
-(defn replace-all-who-call [v f]
+(defn replace-callers [v f]
   (replace-vars (vars-who-call v) f))

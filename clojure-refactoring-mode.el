@@ -177,6 +177,7 @@
         (clojure-refactoring-process-global-replacements
          (read (clojure-refactoring-call
                 expr))))))
+  (save-some-buffers 't)
   (clojure-refactoring-reload-all-user-ns))
 
 (defun clojure-refactoring-extract-global ()
@@ -222,18 +223,17 @@
 
 (defun clojure-refactoring-process-global-replace (replace)
   (if (get-from-alist :new-source replace)
-      (save-excursion
-        (progn
-          (if (string= (file-truename (buffer-file-name))
-                       (file-truename (get-from-alist :file replace)))
-              nil
-            (find-file (get-from-alist :file replace)))
-          (goto-char (point-min))
-          (forward-line (1- (get-from-alist :line replace)))
-          (beginning-of-line)
-          (forward-kill-sexp)
-          (insert (get-from-alist :new-source replace))
-          (save-current-buffer)))))
+      (progn
+        (if (string= (file-truename (buffer-file-name))
+                     (file-truename (get-from-alist :file replace)))
+            nil
+          (find-file (get-from-alist :file replace)))
+        (goto-char (point-min))
+        (forward-line (1- (get-from-alist :line replace)))
+        (beginning-of-line)
+        (forward-kill-sexp)
+        (insert (get-from-alist :new-source replace))
+        (save-current-buffer))))
 
 (defun clojure-refactoring-process-global-replacements (replacements)
   (save-window-excursion
