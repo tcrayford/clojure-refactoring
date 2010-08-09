@@ -16,6 +16,12 @@
 (deftest fn_args
   (is (= (fn-args test-fn-node) ['msg])))
 
+(deftest sub_nodes
+  (is (= (sub-nodes '(defn a [b] (+ b 1)))
+         '((defn a [b] (+ b 1)) defn a [b] b (+ b 1) + b 1)))
+  (is (some #{:a} (sub-nodes '(defn a [b] {:a 1 :b b}))))
+  (is (not (some #{[:a 1]} (sub-nodes {:a 1})))))
+
 (deftest is_defn?
   (is (defn? '(defn foo [] 1))))
 

@@ -14,8 +14,17 @@
     (with-pprint-dispatch *code-dispatch*
       (pprint node))))
 
+(defn contains-sub-nodes? [tree]
+  (or (sequential? tree) (map? tree)))
+
+(defn expand-sub-nodes [tree]
+  (if (map? tree)
+    (interleave (keys tree) (vals tree))
+    (seq tree)))
+
 (defn sub-nodes [tree]
-  (tree-seq sequential? seq tree))
+  (tree-seq contains-sub-nodes?
+            expand-sub-nodes tree))
 
 (def binding-forms
      #{'let 'fn 'binding 'for 'doseq 'dotimes 'defn 'loop 'defmacro})
@@ -67,7 +76,6 @@
   (postwalk
    replace-with-string
    coll))
-
 
 (defn maybe-replace-regex [obj]
   (if (seq? obj)

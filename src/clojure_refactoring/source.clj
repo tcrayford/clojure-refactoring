@@ -52,7 +52,7 @@ Example: (get-source-from-var 'filter)"
               (read (PushbackReader. pbr))
               (str text))))))
 
-(defn require-if-needed [ns]
+(defn find-and-load [ns]
   (if (find-ns ns)
     (find-ns ns)
     (do (require ns)
@@ -61,12 +61,12 @@ Example: (get-source-from-var 'filter)"
 (defn find-ns-in-user-dir []
   (->>
    (java.io.File. (System/getProperty "user.dir"))
-   (find-namespaces-in-dir)
-   (map require-if-needed)
+   find-namespaces-in-dir
+   (map find-and-load)
    (remove nil?)))
 
-(defn new-file [file-path]
-  (java.io.File. file-path))
+(defn new-file [path] ;;extracted so we can stub using binding
+  (java.io.File. path))
 
 (defn in-time? [cached]
   (= (.lastModified (new-file (:file cached)))
@@ -97,9 +97,7 @@ Example: (get-source-from-var 'filter)"
   "Checks if a var calls a function named 'fn"
   (if-let [source (get-source-from-cache var)]
     (let [node (read-string source)]
-      (if (rec-contains? node fn)
-        var
-        false))))
+      (rec-contains? node fn))))
 
 (defn does-ns-refer-to-var? [ns v]
   (when v
@@ -123,9 +121,10 @@ Example: (get-source-from-var 'filter)"
        (flatten)))
 
 (defn populate-cache []
-  (doseq [v (->> (map require-and-return (find-ns-in-user-dir))
+  (doseq [vars (->>
+                 (map require-and-return (find-ns-in-user-dir))
                  (all-vars))]
-    (cache-source v)))
+    (cache-source vars)))
 
 (defn empty-cache []
   (reset! source-cache {}))
@@ -136,8 +135,7 @@ Example: (get-source-from-var 'filter)"
     (->>
      (all-ns-that-refer-to var)
      (all-vars)
-     (map #(does-var-call-fn % sym))
-     (filter identity))))
+     (filter #(does-var-call-fn % sym)))))
 
 (defn source-for-vars-who-call [var]
   (map (comp read-string get-source-from-cache) (vars-who-call var)))
