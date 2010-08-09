@@ -2,7 +2,31 @@
   (:use clojure-refactoring.core)
   (:use [clojure.contrib.find-namespaces :only [find-namespaces-in-dir]])
   (:import (clojure.lang RT)
-           (java.io LineNumberReader InputStreamReader PushbackReader)))
+           (java.io LineNumberReader InputStreamReader PushbackReader))
+  (:import (java.io StringReader File)
+           (java.util.zip ZipFile)
+           (clojure.lang LineNumberingPushbackReader)))
+
+;;the below stolen from slime
+(defn- clean-windows-path [#^String path]
+  ;; Decode file URI encoding and remove an opening slash from
+  ;; /c:/program%20files/... in jar file URLs and file resources.
+  (or (and (.startsWith (System/getProperty "os.name") "Windows")
+           (second (re-matches #"^/([a-zA-Z]:/.*)$" path)))
+      path))
+
+(defn- slime-file-resource [#^java.net.URL resource]
+  (clean-windows-path (.getFile resource)))
+
+(defn- slime-find-resource [#^String file]
+  (let [resource (.getResource (clojure.lang.RT/baseLoader) file)]
+    (slime-file-resource resource)))
+
+(defn slime-find-file [#^String file]
+  (if (.isAbsolute (File. file))
+    file
+    (slime-find-resource file)))
+;; end stealing from slime
 
 (defonce source-cache (atom {}))
 
@@ -49,7 +73,7 @@ Example: (get-source-from-var 'filter)"
     (when-let [f (new-file file-path)]
       (CachedSource. (.lastModified f)
                      (get-source-from-var v)
-                     file-path))))
+                     (slime-find-file file-path)))))
 
 (defn cache-source [var]
   (if-let [x (new-cached-source var)]
@@ -73,7 +97,7 @@ Example: (get-source-from-var 'filter)"
 
 (defn does-ns-refer-to-var? [ns v]
   (when v
-   (= (ns-resolve ns (.sym v)) v)))
+    (= (ns-resolve ns (.sym v)) v)))
 
 (defn reload-all-user-ns []
   (map #(require (ns-name %) :reload) (find-ns-in-user-dir)))
@@ -111,4 +135,4 @@ Example: (get-source-from-var 'filter)"
 (defn source-for-vars-who-call [var]
   (map (comp read-string get-source-from-cache) ;; TODO: duplicating this, can we do
        ;; better?
-   (all-vars-who-call var)))
+       (all-vars-who-call var)))
