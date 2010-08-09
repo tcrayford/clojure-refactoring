@@ -1,4 +1,4 @@
-(defproject clojure-refactoring "0.1.6-SNAPSHOT"
+(defproject clojure-refactoring "0.2.0-SNAPSHOT"
   :description "Clojure side of a refactoring tool"
   :dependencies []
   :dev-dependencies [[lein-clojars "0.5.0-SNAPSHOT"]
