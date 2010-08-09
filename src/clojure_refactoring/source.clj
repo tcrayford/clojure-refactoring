@@ -124,15 +124,14 @@ Example: (get-source-from-var 'filter)"
 (defn empty-cache []
   (reset! source-cache {}))
 
-(defn all-vars-who-call [var]
+(defn vars-who-call [var]
   {:pre [(not (nil? var))]}
   (let [sym (.sym var)]
-    (->> (all-ns-that-refer-to var)
-         (all-vars)
-         (map #(does-var-call-fn % sym))
-         (filter #(identity %)))))
+    (->>
+      (all-ns-that-refer-to var)
+      (all-vars)
+      (map #(does-var-call-fn % sym))
+      (filter #(identity %)))))
 
 (defn source-for-vars-who-call [var]
-  (map (comp read-string get-source-from-cache) ;; TODO: duplicating this, can we do
-       ;; better?
-       (all-vars-who-call var)))
+  (map (comp read-string get-source-from-cache) (vars-who-call var)))

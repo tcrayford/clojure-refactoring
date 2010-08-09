@@ -32,4 +32,4 @@
   (map #(map-to-alist (build-replacement-map % f)) vars))
 
 (defn replace-all-who-call [v f]
-  (replace-vars (all-vars-who-call v) f))
+  (replace-vars (vars-who-call v) f))

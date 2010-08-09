@@ -172,7 +172,7 @@
   (save-excursion
     (let ((old-name (clojure-refactoring-read-symbol-at-point))
           (new-name (read-from-minibuffer "New name: ")))
-      (let ((expr (format "(require 'clojure-refactoring.rename) (ns clojure-refactoring.rename) (global-rename (find-var '%s/%s) '%s)"
+      (let ((expr (format "(require 'clojure-refactoring.rename) (ns clojure-refactoring.rename) (global-rename '%s '%s '%s)"
                           (slime-current-package) old-name new-name)))
         (clojure-refactoring-process-global-replacements
          (read (clojure-refactoring-call

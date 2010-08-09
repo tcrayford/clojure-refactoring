@@ -45,7 +45,7 @@
       (is (= (:line (replacement-map-for-tests)) 1)))))
 
 (deftest replace_all_who_call ;;TODO: better tests
-  (expect [all-vars-who-call (returns [#'a])
+  (expect [vars-who-call (returns [#'a])
            map-to-alist (times 1 (returns :replacement-alist))
            build-replacement-map (times 1 (returns :replacement-map))]
    (is (=

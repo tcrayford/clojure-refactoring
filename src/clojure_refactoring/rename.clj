@@ -7,8 +7,9 @@
   (format-code
    (postwalk-replace {old-name new-name} node)))
 
-(defn global-rename [old-var new-name]
-  (replace-all-who-call old-var
-                        (renaming-fn old-var new-name)))
+(defn global-rename [ns old-name new-name]
+  (let [old-var (ns-resolve ns old-name)]
+   (replace-all-who-call old-var
+                         (renaming-fn old-var new-name))))
 
 
