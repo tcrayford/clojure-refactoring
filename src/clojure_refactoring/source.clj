@@ -59,45 +59,43 @@ Example: (get-source-from-var 'filter)"
         (find-ns ns))))
 
 (defn find-ns-in-user-dir []
-  (->>
-   (java.io.File. (System/getProperty "user.dir"))
-   find-namespaces-in-dir
-   (map find-and-load)
-   (remove nil?)))
+  (->> (java.io.File. (System/getProperty "user.dir"))
+       find-namespaces-in-dir
+       (map find-and-load)
+       (remove nil?)))
 
 (defn new-file [path] ;;extracted so we can stub using binding
   (java.io.File. path))
 
-(defn in-time? [cached]
-  (= (.lastModified (new-file (:file cached)))
-     (:time cached)))
-
 (def file-from-var (comp :file meta))
 
-(defn new-cached-source [v]
+(defn new-cached-source [v] ;; refactor this using maybe monad?
   (when-let [file-path (file-from-var v)]
     (when-let [f (new-file file-path)]
       (CachedSource. (.lastModified f)
                      (get-source-from-var v)
                      (slime-find-file file-path)))))
 
-(defn cache-source [var]
-  (if-let [x (new-cached-source var)]
-    (do (swap! source-cache #(assoc % var x))
+(defn in-time? [cached]
+  (= (.lastModified (new-file (:file cached)))
+     (:time cached)))
+
+(defn cache-source [v]
+  (if-let [x (new-cached-source v)]
+    (do (swap! source-cache #(assoc % v x))
         (:source x))))
 
-(defn get-source-from-cache [var]
-  (if-let [cached (@source-cache var)] ;; use anaphoric aand for this
-    (if (in-time? cached)
+(defn get-source-from-cache [v]
+  (if-let [cached (@source-cache v)]
+    (if (and (:file cached) (in-time? cached))
       (:source cached)
-      (cache-source var))
-    (cache-source var)))
+      (cache-source v))
+    (cache-source v)))
 
-(defn- does-var-call-fn [var fn]
+(defn- does-var-call-fn? [v fn]
   "Checks if a var calls a function named 'fn"
-  (if-let [source (get-source-from-cache var)]
-    (let [node (read-string source)]
-      (rec-contains? node fn))))
+  (if-let [source (get-source-from-cache v)]
+    (rec-contains? (read-string source) fn)))
 
 (defn does-ns-refer-to-var? [ns v]
   (when v
@@ -110,10 +108,10 @@ Example: (get-source-from-var 'filter)"
   (do (require (ns-name ns) :reload)
       ns))
 
-(defn all-ns-that-refer-to [var]
+(defn all-ns-that-refer-to [v]
   (->> (find-ns-in-user-dir)
        (map require-and-return)
-       (filter #(does-ns-refer-to-var? % var))))
+       (filter #(does-ns-refer-to-var? % v))))
 
 (defn all-vars [nses]
   (->> (map ns-interns nses)
@@ -121,21 +119,16 @@ Example: (get-source-from-var 'filter)"
        (flatten)))
 
 (defn populate-cache []
-  (doseq [vars (->>
-                 (map require-and-return (find-ns-in-user-dir))
-                 (all-vars))]
+  (doseq [vars (->> (map require-and-return (find-ns-in-user-dir))
+                    (all-vars))]
     (cache-source vars)))
 
 (defn empty-cache []
   (reset! source-cache {}))
 
-(defn vars-who-call [var]
-  {:pre [(not (nil? var))]}
-  (let [sym (.sym var)]
-    (->>
-     (all-ns-that-refer-to var)
-     (all-vars)
-     (filter #(does-var-call-fn % sym)))))
-
-(defn source-for-vars-who-call [var]
-  (map (comp read-string get-source-from-cache) (vars-who-call var)))
+(defn vars-who-call [v]
+  {:pre [(not (nil? v))]}
+  (let [sym (.sym v)]
+    (->> (all-ns-that-refer-to v)
+         (all-vars)
+         (filter #(does-var-call-fn? % sym)))))
