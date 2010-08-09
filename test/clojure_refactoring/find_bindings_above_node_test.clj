@@ -13,6 +13,15 @@
                                    '(+ 1 a))
          '[a])))
 
+(deftest add_multiple_keys
+  (testing "keys"
+    (is (= (add-multiple-keys {:keys '[bar blah foo]})
+           '(bar blah foo))))
+  (testing "syms"
+    (is (= (add-multiple-keys {:syms '[bar blah foo]}) '(bar blah foo))))
+  (testing "strs"
+    (is (= (add-multiple-keys {:strs '[bar blah foo]}) '(bar blah foo)))))
+
 (deftest find_bindings
   (is (= (find-bindings-above-node
           '(defn myfn [a] (+ 1 a)) '(+ 1 a))

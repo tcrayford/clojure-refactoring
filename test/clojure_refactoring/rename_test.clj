@@ -20,4 +20,3 @@
     (is (= ((renaming-fn #'a 'z) '(defn b [c] (a 1 2)))
            '(defn b [c] (z 1 2)))))) ;;eventually, this should only
 ;;replace things that resolve to vars in that namespace
-

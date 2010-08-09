@@ -77,6 +77,3 @@
       (is (not (does-ns-refer-to-var?
                 this-ns
                 (find-var 'clojure-refactoring.source-test/boo)))))))
-
-
-

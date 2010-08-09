@@ -11,12 +11,13 @@
     m))
 
 (defn add-multiple-keys [m]
-  (->> (dissoc m :keys)
-       (keys)
-       (conj (:keys m))
-       (remove nil?)))
+  (flatten
+   (map (fn [[k v]]
+          (if (keyword? k) v k))
+        m)))
 
 (defn extract-destructured-map [m]
+  "Extracts destructuring from map"
   (if (and (map? m) (:keys m))
     (add-multiple-keys m)
     (maybe-keys m)))

@@ -52,11 +52,17 @@ Example: (get-source-from-var 'filter)"
               (read (PushbackReader. pbr))
               (str text))))))
 
+(defn require-if-needed [ns]
+  (if (find-ns ns)
+    (find-ns ns)
+    (do (require ns)
+        (find-ns ns))))
+
 (defn find-ns-in-user-dir []
   (->>
    (java.io.File. (System/getProperty "user.dir"))
    (find-namespaces-in-dir)
-   (map find-ns)
+   (map require-if-needed)
    (remove nil?)))
 
 (defn new-file [file-path]
@@ -128,10 +134,10 @@ Example: (get-source-from-var 'filter)"
   {:pre [(not (nil? var))]}
   (let [sym (.sym var)]
     (->>
-      (all-ns-that-refer-to var)
-      (all-vars)
-      (map #(does-var-call-fn % sym))
-      (filter #(identity %)))))
+     (all-ns-that-refer-to var)
+     (all-vars)
+     (map #(does-var-call-fn % sym))
+     (filter identity))))
 
 (defn source-for-vars-who-call [var]
   (map (comp read-string get-source-from-cache) (vars-who-call var)))
