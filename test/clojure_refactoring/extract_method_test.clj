@@ -9,6 +9,12 @@
 (deftest fn_call
   (is (= (fn-call '(defn a [b] (+ 1 2))) '(a b))))
 
+(deftest remove_extracted_function
+  (is (= (remove-extracted-function "(inc a)"
+                                  "(defn b [a] (inc a))"
+                                  '(defn arr [a] (inc a)))
+"(defn b [a] (arr a))")))
+
 
 ;; Acceptance level testing below
 (deftest uses_variables_from_let

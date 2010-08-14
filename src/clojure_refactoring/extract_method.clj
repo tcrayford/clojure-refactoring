@@ -1,6 +1,6 @@
 (ns clojure-refactoring.extract-method
-  (:use clojure-refactoring.support.core
-        clojure-refactoring.support.find-bindings-above-node
+  (:use [clojure-refactoring.support core
+         find-bindings-above-node parsley]
         [clojure.contrib str-utils]))
 
 (defn find-occurences [args node]
@@ -38,10 +38,10 @@ Works for all binding forms in core/binding-forms"
    (java.util.regex.Pattern/quote s)))
 
 (defn remove-extracted-function [extract-string fn-string new-fun]
-  (re-gsub
-   (re-quote extract-string)
-   (str (fn-call new-fun))
-   fn-string))
+  (parsley-node-to-string
+   (replace-sexp-in-ast (read-string extract-string)
+                        (fn-call new-fun)
+                        (sexp fn-string))))
 
 (defn format-output [extract-string fn-string new-fun]
   "Formats the output for extract-method to print"
