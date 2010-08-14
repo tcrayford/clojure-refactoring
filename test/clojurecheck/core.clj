@@ -1,9 +1,8 @@
-#_(when (= (class clojure.test/report) clojure.lang.MultiFn)
-  (do (require 'clojure.test)
-      (ns clojure.test)
-      (def old-report clojure.test/report)))
-
-;; IMPORTANT: uncomment this BEFORE running tests in lein
+(when (= (class clojure.test/report) clojure.lang.MultiFn)
+  (eval
+   '(do (require 'clojure.test)
+       (ns clojure.test)
+       (def old-report clojure.test/report))))
 
 ; Copyright 2010 © Meikel Brandmeyer.
 
