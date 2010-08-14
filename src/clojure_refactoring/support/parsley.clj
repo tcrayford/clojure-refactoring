@@ -56,3 +56,20 @@
 
 (defn parsley-to-string [root-node]
   (apply str (map parsley-node-to-string (second (first root-node)))))
+
+(defn match-parsley [exp ast]
+  (try
+    (= exp (read-string (parsley-to-string ast)))
+    (catch Exception e nil)))
+
+(defn replace-sexp-in-ast [old new ast]
+  "Takes a sexp represented as a list, and a parsley tree, and replaces the parse tree with a new one"
+  (let [new-ast (sexp (pr-str new))]
+   (postwalk
+    (fn [node]
+      (if (and (map? node) (match-parsley old node))
+        new-ast
+        node))
+    ast)))
+
+
