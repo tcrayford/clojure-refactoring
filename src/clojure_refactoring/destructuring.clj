@@ -1,7 +1,7 @@
 (ns clojure-refactoring.destructuring
   (:use [clojure.contrib str-utils pprint]
         clojure.walk
-        clojure-refactoring.support.core))
+        [clojure-refactoring.support core parsley]))
 
 (defn count= [seq n]
   "Checks if the count of seq is equal to n"
@@ -11,9 +11,9 @@
   "Returns true if node is a map lookup using keywords"
   (and (seq? node)
        (count= (filter keyword? node) 1)
-       (= (count node) 2)))
+       (count= node 2)))
 
-(defn key->sym [kw]
+(defn key->sym [kw] ;;TODO: this should go into core
   "Turns a keyword into a symbol"
   (symbol (name kw)))
 
@@ -39,35 +39,37 @@ TODO: this needs a better name"
               (assoc (get binding-map m {}) (key->sym key) key))))
    {} lookups))
 
-(defn destructured-binding-vec [old-vec binding-map]
-  "Replaces each key in the binding map found in old-vec with the value
-from the binding map"
-  (postwalk-replace binding-map old-vec))
+(defn destructured-binding-vec [old-vec lookups]
+  "Replaces each key in the binding map found in old-vec with the value\nfrom the binding map"
+  (postwalk-replace (lookups->binding-map lookups) old-vec))
 
-(defn replace-lookup-with-destructured-symbol [lookups node]
-  "Replaces node with a destructured symbol from lookups
-if this node is contained in lookups"
-  (if (lookups node)
-    (key->sym (first (lookup->canoninical-form node)))
-    node))
+;; TODO: refactor all code below this line with a parsley monad
+(defn replace-lookups-with-destructured-symbols [lookups ast]
+  (reduce
+    (fn [ast lookup]
+      (replace-sexp-in-ast-node
+        lookup
+        (key->sym (first (lookup->canoninical-form lookup)))
+        ast))
+    ast
+    lookups))
 
-(defn add-binding-map [lookups root-node]
+(defn add-binding-map [lookups root-node root-ast]
   "Takes a set of lookups and a function node, and
 adds a binding map made from the lookups to the root node"
   (let [args (fn-args root-node)]
-    (map
-     #(if (= % args)
-        (destructured-binding-vec args (lookups->binding-map lookups))
-        %)
-     root-node)))
+    (replace-sexp-in-ast args
+                         (destructured-binding-vec
+                          args lookups)
+                         root-ast)))
 
 (defn destructure-map [fn-code name]
   "Destructures all calls to map called name inside a function node"
-  (let [root-node (read-string fn-code)
+  (let [root-ast (sexp fn-code)
+        root-node (read-string fn-code)
         lookups (find-lookups root-node)]
-    (format-code
-     (postwalk
-      (partial
-       replace-lookup-with-destructured-symbol
-       lookups)
-      (add-binding-map lookups root-node)))))
+    (str (parsley-node-to-string
+          (replace-lookups-with-destructured-symbols
+            lookups
+            (add-binding-map lookups root-node root-ast)))
+         "\n")))
