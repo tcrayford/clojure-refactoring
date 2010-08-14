@@ -1,6 +1,6 @@
 (ns clojure-refactoring.extract-method
-  (:use clojure-refactoring.core
-        clojure-refactoring.find-bindings-above-node
+  (:use clojure-refactoring.support.core
+        clojure-refactoring.support.find-bindings-above-node
         [clojure.contrib str-utils]))
 
 (defn find-occurences [args node]

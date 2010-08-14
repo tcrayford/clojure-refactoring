@@ -1,5 +1,5 @@
-(ns clojure-refactoring.source
-  (:use clojure-refactoring.core)
+(ns clojure-refactoring.support.source
+  (:use clojure-refactoring.support.core)
   (:use [clojure.contrib.find-namespaces :only [find-namespaces-in-dir]])
   (:import (clojure.lang RT)
            (java.io LineNumberReader InputStreamReader PushbackReader))

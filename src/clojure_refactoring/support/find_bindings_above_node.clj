@@ -1,5 +1,5 @@
-(ns clojure-refactoring.find-bindings-above-node
-  (:use clojure-refactoring.core))
+(ns clojure-refactoring.support.find-bindings-above-node
+  (:use clojure-refactoring.support.core))
 
 (declare process-multiple-nodes
          process-remaining-bindings

@@ -1,5 +1,5 @@
-(ns clojure-refactoring.find-bindings-above-node-test
-  (:use clojure-refactoring.find-bindings-above-node :reload)
+(ns clojure-refactoring.support.find-bindings-above-node-test
+  (:use clojure-refactoring.support.find-bindings-above-node :reload)
   (:use clojure.test))
 
 (deftest extract_destructured_maps

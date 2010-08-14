@@ -1,6 +1,7 @@
 (ns clojure-refactoring.thread-expression-test
   (:use clojure-refactoring.thread-expression :reload)
-  (:use clojure-refactoring.core clojure.test clojure.contrib.str-utils))
+  (:use clojure-refactoring.support.core
+        clojure.test clojure.contrib.str-utils))
 
 (use-fixtures :once #(time (%)))
 

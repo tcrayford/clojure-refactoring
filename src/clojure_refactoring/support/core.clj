@@ -1,4 +1,4 @@
-(ns clojure-refactoring.core
+(ns clojure-refactoring.support.core
   (:use [clojure.contrib str-utils pprint])
   (:use [clojure.contrib.seq-utils :only (find-first)])
   (:use clojure.walk)

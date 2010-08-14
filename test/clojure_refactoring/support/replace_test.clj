@@ -1,6 +1,6 @@
-(ns clojure-refactoring.replace-test
-  (:use clojure-refactoring.replace :reload)
-  (:use clojure-refactoring.source)
+(ns clojure-refactoring.support.replace-test
+  (:use clojure-refactoring.support.replace :reload)
+  (:use clojure-refactoring.support.source)
   (:use clojure.test)
   (:use clojure.contrib.mock))
 

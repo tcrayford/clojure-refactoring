@@ -1,6 +1,6 @@
 (ns clojure-refactoring.rename
-  (:use clojure-refactoring.core)
-  (:use clojure-refactoring.replace)
+  (:use clojure-refactoring.support.core)
+  (:use clojure-refactoring.support.replace)
   (:use clojure.walk))
 
 (defn rename [node old-name new-name]

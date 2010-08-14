@@ -1,5 +1,5 @@
-(ns clojure-refactoring.core-test
-  (:use clojure-refactoring.core :reload)
+(ns clojure-refactoring.support.core-test
+  (:use clojure-refactoring.support.core :reload)
   (:use clojure.test))
 
 (defn fixture [f]

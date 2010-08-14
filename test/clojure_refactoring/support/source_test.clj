@@ -1,7 +1,7 @@
-(ns clojure-refactoring.source-test
-  (:use clojure-refactoring.source :reload)
-  (:import clojure-refactoring.source.CachedSource)
-  (:use clojure-refactoring.core)
+(ns clojure-refactoring.support.source-test
+  (:use clojure-refactoring.support.source :reload)
+  (:import clojure-refactoring.support.source.CachedSource)
+  (:use clojure-refactoring.support.core)
   (:use clojure.test clojure.contrib.mock))
 
 (def a nil) ;; used to test does-ns-refer-to-var? below.
@@ -63,17 +63,17 @@
             (is (empty? (all-ns-that-refer-to 'a))))))
 
 (deftest does_ns_refer_to_var
-  (let [this-ns (find-ns 'clojure-refactoring.source-test)]
+  (let [this-ns (find-ns 'clojure-refactoring.support.source-test)]
     (is (does-ns-refer-to-var? this-ns #'a))
     (testing "same named var in another ns"
       (is (not (does-ns-refer-to-var?
                 this-ns
-                (find-var 'clojure-refactoring.replace-test/a)))))
+                (find-var 'clojure-refactoring.support.replace-test/a)))))
     (testing "var named something that doesn't exist in the current ns"
       (is (not (does-ns-refer-to-var?
                 this-ns
-                (find-var 'clojure-refactoring.replace/line-from-var)))))
+                (find-var 'clojure-refactoring.support.replace/line-from-var)))))
     (testing "non existent var"
       (is (not (does-ns-refer-to-var?
                 this-ns
-                (find-var 'clojure-refactoring.source-test/boo)))))))
+                (find-var 'clojure-refactoring.support.source-test/boo)))))))

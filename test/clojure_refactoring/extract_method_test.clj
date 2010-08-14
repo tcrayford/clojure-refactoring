@@ -1,5 +1,6 @@
 (ns clojure-refactoring.extract-method-test
-  (:use clojure-refactoring.extract-method clojure-refactoring.core :reload)
+  (:use clojure-refactoring.extract-method
+        clojure-refactoring.support.core :reload)
   (:use clojure.test clojure.contrib.str-utils))
 
 (deftest fn_name

@@ -1,5 +1,5 @@
-(ns clojure-refactoring.replace
-  (:use [clojure-refactoring source core])
+(ns clojure-refactoring.support.replace
+  (:use [clojure-refactoring.support source core])
   (:use clojure.walk)
   (:require clojure.contrib.string)
   (:import (java.io StringReader File)

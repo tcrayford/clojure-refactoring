@@ -1,6 +1,6 @@
 (ns clojure-refactoring.local-binding
   (:use clojure.walk
-        clojure-refactoring.core)
+        clojure-refactoring.support.core)
   (:use [clojure.contrib.seq-utils :only (find-first)]))
 
 (defn get-function-definition [defn-form]

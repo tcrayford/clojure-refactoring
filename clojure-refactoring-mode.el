@@ -164,7 +164,7 @@
           new-name))))))
 
 (defun clojure-refactoring-reload-all-user-ns ()
-  (clojure-refactoring-eval-sync "(require 'clojure-refactoring.source)(clojure-refactoring.source/reload-all-user-ns)"))
+  (clojure-refactoring-eval-sync "(require 'clojure-refactoring.support.source)(clojure-refactoring.support.source/reload-all-user-ns)"))
 
 (defun clojure-refactoring-global-rename ()
   (interactive)
