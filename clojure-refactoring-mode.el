@@ -245,6 +245,16 @@
     map)
   "Keymap for Clojure refactoring mode.")
 
+(defun clojure-refactoring-eval-async (string &optional handler)
+  (slime-eval-async `(swank:eval-and-grab-output ,string)
+                    (or handler #'identity)))
+
+(defun clojure-refactoring-warm-cache ()
+  (clojure-refactoring-eval-async
+   "(require 'clojure-refactoring.support.source)(clojure-refactoring.support.source/populate-cache)"))
+
+(add-hook 'slime-connected-hook 'clojure-refactoring-warm-cache)
+
 ;;;###autoload
 (define-minor-mode clojure-refactoring-mode
   "A minor mode for a clojure refactoring tool"

@@ -116,13 +116,13 @@ Example: (get-source-from-var 'filter)"
   (when v
     (= (ns-resolve ns (.sym v)) v)))
 
-(defn reload-all-user-ns []
-  (doseq [n (find-ns-in-user-dir)]
-    (require (ns-name n) :reload)))
-
 (defn require-and-return [ns]
   (do (require (ns-name ns) :reload)
       ns))
+
+(defn reload-all-user-ns []
+  (pmap #(require-and-return %)
+        (find-ns-in-user-dir)))
 
 (defn all-ns-that-refer-to [v]
   (->> (find-ns-in-user-dir)
@@ -132,7 +132,7 @@ Example: (get-source-from-var 'filter)"
 (defn all-vars [nses]
   (->> (map ns-interns nses)
        (map vals)
-       (flatten)))
+       flatten))
 
 (defn populate-cache []
   (doseq [vars (->> (map require-and-return (find-ns-in-user-dir))
