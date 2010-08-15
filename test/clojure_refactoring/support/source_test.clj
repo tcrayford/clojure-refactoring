@@ -7,29 +7,31 @@
 (def a nil) ;; used to test does-ns-refer-to-var? below.
 
 (defn proxy-file [time]
-  (proxy [java.io.File] ["~/"] (lastModified [] time)))
+  (proxy [java.io.File] ["~/"] (lastModified [] time)
+         (getCanonicalPath [] "absolute-path")))
 
 (deftest in_time
   (testing "true when last modified is equal to time"
-    (expect [new-file (returns (proxy [java.io.File] ["~/"]
-                                 (lastModified [] 0)))
-             slime-find-file (returns "")]
+    (expect [new-file (returns (proxy-file 0))]
             (is (in-time? (CachedSource. 0
                                          ""
                                          "~/")))))
   (testing "false when last modified is greater than original time"
-    (expect [new-file (returns (proxy-file 1))
-             slime-find-file (returns "")]
+    (expect [new-file (returns (proxy-file 1))]
             (is (not (in-time? (CachedSource. 0
                                               ""
                                               "~/")))))))
 
+(deftest absolute_file_from_var
+  (expect [file-from-var (times 1 (returns "filename"))
+           new-file (times 1 (returns (proxy-file 0)))
+           slime-find-file (times 1(returns ""))]
+          (is (absolute-file-from-var #'a))))
+
 (deftest new_cached_source
   (binding [source-cache (atom {})]
     (expect [get-source-from-var (returns "(+ 1 2)")
-             file-from-var (returns "filename")
-             new-file (returns (proxy-file 0))
-             slime-find-file (returns "")]
+             absolute-file-from-var (returns (proxy-file 0))]
             (is (= (:source (new-cached-source 'a))
                    "(+ 1 2)")))))
 
@@ -37,9 +39,8 @@
   (testing "if the cache is invalid, reload the source"
     (binding [source-cache (atom {'a (CachedSource. 0 "(+ a b)" "~/")})]
       (expect [get-source-from-var (returns "(+ 1 2)")
-               file-from-var (returns "filename")
                new-file (returns (proxy-file 1))
-               slime-find-file (returns "")]
+               absolute-file-from-var (returns (proxy-file 1))]
               (is (= (get-source-from-cache 'a) "(+ 1 2)")))))
 
   (testing "if the cache is valid, return the cached value"
@@ -68,12 +69,15 @@
     (testing "same named var in another ns"
       (is (not (does-ns-refer-to-var?
                 this-ns
-                (find-var 'clojure-refactoring.support.replace-test/a)))))
+                (find-var
+                 'clojure-refactoring.support.replace-test/a)))))
     (testing "var named something that doesn't exist in the current ns"
       (is (not (does-ns-refer-to-var?
                 this-ns
-                (find-var 'clojure-refactoring.support.replace/line-from-var)))))
+                (find-var
+                 'clojure-refactoring.support.replace/line-from-var)))))
     (testing "non existent var"
       (is (not (does-ns-refer-to-var?
                 this-ns
-                (find-var 'clojure-refactoring.support.source-test/boo)))))))
+                (find-var
+                 'clojure-refactoring.support.source-test/boo)))))))

@@ -1,5 +1,6 @@
 (ns clojure-refactoring.support.source
   (:use clojure-refactoring.support.core)
+  (:use clojure.contrib.monads)
   (:use [clojure.contrib.find-namespaces :only [find-namespaces-in-dir]])
   (:import (clojure.lang RT)
            (java.io LineNumberReader InputStreamReader PushbackReader))
@@ -69,13 +70,17 @@ Example: (get-source-from-var 'filter)"
 
 (def file-from-var (comp :file meta))
 
+(defn absolute-file-from-var [v]
+  ((with-monad maybe-m
+     (m-chain [file-from-var
+               slime-find-file
+               new-file])) v))
+
 (defn new-cached-source [v] ;; refactor this using maybe monad?
-  (when-let [file-path (file-from-var v)]
-    (when-let [absolute-path (slime-find-file file-path)]
-      (when-let [f (new-file absolute-path)]
-        (CachedSource. (.lastModified f)
-                       (get-source-from-var v)
-                       absolute-path)))))
+  (when-let [f (absolute-file-from-var v)]
+   (CachedSource. (.lastModified f)
+                  (get-source-from-var v)
+                  (.getCanonicalPath f))))
 
 (defn in-time? [cached]
   (= (.lastModified (new-file (:file cached)))
