@@ -1,11 +1,11 @@
 (ns clojure-refactoring.support.replace-test
   (:use clojure-refactoring.support.replace :reload)
-  (:use clojure-refactoring.support.source)
+  (:use [clojure-refactoring.support source parsley])
   (:use clojure.test)
   (:use clojure.contrib.mock))
 
 (defn replace-test-fn [top-level-node]
-  'a)
+  (second (first (sexp "a"))))
 
 (def a nil) ;; needed so we can use the var below
 

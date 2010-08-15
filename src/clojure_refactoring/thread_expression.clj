@@ -1,5 +1,5 @@
 (ns clojure-refactoring.thread-expression
-  (:use clojure-refactoring.support.core
+  (:use [clojure-refactoring.support core parsley]
         clojure.walk
         [clojure.contrib str-utils]))
 

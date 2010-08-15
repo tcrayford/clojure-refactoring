@@ -123,7 +123,6 @@
 (defun clojure-refactoring-thread-expr (str)
   (let ((body (get-sexp)))
     (save-excursion
-      (cleanup-buffer)
       (clojure-refactoring-insert-sexp
        (clojure-refactoring-call-with-string-args
         "thread-expression"
@@ -156,7 +155,7 @@
       (let ((body (buffer-substring-no-properties (mark t) (point))))
         (forward-kill-sexp)
         (clojure-refactoring-insert-sexp
-         (clojure-refactoring-call-with-quoted-args
+         (clojure-refactoring-call-with-string-args
           "rename"
           "rename"
           body

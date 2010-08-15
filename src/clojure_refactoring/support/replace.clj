@@ -1,5 +1,5 @@
 (ns clojure-refactoring.support.replace
-  (:use [clojure-refactoring.support source core])
+  (:use [clojure-refactoring.support source core parsley])
   (:use clojure.walk)
   (:require clojure.contrib.string)
   (:import (java.io StringReader File)
@@ -18,9 +18,8 @@
   {:file (slime-file-from-var v)
    :var-name (.sym v)
    :line (line-from-var v)
-   :new-source (clojure.contrib.string/butlast 1
-                (format-code
-                 (f (read-string (get-source-from-cache v)))))})
+   :new-source (parsley-node-to-string
+                (f (sexp (get-source-from-cache v))))})
 
 (defn replace-vars [vars f]
   (map #(map-to-alist (build-replacement-map % f)) vars))
