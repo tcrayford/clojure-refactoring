@@ -27,7 +27,7 @@
 
 (defn binding-node-that-contains? [node expr]
   (and (seq? node)
-       binding-node?
+       (binding-node? node)
        (rec-contains? node expr)))
 
 (defn find-bindings-above-node [node expr]

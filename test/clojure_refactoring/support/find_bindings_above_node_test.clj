@@ -54,3 +54,9 @@
           '(defn add [s] (for [x (re-split #"," s)] (Integer. x)))
           '(re-split #"," s))
          '[s x]))))
+
+(deftest do_blocks
+  (is (= (find-bindings-above-node
+          '(do (let [a 1] (do (inc (let [b 2] (+ a b))))))
+          '(+ a b))
+         '[a b])))
