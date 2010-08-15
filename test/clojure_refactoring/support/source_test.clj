@@ -2,7 +2,8 @@
   (:use clojure-refactoring.support.source :reload)
   (:import clojure-refactoring.support.source.CachedSource)
   (:use clojure-refactoring.support.core)
-  (:use clojure.test clojure.contrib.mock))
+  (:use clojure.test clojure.contrib.mock)
+  (:require clojure-refactoring.support.replace-test))
 
 (use-fixtures :once #(time (%)))
 
@@ -17,12 +18,14 @@
     (expect [new-file (returns (proxy-file 0))]
             (is (in-time? (CachedSource. 0
                                          ""
-                                         "~/")))))
+                                         "~/"
+                                         {})))))
   (testing "false when last modified is greater than original time"
     (expect [new-file (returns (proxy-file 1))]
             (is (not (in-time? (CachedSource. 0
                                               ""
-                                              "~/")))))))
+                                              "~/"
+                                              {})))))))
 
 (deftest absolute_file_from_var
   (expect [file-from-var (times 1 (returns "filename"))
@@ -39,14 +42,14 @@
 
 (deftest get_source_from_cache
   (testing "if the cache is invalid, reload the source"
-    (binding [source-cache (atom {'a (CachedSource. 0 "(+ a b)" "~/")})]
+    (binding [source-cache (atom {'a (CachedSource. 0 "(+ a b)" "~/" {})})]
       (expect [get-source-from-var (returns "(+ 1 2)")
                new-file (returns (proxy-file 1))
                absolute-file-from-var (returns (proxy-file 1))]
               (is (= (get-source-from-cache 'a) "(+ 1 2)")))))
 
   (testing "if the cache is valid, return the cached value"
-    (binding [source-cache (atom {'a (CachedSource. 0 "(+ a b)" "~/")})]
+    (binding [source-cache (atom {'a (CachedSource. 0 "(+ a b)" "~/" {})})]
       (expect [get-source-from-var (returns "(+ 1 2)")
                file-from-var (returns "filename")
                new-file (returns (proxy-file 0))]

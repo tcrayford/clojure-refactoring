@@ -19,7 +19,7 @@
    :var-name (.sym v)
    :line (line-from-var v)
    :new-source (parsley-node-to-string
-                (f (sexp (get-source-from-cache v))))})
+                (f (:parsley (get-entry-from-cache v))))})
 
 (defn replace-vars [vars f]
   (map #(map-to-alist (build-replacement-map % f)) vars))

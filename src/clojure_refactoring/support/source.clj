@@ -1,6 +1,6 @@
 (ns clojure-refactoring.support.source
-  (:use clojure-refactoring.support.core)
   (:use clojure.contrib.monads)
+  (:use [clojure-refactoring.support core parsley])
   (:use [clojure.contrib.find-namespaces :only [find-namespaces-in-dir]])
   (:import (clojure.lang RT)
            (java.io LineNumberReader InputStreamReader PushbackReader))
@@ -31,7 +31,7 @@
 
 (defonce source-cache (atom {}))
 
-(defrecord CachedSource [time source file])
+(defrecord CachedSource [time source file parsley])
 
 ;; Yoinked and modified from clojure.contrib.repl-utils.
 ;; Now takes a var instead of a sym in the current ns
@@ -78,25 +78,34 @@ Example: (get-source-from-var 'filter)"
 
 (defn new-cached-source [v] ;; refactor this using maybe monad?
   (when-let [f (absolute-file-from-var v)]
-   (CachedSource. (.lastModified f)
-                  (get-source-from-var v)
-                  (.getCanonicalPath f))))
+    (let [source (get-source-from-var v)]
+      (CachedSource. (.lastModified f)
+                     source
+                     (.getCanonicalPath f)
+                     (sexp source)))))
 
 (defn in-time? [cached]
   (= (.lastModified (new-file (:file cached)))
      (:time cached)))
 
-(defn cache-source [v]
+(defn cache [v]
   (if-let [x (new-cached-source v)]
     (do (swap! source-cache #(assoc % v x))
-        (:source x))))
+        x)))
 
-(defn get-source-from-cache [v]
+(defn cache-source [v]
+  (:source (cache v)))
+
+(defn get-entry-from-cache [v]
   (if-let [cached (@source-cache v)]
     (if (and (:file cached) (in-time? cached))
-      (:source cached)
-      (cache-source v))
-    (cache-source v)))
+      cached
+      (cache v))
+    (cache v)))
+
+(defn get-source-from-cache [v]
+  (if-let [entry (get-entry-from-cache v)]
+    (:source entry)))
 
 (defn- does-var-call-fn? [v fn]
   "Checks if a var calls a function named 'fn"
