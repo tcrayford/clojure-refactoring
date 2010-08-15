@@ -117,7 +117,8 @@ Example: (get-source-from-var 'filter)"
     (= (ns-resolve ns (.sym v)) v)))
 
 (defn reload-all-user-ns []
-  (map #(require (ns-name %) :reload) (find-ns-in-user-dir)))
+  (doseq [n (find-ns-in-user-dir)]
+    (require (ns-name n) :reload)))
 
 (defn require-and-return [ns]
   (do (require (ns-name ns) :reload)

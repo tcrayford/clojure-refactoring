@@ -28,6 +28,11 @@
                (is (= (parsley-to-string (sexp s))
                       s))))
 
+(defn parsley-rec-contains [obj ast]
+  (-> (parsley-to-string ast)
+      read-string
+      (rec-contains? obj)))
+
 (deftest replace_sexp_in_ast
   (cc/property "replace-sexp-in-ast where
          both new and old sexps are the same returns the ast"
@@ -40,29 +45,25 @@
                (let [s (pr-str
                         `(~a ~@(random-sexp)))]
                  (is (not
-                      (-> (replace-sexp-in-ast a b (sexp s))
-                          (parsley-to-string)
-                          (read-string)
-                          (rec-contains? 'a))))))
+                      (parsley-rec-contains 'a
+                                            (replace-sexp-in-ast a b (sexp s)))))))
   (cc/property "replacing lists"
                [a random-sexp
                 b random-sexp
                 c random-sexp]
                (let [s (pr-str `(~@a ~@c))]
                  (is (not
-                      (-> (replace-sexp-in-ast a b (sexp s))
-                          (parsley-to-string)
-                          (read-string)
-                          (rec-contains? a))))))
+                      (parsley-rec-contains
+                       a
+                       (replace-sexp-in-ast a b (sexp s)))))))
   (cc/property "replacing more lists"
                [old random-sexp
                 new random-sexp]
                (let [s (pr-str `(defn a [b] ~old))]
                  (is (not
-                      (-> (replace-sexp-in-ast old new (sexp s))
-                          (parsley-to-string)
-                          (read-string)
-                          (rec-contains? old))))))
+                      (parsley-rec-contains
+                       old
+                       (replace-sexp-in-ast old new (sexp s)))))))
   (is (= (parsley-node-to-string
           (replace-sexp-in-ast
            '(inc b)
@@ -75,6 +76,19 @@
            '(string-split s)
            (sexp "(re-split #\",\" s)")))
          "(string-split s)")))
+
+(deftest replace_symbol_in_ast_node
+  (cc/property "replaces the symbol"
+               [old random-symbol
+                new random-symbol]
+               (let [ast (sexp (pr-str `(defn a [b] (~old bar))))]
+                 (is (not
+                      (parsley-rec-contains
+                       old
+                       (replace-symbol-in-ast-node
+                        old
+                        new
+                        ast)))))))
 
 (deftest match_parsley
   (cc/property "parsley matches sexp on the read string"

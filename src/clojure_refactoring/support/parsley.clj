@@ -68,6 +68,14 @@
                  (read-string (parsley-to-string ast))))))
     (catch Exception e nil)))
 
+(defn replace-symbol-in-ast-node [old new ast]
+  (postwalk
+   (fn [node]
+     (if (= node {:tag :atom, :content (list (name old))})
+     {:tag :atom, :content (list (name new))}
+     node))
+   ast))
+
 (defn replace-sexp-in-ast-node [old new ast]
   "Takes a partial ast and replaces old (as represented by a sexp) with new (also represented by a sexp)"
   (let [new-ast (second (first (sexp (pr-str new))))]

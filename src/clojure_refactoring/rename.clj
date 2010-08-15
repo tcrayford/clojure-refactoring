@@ -15,10 +15,10 @@
 (defn renaming-fn [old-var new-sym]
   "Returns a function for renaming nodes"
   (fn [node]
-    (replace-sexp-in-ast
+    (replace-symbol-in-ast-node
      (.sym old-var)
      new-sym
-     node)))
+     (second (first node)))))
 
 (defn global-rename [ns old-name new-name]
   "Sends a list of alists to emacs for processing as renames"
