@@ -63,18 +63,26 @@
   "True if the result of applying f on any sub-element of coll is true"
   (filter f (sub-nodes coll)))
 
-(defn regex? [obj]
-  (= (class obj) java.util.regex.Pattern))
+;; The following protocol/extend is for speed only
+(defprotocol ReplaceRegexWithString
+  (maybe-replace-with-string [this]))
 
-(defn replace-with-string [node]
-  (if (regex? node)
-    (.toString node)
-    node))
+(extend-type java.util.regex.Pattern
+  ReplaceRegexWithString
+  (maybe-replace-with-string [this] (.toString this)))
+
+(extend-type java.lang.Object
+  clojure-refactoring.support.core/ReplaceRegexWithString
+  (maybe-replace-with-string [this] this))
+
+(extend-type nil
+  ReplaceRegexWithString
+  (maybe-replace-with-string [this] nil))
 
 (defn replace-regex [coll]
   "Returns a copy of coll with all regex replaced by the string given by calling toString on them"
   (postwalk
-   replace-with-string
+   maybe-replace-with-string
    coll))
 
 (defn maybe-replace-regex [obj]

@@ -4,7 +4,7 @@
   (:use clojure-refactoring.support.core)
   (:use net.cgrand.parsley))
 
-(def sexp
+(defonce sexp
      (memoize
       (parser {:space [#{:whitespace :comment :discard}:*]
                :main :expr*}
@@ -44,31 +44,34 @@
 
               :whitespace (token #{\space \tab \newline \,}:+ (?! #{\space \tab \newline \,})))))
 
-(def parsley-node-to-string
-     (memoize
-      (fn [node]
-        (->> (postwalk (fn [n] (if (map? n) (:content n) n)) node)
-             (flatten)
-             (reduce str)))))
+(defn parsley-node-to-string [node]
+     (->> (postwalk
+           (fn [n]
+             (if (map? n) (:content n) n))
+           node)
+          (flatten)
+          (apply str)))
 
-(def parsley-to-string
-     (memoize
-      (fn [root-node]
-        (apply str (map parsley-node-to-string (second (first root-node)))))))
+(defn parsley-to-string [root-node]
+  (->>
+   (first root-node)
+   (second)
+   (map parsley-node-to-string)
+   (apply str)))
 
 (defn match-parsley [exp ast]
   (try
-    (let [ex (replace-regex exp)]
-      (or (= ex (replace-regex
+    (let [ex (maybe-replace-regex exp)]
+      (or (= ex (maybe-replace-regex
                  (read-string (parsley-node-to-string ast))))
-          (= ex (replace-regex
+          (= ex (maybe-replace-regex
                  (read-string (parsley-to-string ast))))))
     (catch Exception e nil)))
 
 (defn replace-sexp-in-ast-node [old new ast]
   "Takes a partial ast and replaces old (as represented by a sexp) with new (also represented by a sexp)"
   (let [new-ast (second (first (sexp (pr-str new))))]
-    (prewalk
+    (postwalk
      (fn [node]
        (if (and (map? node) (:content node) (match-parsley old node))
          new-ast

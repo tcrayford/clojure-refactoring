@@ -44,6 +44,9 @@
   (is (rec-contains? '(defn what [s] (re-split #"," s))
                      '(re-split #"," s))))
 
+(deftest maybe_replace_regex_with_string
+  (is (= (.toString #",") (maybe-replace-with-string #","))))
+
 (deftest binding_node?
   (is (= (binding-node? '(let [a 1] a)) 'let))
   (is (= (binding-node? '(defn myfn [a] (+ 1 a))) 'defn))

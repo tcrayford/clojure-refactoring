@@ -16,7 +16,7 @@
                             (repeatedly random-symbol-char)))))
 
 (defn random-sexp [& args]
-  (into () (take (rand 10)
+  (into () (take (inc (rand 10))
                  (repeatedly random-symbol))))
 
 (defn random-sexp-with-comments [& args]
@@ -54,6 +54,15 @@
                           (parsley-to-string)
                           (read-string)
                           (rec-contains? a))))))
+  (cc/property "replacing more lists"
+               [old random-sexp
+                new random-sexp]
+               (let [s (pr-str `(defn a [b] ~old))]
+                 (is (not
+                      (-> (replace-sexp-in-ast old new (sexp s))
+                          (parsley-to-string)
+                          (read-string)
+                          (rec-contains? old))))))
   (is (= (parsley-node-to-string
           (replace-sexp-in-ast
            '(inc b)
