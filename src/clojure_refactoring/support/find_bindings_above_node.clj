@@ -1,10 +1,6 @@
 (ns clojure-refactoring.support.find-bindings-above-node
   (:use clojure-refactoring.support.core))
 
-(declare process-multiple-nodes
-         process-remaining-bindings
-         process-nested-bindings)
-
 (defn maybe-keys [m]
   (if (map? m)
     (keys m)
@@ -29,10 +25,13 @@
      (comp unique-vec flatten
            extract-destructured-maps))
 
+(defn binding-node-that-contains? [node expr]
+  (and (seq? node)
+       binding-node?
+       (rec-contains? node expr)))
+
 (defn find-bindings-above-node [node expr]
   (->> (sub-nodes node)
-       (filter seq?)
-       (filter #(rec-contains? % expr))
-       (filter binding-node?)
+       (filter #(binding-node-that-contains? % expr))
        (map (comp extract-destructured-maps bound-symbols))
-       (remove-unwanted-binding-atoms)))
+       remove-unwanted-binding-atoms))
