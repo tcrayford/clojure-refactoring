@@ -167,10 +167,11 @@
 
 (defun clojure-refactoring-global-rename ()
   (interactive)
-  (clojure-refactoring-reload-all-user-ns)
   (save-excursion
     (let ((old-name (clojure-refactoring-read-symbol-at-point))
           (new-name (read-from-minibuffer "New name: ")))
+      (save-some-buffers 't)
+      (clojure-refactoring-reload-all-user-ns)
       (let ((expr (format "(require 'clojure-refactoring.rename) (ns clojure-refactoring.rename) (global-rename '%s '%s '%s)"
                           (slime-current-package) old-name new-name)))
         (clojure-refactoring-process-global-replacements

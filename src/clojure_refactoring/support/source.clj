@@ -71,10 +71,11 @@ Example: (get-source-from-var 'filter)"
 
 (defn new-cached-source [v] ;; refactor this using maybe monad?
   (when-let [file-path (file-from-var v)]
-    (when-let [f (new-file file-path)]
-      (CachedSource. (.lastModified f)
-                     (get-source-from-var v)
-                     (slime-find-file file-path)))))
+    (when-let [absolute-path (slime-find-file file-path)]
+      (when-let [f (new-file absolute-path)]
+        (CachedSource. (.lastModified f)
+                       (get-source-from-var v)
+                       absolute-path)))))
 
 (defn in-time? [cached]
   (= (.lastModified (new-file (:file cached)))
