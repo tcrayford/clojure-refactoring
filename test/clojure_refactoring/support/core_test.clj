@@ -11,7 +11,7 @@
        (read-string test-fn-string))
   (f))
 
-(use-fixtures :once fixture)
+(use-fixtures :once fixture #(time (%)))
 
 (deftest fn_args
   (is (= (fn-args test-fn-node) ['msg])))

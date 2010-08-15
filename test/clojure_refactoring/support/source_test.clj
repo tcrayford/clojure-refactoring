@@ -4,6 +4,8 @@
   (:use clojure-refactoring.support.core)
   (:use clojure.test clojure.contrib.mock))
 
+(use-fixtures :once #(time (%)))
+
 (def a nil) ;; used to test does-ns-refer-to-var? below.
 
 (defn proxy-file [time]

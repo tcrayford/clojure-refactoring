@@ -2,6 +2,8 @@
   (:use clojure-refactoring.destructuring :reload)
   (:use clojure.test))
 
+(use-fixtures :once #(time (%)))
+
 (deftest is_map_lookup?
   (testing "map lookups are lists with a symbol and keyword paired"
     (is (map-lookup? '(:foo a))))

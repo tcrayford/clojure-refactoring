@@ -2,6 +2,8 @@
   (:use clojure-refactoring.support.find-bindings-above-node :reload)
   (:use clojure.test))
 
+(use-fixtures :once #(time (%)))
+
 (deftest extract_destructured_maps
   (is (= (extract-destructured-maps '[{a :a}])
          '[a]))

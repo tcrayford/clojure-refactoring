@@ -3,6 +3,8 @@
         clojure-refactoring.support.core :reload)
   (:use clojure.test clojure.contrib.str-utils))
 
+(use-fixtures :once #(time (%)))
+
 (deftest fn_name
   (is (= (fn-name '(defn a [c] c)) 'a)))
 

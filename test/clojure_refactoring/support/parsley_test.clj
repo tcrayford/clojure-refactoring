@@ -4,6 +4,8 @@
   (:use [clojure-refactoring.support.core :only [rec-contains?]])
   (:require [clojurecheck.core :as cc]))
 
+(use-fixtures :once #(time (%)))
+
 (def symbol-chars (vec "abcdefghijklmnopqrstuvwxyz"))
 
 (defn random-symbol-char [& args]

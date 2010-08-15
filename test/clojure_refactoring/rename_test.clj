@@ -4,6 +4,8 @@
   (:require [clojure-refactoring.support.parsley :as parsley])
   (:use clojure-refactoring.rename :reload))
 
+(use-fixtures :once #(time (%)))
+
 (def a nil)
 
 (deftest renames-basic-function-call

@@ -306,7 +306,7 @@
   Default is 1000."
        :added "2.0"}
      *trials*
-     1000)
+     100)
 
 (defn *size-scale*
   "The scale function used to scale up the size guidance with increasing

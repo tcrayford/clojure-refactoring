@@ -2,6 +2,8 @@
   (:use clojure.test)
   (:use clojure-refactoring.local-binding :reload))
 
+(use-fixtures :once #(time (%)))
+
 (deftest wraps_code_as_local
   (is (= (local-wrap "(defn a [b] (+ b (/ b 1)))"
                      "(/ b 1)"

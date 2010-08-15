@@ -4,6 +4,8 @@
   (:use clojure.test)
   (:use clojure.contrib.mock))
 
+(use-fixtures :once #(time (%)))
+
 (defn replace-test-fn [top-level-node]
   (second (first (sexp "a"))))
 
