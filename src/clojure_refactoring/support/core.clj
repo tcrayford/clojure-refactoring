@@ -15,11 +15,13 @@
       (pprint node))))
 
 (defn contains-sub-nodes? [tree]
-  (or (sequential? tree) (map? tree)))
+  (or (sequential? tree)
+      (map? tree)
+      (set? tree)))
 
 (defn expand-sub-nodes [tree]
   (if (map? tree)
-    (interleave (keys tree) (vals tree))
+  (interleave (keys tree) (vals tree))
     (seq tree)))
 
 (defn sub-nodes [tree]
@@ -39,7 +41,7 @@
 
 (defn fn-args [node]
   "Returns the function arguments from a top-level defn node"
-  (find-first #(vector? %) node))
+  (find-first vector? node))
 
 (defn extract-binding-form [node]
   "Returns a vector of bindings iff the node is a binding node. Won't work with multiple arity defns"
@@ -47,7 +49,7 @@
 
 (defn unique-vec [coll]
   "Strips all duplicates from coll and forces it into a vector"
-  (vec (apply sorted-set coll)))
+  (vec (distinct coll)))
 
 (defn bound-symbols [node]
   "Returns a vector of the bound symbols inside node"
