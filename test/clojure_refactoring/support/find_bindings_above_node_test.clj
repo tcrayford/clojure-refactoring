@@ -10,6 +10,9 @@
   (is (= (extract-destructured-maps '[{b :a}])
          '[b])))
 
+(deftest munge_anonymous_fns
+  (is (= (munge-anonymous-fn '#(inc %)) (munge-anonymous-fn '#(inc %)))))
+
 (deftest let_bind
   (is (= (find-bindings-above-node '(defn myfn [a] (let [a 1] (+ 1 a)))
                                    '(+ 1 a))
@@ -41,9 +44,9 @@
          '[b]))
   (testing "destructured bindings"
     (is (= (find-bindings-above-node
-            '(let [{a :a} {:a 1}] (+ 1 a))
+            '(let [{a :a :as c :or {:a 1}} {:a 1}] (+ 1 a))
             '(+ 1 a))
-           '[a]))
+           '[a c]))
     (is (= (find-bindings-above-node
             '(let [{:keys [a b]} {:a 1 :b 2}] (+ a b))
             '(+ a b))
@@ -60,3 +63,15 @@
           '(do (let [a 1] (do (inc (let [b 2] (+ a b))))))
           '(+ a b))
          '[a b])))
+
+(deftest loop_as_bindings_with_anonymous_fns
+  (is (= (find-bindings-above-node
+          '(loop [foo 1]
+             (recur #(inc foo)))
+          '(recur #(inc foo)))
+         '[foo])))
+
+(deftest anonymous-fns-with-reader-macro
+  (is (= (find-bindings-above-node '(let [a 1] #(inc %))
+                                   '#(inc %))
+         '[a])))

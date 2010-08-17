@@ -106,3 +106,11 @@
   (and (binding-node? node)
        (not
         (contains-binding-nodes? node))))
+
+(defn tree-replace-if [pred f coll]
+  (postwalk
+   (fn [n]
+     (if (pred n)
+       (f n)
+       n))
+   coll))
