@@ -107,7 +107,9 @@
        (not
         (contains-binding-nodes? node))))
 
-(defn tree-replace-if [pred f coll]
+(defn tree-replace-when [pred f coll]
+  "Walks over a tree, replacing nodes when (pred node) is true
+by calling (f node)"
   (postwalk
    (fn [n]
      (if (pred n)
