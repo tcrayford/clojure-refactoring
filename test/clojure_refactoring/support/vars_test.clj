@@ -1,6 +1,6 @@
-(ns clojure-refactoring.support.namespaces-test
-  (:use clojure-refactoring.support.namespaces :reload)
+(ns clojure-refactoring.support.vars-test
   (:use clojure-refactoring.support.vars :reload)
+  (:use clojure-refactoring.support.namespaces)
   (:use clojure.test)
   (:use clojure.contrib.mock))
 
@@ -22,7 +22,7 @@
             (is (empty? (all-ns-that-refer-to 'a))))))
 
 (deftest does_ns_refer_to_var
-  (let [this-ns (find-ns 'clojure-refactoring.support.namespaces-test)]
+  (let [this-ns (find-ns 'clojure-refactoring.support.vars-test)]
     (is (does-ns-refer-to-var? this-ns #'a))
     (testing "same named var in another ns"
       (is (not (does-ns-refer-to-var?
