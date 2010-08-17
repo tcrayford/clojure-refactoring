@@ -20,8 +20,7 @@
     (add-multiple-keys m)
     (maybe-keys m)))
 
-(def extract-destructured-maps
-     "Extracts all symbols out of destructured maps"
+(def extract-destructured-maps ;;Extracts all symbols out of destructured maps
      (comp flatten (partial map extract-destructured-map)))
 
 (def remove-unwanted-binding-atoms
@@ -57,13 +56,13 @@ value for a given node"
       (do (swap! munge-cache assoc (format-code node) output)
           output))))
 
-(defn munge-anonymous-fns [node]
-  "Replaces all anonymous fns in a node with munged versions"
-  (tree-replace-when anonymous-fn? munge-anonymous-fn node))
-
 (defn anonymous-fn? [node]
   "Returns true if node is an anonymous function"
   (and (seq? node) (= (first node) 'fn*)))
+
+(defn munge-anonymous-fns [node]
+  "Replaces all anonymous fns in a node with munged versions"
+  (tree-replace-when anonymous-fn? munge-anonymous-fn node))
 
 (defn find-bindings-above-node [node expr]
   "Finds all binding expressions above expr in a particular node"
