@@ -163,7 +163,7 @@
           new-name))))))
 
 (defun clojure-refactoring-reload-all-user-ns ()
-  (clojure-refactoring-eval-sync "(require 'clojure-refactoring.support.source)(clojure-refactoring.support.source/reload-all-user-ns)"))
+  (clojure-refactoring-eval-sync "(require 'clojure-refactoring.support.namespaces)(clojure-refactoring.support.namespaces/reload-all-user-ns)"))
 
 (defun clojure-refactoring-global-rename ()
   (interactive)
@@ -245,21 +245,9 @@
     map)
   "Keymap for Clojure refactoring mode.")
 
-(defun clojure-refactoring-eval-async (string &optional handler)
-  (slime-eval-async `(swank:eval-and-grab-output ,string)
-                    (or handler #'identity)))
-
-(defun clojure-refactoring-warm-cache ()
-  (clojure-refactoring-eval-async
-   "(require 'clojure-refactoring.support.source)(clojure-refactoring.support.source/populate-cache)"))
-
-(add-hook 'slime-connected-hook 'clojure-refactoring-warm-cache)
-
 ;;;###autoload
 (define-minor-mode clojure-refactoring-mode
-  "A minor mode for a clojure refactoring tool"
-  (when (slime-connected-p)
-    (run-hooks 'slime-connected-hook)))
+  "A minor mode for a clojure refactoring tool")
 
 (progn (defun clojure-refactoring-enable ()
          (clojure-refactoring-mode t))

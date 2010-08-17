@@ -1,19 +1,14 @@
 (ns clojure-refactoring.support.replace
-  (:use [clojure-refactoring.support source core parsley])
-  (:use clojure.walk)
-  (:require clojure.contrib.string)
-  (:import (java.io StringReader File)
-           (java.util.zip ZipFile)
-           (clojure.lang LineNumberingPushbackReader)))
+  (:use [clojure-refactoring.support
+         source core paths vars])
+  (:use [clojure-refactoring.support.parsley
+         :only [parsley-node-to-string]]))
 
 (defn map-to-alist [m]
   "Converts a clojure map to an alist suitable for emacs"
   (map (fn [[k v]] (list k v)) m))
 
 (def line-from-var (comp :line meta))
-
-(defn slime-file-from-var [v]
-  (slime-find-file (file-from-var v)))
 
 (defn build-replacement-map [v f]
   "Builds a replacement for a var (to be sent to emacs) by calling f on the parsley tree

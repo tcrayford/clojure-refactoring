@@ -1,6 +1,7 @@
 (ns clojure-refactoring.support.replace-test
   (:use clojure-refactoring.support.replace :reload)
-  (:use [clojure-refactoring.support source parsley])
+  (:use [clojure-refactoring.support source parsley
+         namespaces paths vars])
   (:use clojure.test)
   (:use clojure.contrib.mock))
 
