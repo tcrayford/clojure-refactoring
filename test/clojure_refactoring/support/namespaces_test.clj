@@ -1,5 +1,4 @@
-(ns clojure-refactoring.support.vars-test
-  (:use clojure-refactoring.support.vars :reload)
+(ns clojure-refactoring.support.namespaces-test
   (:use clojure-refactoring.support.namespaces)
   (:use clojure.test)
   (:use clojure.contrib.mock))
@@ -7,6 +6,14 @@
 (use-fixtures :once #(time (%)))
 
 (def a nil) ;; used to test does-ns-refer-to-var? below.
+
+(deftest filename_from_ns
+  (let [path "clojure_refactoring/support/namespaces.clj"]
+      (expect [clojure-refactoring.support.paths/slime-find-file
+            (returns path
+             (has-args [#(= path %)] (times 1)))]
+           (is (= (filename-from-ns 'clojure-refactoring.support.namespaces)
+                  path)))))
 
 (deftest all_ns_that_refer_to
   (testing "it requires all of them"
@@ -22,7 +29,7 @@
             (is (empty? (all-ns-that-refer-to 'a))))))
 
 (deftest does_ns_refer_to_var
-  (let [this-ns (find-ns 'clojure-refactoring.support.vars-test)]
+  (let [this-ns (find-ns 'clojure-refactoring.support.namespaces-test)]
     (is (does-ns-refer-to-var? this-ns #'a))
     (testing "same named var in another ns"
       (is (not (does-ns-refer-to-var?
