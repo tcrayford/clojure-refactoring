@@ -58,14 +58,14 @@ TODO: this needs a better name"
   "Takes a set of lookups and a function node, and
 adds a binding map made from the lookups to the root node"
   (let [args (fn-args root-node)]
-    (replace-sexp-in-ast args
+    (replace-sexp-in-ast-node args
                          (destructured-binding-vec
                           args lookups)
                          root-ast)))
 
 (defn destructure-map [fn-code name]
   "Destructures all calls to map called name inside a function node"
-  (let [root-ast (sexp fn-code)
+  (let [root-ast (parse fn-code)
         root-node (read-string fn-code)
         lookups (find-lookups root-node)]
     (str (parsley-node-to-string

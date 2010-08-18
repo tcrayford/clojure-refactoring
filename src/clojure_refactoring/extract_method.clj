@@ -39,9 +39,9 @@ Works for all binding forms in core/binding-forms"
 
 (defn remove-extracted-function [extract-string fn-string new-fun]
   (parsley-node-to-string
-   (replace-sexp-in-ast (read-string extract-string)
+   (replace-sexp-in-ast-node (read-string extract-string)
                         (fn-call new-fun)
-                        (sexp fn-string))))
+                        (parse fn-string))))
 
 (defn format-output [extract-string fn-string new-fun]
   "Formats the output for extract-method to print"

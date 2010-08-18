@@ -46,7 +46,7 @@ Example: (get-source-from-var 'filter)"
       (CachedSource. (.lastModified f)
                      source
                      (.getCanonicalPath f)
-                     (sexp source)))))
+                     (parse source)))))
 
 (defn in-time? [cached]
   (= (.lastModified (new-file (:file cached)))

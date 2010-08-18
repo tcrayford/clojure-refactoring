@@ -44,6 +44,8 @@
 
               :whitespace (token #{\space \tab \newline \,}:+ (?! #{\space \tab \newline \,})))))
 
+(def parse (comp second first sexp))
+
 (defn parsley-node-to-string [node]
      (->> (postwalk
            (fn [n]
@@ -52,20 +54,11 @@
           (flatten)
           (apply str)))
 
-(defn parsley-to-string [root-node]
-  (->>
-   (first root-node)
-   (second)
-   (map parsley-node-to-string)
-   (apply str)))
-
 (defn match-parsley [exp ast]
   (try
     (let [ex (maybe-replace-regex exp)]
-      (or (= ex (maybe-replace-regex
-                 (read-string (parsley-node-to-string ast))))
-          (= ex (maybe-replace-regex
-                 (read-string (parsley-to-string ast))))))
+      (= ex (maybe-replace-regex
+             (read-string (parsley-node-to-string ast)))))
     (catch Exception e nil)))
 
 (defn replace-symbol-in-ast-node [old new ast]
@@ -85,7 +78,3 @@
          new-ast
          node))
      ast)))
-
-(defn replace-sexp-in-ast [old new ast]
-  "Takes a sexp represented as a list, and a parsley tree, and replaces the parse tree with a new one"
-  (replace-sexp-in-ast-node old new (second (first ast))))

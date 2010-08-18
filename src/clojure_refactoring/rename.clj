@@ -3,14 +3,14 @@
   (:use clojure.walk))
 
 (defn rename [node old-name new-name]
-  (let [ast (sexp node)
+  (let [ast (parse node)
         old (symbol old-name)
         new (symbol new-name)]
     (str (parsley-node-to-string
-      (replace-sexp-in-ast old
-                           new
-                           ast))
-         "\n")))
+          (replace-sexp-in-ast-node
+           old
+           new
+           ast)) "\n")))
 
 (defn renaming-fn [old-var new-sym]
   "Returns a function for renaming nodes"
@@ -18,7 +18,7 @@
     (replace-symbol-in-ast-node
      (.sym old-var)
      new-sym
-     (second (first node)))))
+     node)))
 
 (defn global-rename [ns old-name new-name]
   "Sends a list of alists to emacs for processing as renames"

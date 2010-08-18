@@ -22,7 +22,7 @@
   (testing "it replaces occurences of the var name"
     (is (= (parsley/parsley-node-to-string
             ((renaming-fn #'a 'z)
-             (parsley/sexp
+             (parsley/parse
               "(defn b [c] (a 1 2))")))
 
            "(defn b [c] (z 1 2))")))) ;;eventually, this should only

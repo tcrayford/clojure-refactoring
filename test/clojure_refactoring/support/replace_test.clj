@@ -8,7 +8,7 @@
 (use-fixtures :once #(time (%)))
 
 (defn replace-test-fn [top-level-node]
-  (second (first (sexp "a"))))
+  (parse "a"))
 
 (def a nil) ;; needed so we can use the var below
 
@@ -23,20 +23,20 @@
 
 (deftest build_replacement_map
   (testing "it has the right attributes"
-    (expect [get-entry-from-cache (times 1 (returns (sexp "(+ a 1)")))]
+    (expect [get-entry-from-cache (times 1 (returns (parse "(+ a 1)")))]
             (let [m (replacement-map-for-tests)]
               (is (:file m))
               (is (:var-name m))
               (is (:line m))
               (is (:new-source m)))))
   (testing "populates the attributes correctly"
-    (expect [get-entry-from-cache (times 1 (returns (sexp "(+ a 1)")))]
+    (expect [get-entry-from-cache (times 1 (returns (parse "(+ a 1)")))]
             (is (= (:new-source (replacement-map-for-tests)) "a")))
-    (expect [get-entry-from-cache (returns (sexp "(+ a 1)"))
+    (expect [get-entry-from-cache (returns (parse "(+ a 1)"))
              slime-file-from-var (times 1 (returns "foo"))]
             (is (= (:file (replacement-map-for-tests)) "foo")))
     (expect [get-entry-from-cache
-             (returns (sexp "(+ a 1)"))
+             (returns (parse "(+ a 1)"))
              line-from-var
              (returns 1)]
             (is (= (:line (replacement-map-for-tests)) 1)))))
