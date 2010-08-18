@@ -28,6 +28,10 @@
   (tree-seq contains-sub-nodes?
             expand-sub-nodes tree))
 
+(defn count= [seq n]
+  "Checks if the count of seq is equal to n"
+  (= (count seq) n))
+
 (def binding-forms
      #{'let 'fn 'binding 'for 'doseq 'dotimes 'defn 'loop 'defmacro})
 
@@ -92,14 +96,14 @@
     (replace-regex obj)
     obj))
 
-(defn rec-contains? [coll obj]
+(defn tree-contains? [coll obj]
   "True if coll contains obj at some level of nesting"
   (some #{(maybe-replace-regex obj)}
         (sub-nodes (maybe-replace-regex coll))))
 
 (defn contains-binding-nodes? [node]
   (some identity
-        (for [sym binding-forms] (rec-contains? (rest node) sym))))
+        (for [sym binding-forms] (tree-contains? (rest node) sym))))
 
 (defn last-binding-form? [node]
   "Returns true if there are no binding nodes inside node"

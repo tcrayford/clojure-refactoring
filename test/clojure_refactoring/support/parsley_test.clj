@@ -1,7 +1,7 @@
 (ns clojure-refactoring.support.parsley-test
   (:use clojure-refactoring.support.parsley :reload)
   (:use clojure.test)
-  (:use [clojure-refactoring.support.core :only [rec-contains?]])
+  (:use [clojure-refactoring.support.core :only [tree-contains?]])
   (:require [clojurecheck.core :as cc]))
 
 (use-fixtures :once #(time (%)))
@@ -31,7 +31,7 @@
 (defn parsley-rec-contains [obj ast]
   (-> (parsley-node-to-string ast)
       read-string
-      (rec-contains? obj)))
+      (tree-contains? obj)))
 
 (deftest replace_sexp_in_ast
   (cc/property "replace-sexp-in-ast where

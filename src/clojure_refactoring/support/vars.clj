@@ -5,7 +5,7 @@
 (defn- does-var-call-fn? [v fn]
   "Checks if a var calls a function named 'fn"
   (if-let [source (get-source-from-cache v)]
-    (rec-contains? (read-string source) fn)))
+    (tree-contains? (read-string source) fn)))
 
 (defn all-vars [nses]
   (->> (map ns-interns nses)

@@ -59,7 +59,7 @@ based on what type of threading is going to be"
   (postwalk expand-threaded node))
 
 (defn any-threaded? [node]
-  (some #(rec-contains? node %) expression-threaders))
+  (some #(tree-contains? node %) expression-threaders))
 
 (defn thread-unthread [code]
   "Takes an expression starting with ->> or -> and unthreads it"

@@ -33,10 +33,6 @@ Works for all binding forms in core/binding-forms"
 (defn make-fn-node [name args body]
   `(~'defn ~(symbol name) ~args ~body))
 
-(defn re-quote [s]
-  (re-pattern
-   (java.util.regex.Pattern/quote s)))
-
 (defn remove-extracted-function [extract-string fn-string new-fun]
   (parsley-node-to-string
    (replace-sexp-in-ast-node (read-string extract-string)

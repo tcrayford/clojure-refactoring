@@ -21,7 +21,6 @@
   (is (= (lookups->binding-map '#{(:a a) (:b a)}) '{a {a :a b :b}}))
   (is (= (lookups->binding-map '#{(a :a) (a :b)}) '{a {a :a b :b}})))
 
-
 ;;Integration level tests below here.
 (deftest destructure_map_test
   (is (= (destructure-map "(defn a [b] (:foo b))" "b")

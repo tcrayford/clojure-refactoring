@@ -3,10 +3,6 @@
         clojure.walk
         [clojure-refactoring.support core parsley]))
 
-(defn count= [seq n]
-  "Checks if the count of seq is equal to n"
-  (= (count seq) n))
-
 (defn map-lookup? [node]
   "Returns true if node is a map lookup using keywords"
   (and (seq? node)

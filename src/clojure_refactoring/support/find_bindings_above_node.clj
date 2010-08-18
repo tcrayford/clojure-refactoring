@@ -2,7 +2,7 @@
   (:use clojure-refactoring.support.core)
   (:use clojure.walk))
 
-(defn maybe-keys [m]
+(defn- maybe-keys [m]
   "If m is a map, call keys on it. Otherwise return it"
   (if (map? m)
     (keys m)
@@ -14,7 +14,7 @@
    (filter symbol? (flatten
                     (sub-nodes m)))))
 
-(defn extract-destructured-map [m]
+(defn- extract-destructured-map [m]
   "Extracts destructuring from map"
   (if (map? m)
     (add-multiple-keys m)
@@ -32,7 +32,7 @@
 contains expr"
   (and (seq? node)
        (binding-node? node)
-       (rec-contains? node expr)))
+       (tree-contains? node expr)))
 
 (def munge-cache (atom {})) ;; Stores the results of munging anonymous functions, indexed by a
 ;; printout of that node's code, so that munging

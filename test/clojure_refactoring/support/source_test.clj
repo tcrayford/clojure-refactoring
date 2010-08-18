@@ -3,11 +3,16 @@
   (:import clojure-refactoring.support.source.CachedSource)
   (:use [clojure-refactoring.support core paths])
   (:use clojure.test clojure.contrib.mock)
+  (:use clojure.contrib.def)
   (:require clojure-refactoring.support.replace-test))
 
 (use-fixtures :once #(time (%)))
 
 (def a nil)
+
+(defmacro after [expr & body]
+  `(do ~expr
+      ~@body))
 
 (defn proxy-file [time]
   (proxy [java.io.File] ["~/"] (lastModified [] time)
@@ -30,7 +35,7 @@
 (deftest absolute_file_from_var
   (expect [file-from-var (times 1 (returns "filename"))
            new-file (times 1 (returns (proxy-file 0)))
-           slime-find-file (times 1(returns ""))]
+           slime-find-file (times 1 (returns ""))]
           (is (absolute-file-from-var #'a))))
 
 (deftest new_cached_source
@@ -54,3 +59,19 @@
                file-from-var (returns "filename")
                new-file (returns (proxy-file 0))]
               (is (= (get-source-from-cache 'a) "(+ a b)"))))))
+
+(deftest caching
+  (expect [get-source-from-var (times 1 (returns "(+ 1 2)"))
+           absolute-file-from-var (times 1 (returns (proxy-file 0)))]
+          (cache #'a))
+  (expect [get-source-from-var (returns "(+ 1 2)")
+           absolute-file-from-var (returns (proxy-file 0))]
+          (binding [source-cache (atom {})]
+            (after (cache #'a)
+                   (is (count= @source-cache 1)))))
+  (expect [get-source-from-var (times 1 (returns "(+ 1 2)"))
+           absolute-file-from-var (times 1 (returns (proxy-file 0)))]
+          (is (get-source-from-var #'a)))
+  (expect [get-source-from-var (times 1 (returns "(+ 1 2)"))
+           absolute-file-from-var (times 1 (returns (proxy-file 0)))]
+          (is (cache-source #'a))))
