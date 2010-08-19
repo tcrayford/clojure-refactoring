@@ -2,10 +2,7 @@
   (:use clojure.contrib.monads)
   (:use [clojure-refactoring.support core parsley paths])
   (:import (clojure.lang RT)
-           (java.io LineNumberReader InputStreamReader PushbackReader))
-  (:import (java.io StringReader File)
-           (java.util.zip ZipFile)
-           (clojure.lang LineNumberingPushbackReader)))
+           (java.io LineNumberReader InputStreamReader PushbackReader)))
 
 (defonce source-cache (atom {}))
 
@@ -44,7 +41,7 @@ Example: (get-source-from-var 'filter)"
   (when-let [f (absolute-file-from-var v)]
     (let [source (get-source-from-var v)]
       (CachedSource. (.lastModified f)
-                     source
+                     (read-string source)
                      (.getCanonicalPath f)
                      (parse source)))))
 

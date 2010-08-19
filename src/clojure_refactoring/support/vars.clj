@@ -2,10 +2,10 @@
   (:use [clojure-refactoring.support namespaces source core])
   (:use [clojure-refactoring.support.namespaces :only [does-ns-refer-to-var? all-ns-that-refer-to]]))
 
-(defn- does-var-call-fn? [v fn]
+(defn does-var-call-fn? [v fn]
   "Checks if a var calls a function named 'fn"
   (if-let [source (get-source-from-cache v)]
-    (tree-contains? (read-string source) fn)))
+    (tree-contains? source fn)))
 
 (defn all-vars [nses]
   (->> (map ns-interns nses)

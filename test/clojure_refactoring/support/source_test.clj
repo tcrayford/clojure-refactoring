@@ -10,9 +10,13 @@
 
 (def a nil)
 
-(defmacro after [expr & body]
-  `(do ~expr
-      ~@body))
+(defmacro modified? [reference & exprs]
+  "Checks if a reference is modified whilst running exprs.
+   Use can be made readable by doing
+   (modified reference :during expr)"
+  `(let [intial# @~reference]
+     (do ~@exprs)
+     (not= @~reference intial#)))
 
 (defn proxy-file [time]
   (proxy [java.io.File] ["~/"] (lastModified [] time)
@@ -39,11 +43,12 @@
           (is (absolute-file-from-var #'a))))
 
 (deftest new_cached_source
-  (binding [source-cache (atom {})]
-    (expect [get-source-from-var (returns "(+ 1 2)")
-             absolute-file-from-var (returns (proxy-file 0))]
-            (is (= (:source (new-cached-source 'a))
-                   "(+ 1 2)")))))
+  (testing "empty cache means we run get-source-from-var"
+   (binding [source-cache (atom {})]
+     (expect [get-source-from-var (times 1 (returns "(+ 1 2)"))
+              absolute-file-from-var (returns (proxy-file 0))]
+             (is (= (:source (new-cached-source 'a))
+                    '(+ 1 2)))))))
 
 (deftest get_source_from_cache
   (testing "if the cache is invalid, reload the source"
@@ -51,7 +56,7 @@
       (expect [get-source-from-var (returns "(+ 1 2)")
                new-file (returns (proxy-file 1))
                absolute-file-from-var (returns (proxy-file 1))]
-              (is (= (get-source-from-cache 'a) "(+ 1 2)")))))
+              (is (= (get-source-from-cache 'a) '(+ 1 2))))))
 
   (testing "if the cache is valid, return the cached value"
     (binding [source-cache (atom {'a (CachedSource. 0 "(+ a b)" "~/" {})})]
@@ -67,11 +72,7 @@
   (expect [get-source-from-var (returns "(+ 1 2)")
            absolute-file-from-var (returns (proxy-file 0))]
           (binding [source-cache (atom {})]
-            (after (cache #'a)
-                   (is (count= @source-cache 1)))))
-  (expect [get-source-from-var (times 1 (returns "(+ 1 2)"))
-           absolute-file-from-var (times 1 (returns (proxy-file 0)))]
-          (is (get-source-from-var #'a)))
+            (is (modified? source-cache :during (cache #'a)))))
   (expect [get-source-from-var (times 1 (returns "(+ 1 2)"))
            absolute-file-from-var (times 1 (returns (proxy-file 0)))]
           (is (cache-source #'a))))
