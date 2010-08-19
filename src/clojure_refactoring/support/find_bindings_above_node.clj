@@ -2,23 +2,16 @@
   (:use clojure-refactoring.support.core)
   (:use clojure.walk))
 
-(defn- maybe-keys [m]
-  "If m is a map, call keys on it. Otherwise return it"
-  (if (map? m)
-    (keys m)
-    m))
-
 (defn add-multiple-keys [m]
   "Pull everything out of a binding map that is a symbol"
   (distinct
-   (filter symbol? (flatten
-                    (sub-nodes m)))))
+   (filter symbol? (sub-nodes m))))
 
 (defn- extract-destructured-map [m]
   "Extracts destructuring from map"
   (if (map? m)
     (add-multiple-keys m)
-    (maybe-keys m)))
+    m))
 
 (def extract-destructured-maps ;;Extracts all symbols out of destructured maps
      (comp flatten (partial map extract-destructured-map)))
@@ -34,27 +27,20 @@ contains expr"
        (binding-node? node)
        (tree-contains? node expr)))
 
-(def munge-cache (atom {})) ;; Stores the results of munging anonymous functions, indexed by a
-;; printout of that node's code, so that munging
-;; the same node always returns the same results.
-;; We do this so we can check if a node contains an anonymous fn
-;; literal.
-
-(defn munge-node [node]
-  (reduce
-   (fn [new-node [original munged]]
-     (postwalk-replace {original munged} new-node))
-   node
-   (map vector (fn-args node) (repeatedly gensym))))
+(defn symbol-from-num [n]
+  "Produces a symbol from a number by prepending
+% to it"
+  (str "%" n))
 
 (defn munge-anonymous-fn [node]
   "Munges anonymous fn args out of a node. Always returns the same
 value for a given node"
-  (if-let [output (@munge-cache (format-code node))]
-    output
-    (let [output (munge-node node)]
-      (do (swap! munge-cache assoc (format-code node) output)
-          output))))
+  (reduce
+   (fn [new-node [original munged]]
+     (postwalk-replace {original munged} new-node))
+   node
+   (map vector (fn-args node)
+        (map symbol-from-num (iterate inc 1)))))
 
 (defn anonymous-fn? [node]
   "Returns true if node is an anonymous function"
