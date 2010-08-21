@@ -9,12 +9,13 @@
 
 
 (deftest parsley_to_string
-  (cc/property "parsley to string is an inverse of sexp"
+  (cc/property "parsley to string is an inverse of parsing"
                [s random-sexp-from-core]
                (is (= (parsley-node-to-string (parse s))
                       s))))
 
 (defn parsley-rec-contains [obj ast]
+  "Works out if a parsley-ast contains a sexp object"
   (-> (parsley-node-to-string ast)
       read-string
       (tree-contains? obj)))
@@ -31,26 +32,27 @@
                (let [s (pr-str
                         `(~a ~@(random-sexp)))]
                  (is (not
-                      (parsley-rec-contains 'a
-                                            (replace-sexp-in-ast-node a b (parse s)))))))
+                      (->> (parse s)
+                           (replace-sexp-in-ast-node a b)
+                           (parsley-rec-contains a))))))
   (cc/property "replacing lists"
                [a random-sexp
                 b random-sexp
                 c random-sexp]
                (let [s (pr-str `(~@a ~@c))]
                  (is (not
-                      (parsley-rec-contains
-                       a
-                       (replace-sexp-in-ast-node a b (parse s)))))))
+                      (->> (parse s)
+                           (replace-sexp-in-ast-node a b)
+                           (parsley-rec-contains a))))))
 
   (cc/property "replacing more lists"
                [old random-sexp
                 new random-sexp]
                (let [s (pr-str `(defn a [b] ~old))]
                  (is (not
-                      (parsley-rec-contains
-                       old
-                       (replace-sexp-in-ast-node old new (parse s)))))))
+                      (->> (parse s)
+                           (replace-sexp-in-ast-node old new)
+                           (parsley-rec-contains old))))))
 
   (is (= (parsley-node-to-string
           (replace-sexp-in-ast-node
@@ -75,8 +77,11 @@
                  (is (not
                       (->>
                        (replace-symbol-in-ast-node old new parsed)
-                       (parsley-rec-contains old)))))))
-
+                       (parsley-rec-contains old))))))
+  (is (= (parsley-node-to-string
+          (replace-symbol-in-ast-node 'a 'z
+                                      (parse "(defn b [c] (a 1 2))")))
+         "(defn b [c] (z 1 2))")))
 
 (deftest match_parsley
   (cc/property "parsley matches sexp on the read string"
@@ -85,7 +90,7 @@
 
 (deftest parsley_walk
   (cc/property "parsley-walk with identity returns the same ast it was passe"
-               [s random-sexp-with-comments]
+               [s random-sexp-from-core]
                (let [parsed (parse s)]
                  (is (= (parsley-walk identity parsed)
                         parsed)))))

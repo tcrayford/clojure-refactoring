@@ -111,12 +111,17 @@
        (not
         (contains-binding-nodes? node))))
 
+(defn call-when [pred f obj]
+  (if (pred obj)
+    (f obj)
+    obj))
+
+(defn replace-when [pred f coll]
+  (map #(call-when pred f %) coll))
+
 (defn tree-replace-when [pred f coll]
   "Walks over a tree, replacing nodes when (pred node) is true
 by calling (f node)"
   (postwalk
-   (fn [n]
-     (if (pred n)
-       (f n)
-       n))
+   #(call-when pred f %)
    coll))
