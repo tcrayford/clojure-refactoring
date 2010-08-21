@@ -1,30 +1,16 @@
 (ns clojure-refactoring.support.parsley-test
   (:use clojure-refactoring.support.parsley :reload)
+  (:use clojure-refactoring.test-helpers)
   (:use clojure.test)
-  (:use [clojure-refactoring.support.core :only [tree-contains?]])
+  (:use clojure-refactoring.support.core)
   (:require [clojurecheck.core :as cc]))
 
 (use-fixtures :once #(time (%)))
 
-(def symbol-chars (vec "abcdefghijklmnopqrstuvwxyz"))
-
-(defn random-symbol-char [& args]
-  (rand-nth symbol-chars))
-
-(defn random-symbol [& args]
-  (symbol (reduce str (take (inc (rand 10))
-                            (repeatedly random-symbol-char)))))
-
-(defn random-sexp [& args]
-  (into () (take (inc (rand 10))
-                 (repeatedly random-symbol))))
-
-(defn random-sexp-with-comments [& args]
-  (str (pr-str (random-sexp)) ";;" (random-symbol) ))
 
 (deftest parsley_to_string
   (cc/property "parsley to string is an inverse of sexp"
-               [s random-sexp-with-comments]
+               [s random-sexp-from-core]
                (is (= (parsley-node-to-string (parse s))
                       s))))
 
@@ -56,6 +42,7 @@
                       (parsley-rec-contains
                        a
                        (replace-sexp-in-ast-node a b (parse s)))))))
+
   (cc/property "replacing more lists"
                [old random-sexp
                 new random-sexp]
@@ -64,12 +51,14 @@
                       (parsley-rec-contains
                        old
                        (replace-sexp-in-ast-node old new (parse s)))))))
+
   (is (= (parsley-node-to-string
           (replace-sexp-in-ast-node
            '(inc b)
            '(arr b)
            (parse "(defn a [b] (inc b))")))
          "(defn a [b] (arr b))"))
+
   (is (= (parsley-node-to-string
           (replace-sexp-in-ast-node
            '(re-split #"," s)
@@ -79,18 +68,24 @@
 
 (deftest replace_symbol_in_ast_node
   (cc/property "replaces the symbol"
-               [old random-symbol
+               [s random-sexp-from-core
                 new random-symbol]
-               (let [ast (parse (pr-str `(defn a [b] (~old bar))))]
+               (let [parsed (parse s)
+                     old (first (read-string s))]
                  (is (not
-                      (parsley-rec-contains
-                       old
-                       (replace-symbol-in-ast-node
-                        old
-                        new
-                        ast)))))))
+                      (->>
+                       (replace-symbol-in-ast-node old new parsed)
+                       (parsley-rec-contains old)))))))
+
 
 (deftest match_parsley
   (cc/property "parsley matches sexp on the read string"
-               [s random-sexp-with-comments]
+               [s random-sexp-from-core]
                (is (match-parsley (read-string s) (parse s)))))
+
+(deftest parsley_walk
+  (cc/property "parsley-walk with identity returns the same ast it was passe"
+               [s random-sexp-with-comments]
+               (let [parsed (parse s)]
+                 (is (= (parsley-walk identity parsed)
+                        parsed)))))

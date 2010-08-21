@@ -1,5 +1,6 @@
 (ns clojure-refactoring.support.parsley
   (:require [net.cgrand.parsley.glr :as core])
+  (:use [clojure-refactoring.support.find-bindings-above-node :only [munge-anonymous-fns]])
   (:use clojure.walk)
   (:use clojure-refactoring.support.core)
   (:use net.cgrand.parsley))
@@ -54,10 +55,32 @@
           (flatten)
           (apply str)))
 
+(defn gensym? [s]
+  (and (symbol? s)
+       (or (.contains (name s) "__auto__")
+           (.contains (name s) "p__"))))
+
+(defn munged-gensym [n]
+  (symbol (str "gensym-" n)))
+
+(defn munge-gensyms [sexp]
+  (reduce
+   (fn [new-sexp [old new]]
+     (postwalk-replace
+      {old new}
+      new-sexp))
+   sexp
+   (map vector
+        (filter gensym? (sub-nodes sexp))
+        (map munged-gensym (iterate inc 0)))))
+
+(def munge-node ;;To replace stuff that read-string changes
+     (comp munge-gensyms munge-anonymous-fns maybe-replace-regex))
+
 (defn match-parsley [exp ast]
   (try
-    (let [ex (maybe-replace-regex exp)]
-      (= ex (maybe-replace-regex
+    (let [ex (munge-node exp)]
+      (= ex (munge-node
              (read-string (parsley-node-to-string ast)))))
     (catch Exception e nil)))
 
@@ -78,3 +101,16 @@
          new-ast
          node))
      ast)))
+
+(defn replace-when [pred f coll]
+  (map #(if (pred %) (f %) %) coll))
+
+(defn parsley-walk [f ast]
+  (if (map? ast)
+    (f
+     (assoc ast :content
+            (replace-when
+             (complement string?)
+             f
+             (:content ast))))
+    (vec (map #(parsley-walk f %) ast))))
