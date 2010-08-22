@@ -35,12 +35,10 @@ contains expr"
 (defn munge-anonymous-fn [node]
   "Munges anonymous fn args out of a node. Always returns the same
 value for a given node"
-  (reduce
-   (fn [new-node [original munged]]
-     (postwalk-replace {original munged} new-node))
-   node
-   (map vector (fn-args node)
-        (map symbol-from-num (iterate inc 1)))))
+  (replace-in-sexp
+   (fn-args node)
+   (map symbol-from-num (iterate inc 1))
+   node))
 
 (defn anonymous-fn? [node]
   "Returns true if node is an anonymous function"

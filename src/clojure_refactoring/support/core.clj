@@ -125,3 +125,14 @@ by calling (f node)"
   (postwalk
    #(call-when pred f %)
    coll))
+
+(defn replace-in-sexp [oldlist newlist sexp]
+  (reduce
+   (fn [new-sexp [old new]]
+     (postwalk-replace
+      {old new}
+      new-sexp))
+   sexp
+   (map vector
+        oldlist
+        newlist)))

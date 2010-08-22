@@ -17,7 +17,7 @@
 (defn parsley-rec-contains [obj ast]
   "Works out if a parsley-ast contains a sexp object"
   (-> (parsley-node-to-string ast)
-      read-string
+       read-string
       (tree-contains? obj)))
 
 (deftest replace_sexp_in_ast
@@ -26,6 +26,7 @@
                [s random-sexp-with-comments]
                (is (= (parse s)
                       (replace-sexp-in-ast-node '(a) '(a) (parse s)))))
+
   (cc/property "after replacing, the old node is no longer present"
                [a random-symbol
                 b random-symbol]
@@ -78,6 +79,24 @@
                       (->>
                        (replace-symbol-in-ast-node old new parsed)
                        (parsley-rec-contains old))))))
+
+  (cc/property "replacing a symbol with itself produces the same tree"
+               [s random-sexp-from-core]
+               (let [parsed (parse s)
+                     old (first (read-string s))]
+                 (is (= (replace-symbol-in-ast-node old old parsed)
+                        parsed))))
+
+  (cc/property "replacing a symbol with another one, then replacing the new one with the original produces the same node"
+               [s random-sexp-from-core
+                new random-symbol]
+               (let [parsed (parse s)
+                     old (first (read-string s))]
+                 (is (= (->>
+                         (replace-symbol-in-ast-node old new parsed)
+                         (replace-symbol-in-ast-node new old))
+                        parsed))))
+
   (is (= (parsley-node-to-string
           (replace-symbol-in-ast-node 'a 'z
                                       (parse "(defn b [c] (a 1 2))")))

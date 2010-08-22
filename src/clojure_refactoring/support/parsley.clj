@@ -55,7 +55,7 @@
 
 (declare parsley-walk)
 
-(defn replace-content [f ast]
+(defn- replace-content [f ast]
   (assoc ast
     :content
     (replace-when
@@ -65,18 +65,13 @@
        f)
      (:content ast))))
 
-(defn replace-symbol [node old new]
-  (if (= node (ast-symbol old))
-    (ast-symbol new)
-    node))
-
 (defn parsley-walk [f ast]
      (if (map? ast)
        (f
         (replace-content f ast))
        (vec (map #(parsley-walk f %) ast))))
 
-(defn parsley-sub-nodes [ast]
+(defn- parsley-sub-nodes [ast]
   (tree-seq #(or (sequential? %)
                  (composite-tag? %))
             #(if (sequential? %)
@@ -86,24 +81,19 @@
 (defn parsley-node-to-string [ast]
   (apply str (filter string? (parsley-sub-nodes ast))))
 
-(defn gensym? [s]
+(defn- gensym? [s]
   (and (symbol? s)
        (or (.contains (name s) "__auto__")
            (.contains (name s) "p__"))))
 
-(defn munged-gensym [n]
+(defn- munged-gensym [n]
   (symbol (str "gensym-" n)))
 
-(defn munge-gensyms [sexp]
-  (reduce
-   (fn [new-sexp [old new]]
-     (postwalk-replace
-      {old new}
-      new-sexp))
-   sexp
-   (map vector
-        (filter gensym? (sub-nodes sexp))
-        (map munged-gensym (iterate inc 0)))))
+(defn- munge-gensyms [sexp]
+  (replace-in-sexp
+   (filter gensym? (sub-nodes sexp))
+   (map munged-gensym (iterate inc 0))
+   sexp))
 
 (def munge-node ;;To replace stuff that read-string changes
      (comp munge-gensyms munge-anonymous-fns maybe-replace-regex))
@@ -115,12 +105,14 @@
              (read-string (parsley-node-to-string ast)))))
     (catch Exception e nil)))
 
+(defn- replace-symbol [node old new]
+  (if (= node (ast-symbol old))
+    (ast-symbol new)
+    node))
+
 (defn replace-symbol-in-ast-node [old new ast]
   (parsley-walk
-   (fn [node]
-     (if (= node (ast-symbol old))
-       (ast-symbol new)
-       node))
+   #(replace-symbol % old new)
    ast))
 
 (defn replace-sexp-in-ast-node [old new ast]
