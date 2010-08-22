@@ -55,15 +55,16 @@
 
 (declare parsley-walk)
 
-(defn- replace-content [f ast]
+(defn- replace-content [f {tag :tag content
+                           :content :as ast}]
   (assoc ast
     :content
     (replace-when
      (complement string?)
-     (if (composite-tag? (:tag ast))
+     (if (composite-tag? tag)
        #(parsley-walk f %)
        f)
-     (:content ast))))
+     content)))
 
 (defn parsley-walk [f ast]
      (if (map? ast)
@@ -119,8 +120,8 @@
   "Takes a partial ast and replaces old (as represented by a sexp) with new (also represented by a sexp)"
   (let [new-ast (second (first (sexp (pr-str new))))]
     (parsley-walk
-     (fn [node]
-       (if (and (map? node) (:content node) (match-parsley old node))
+     (fn [{content :content :as node}]
+       (if (and (map? node) content (match-parsley old node))
          new-ast
          node))
      ast)))

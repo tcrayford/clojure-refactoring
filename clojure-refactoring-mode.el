@@ -211,6 +211,8 @@
   (let ((var-name (read-from-minibuffer "Map name: "))
         (defn (escape-string-literals (slime-defun-at-point))))
     (save-excursion
+      (beginning-of-defun)
+      (forward-kill-sexp)
       (clojure-refactoring-insert-sexp
        (clojure-refactoring-call-with-string-args
         "destructuring"
