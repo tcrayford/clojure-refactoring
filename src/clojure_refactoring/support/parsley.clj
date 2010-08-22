@@ -70,19 +70,21 @@
     (ast-symbol new)
     node))
 
-(defn always [v]
-  "Returns a function that always returns v"
-  (fn [& args]
-    v))
-
 (defn parsley-walk [f ast]
-  (if (map? ast)
-    (f
-     (replace-content f ast))
-    (vec (map #(parsley-walk f %) ast))))
+     (if (map? ast)
+       (f
+        (replace-content f ast))
+       (vec (map #(parsley-walk f %) ast))))
 
-(defn parsley-node-to-string [node]
- (apply str (filter string? (sub-nodes node))))
+(defn parsley-sub-nodes [ast]
+  (tree-seq #(or (sequential? %)
+                 (composite-tag? %))
+            #(if (sequential? %)
+               (seq %)
+               (:content %)) ast))
+
+(defn parsley-node-to-string [ast]
+  (apply str (filter string? (parsley-sub-nodes ast))))
 
 (defn gensym? [s]
   (and (symbol? s)
