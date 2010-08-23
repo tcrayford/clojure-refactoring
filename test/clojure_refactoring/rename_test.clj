@@ -20,7 +20,7 @@
 
 (deftest renaming_fn
   (testing "it replaces occurences of the var name"
-    (is (= (parsley/parsley-node-to-string
+    (is (= (parsley/parsley-to-string
             ((renaming-fn #'a 'z)
              (parsley/parse
               "(defn b [c] (a 1 2))")))

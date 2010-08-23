@@ -2,7 +2,7 @@
   (:use [clojure-refactoring.support
          source core paths vars])
   (:use [clojure-refactoring.support.parsley
-         :only [parsley-node-to-string]]))
+         :only [parsley-to-string]]))
 
 (defn map-to-alist [m]
   "Converts a clojure map to an alist suitable for emacs"
@@ -16,7 +16,7 @@ from that var."
   {:file (slime-file-from-var v)
    :var-name (.sym v)
    :line (line-from-var v)
-   :new-source (parsley-node-to-string
+   :new-source (parsley-to-string
                 (f (:parsley (get-entry-from-cache v))))})
 
 (defn replace-vars [vars f]

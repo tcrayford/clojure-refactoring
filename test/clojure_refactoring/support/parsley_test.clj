@@ -11,12 +11,12 @@
 (deftest parsley_to_string
   (cc/property "parsley to string is an inverse of parsing"
                [s random-sexp-from-core]
-               (is (= (parsley-node-to-string (parse s))
+               (is (= (parsley-to-string (parse s))
                       s))))
 
 (defn parsley-rec-contains [obj ast]
   "Works out if a parsley-ast contains a sexp object"
-  (-> (parsley-node-to-string ast)
+  (-> (parsley-to-string ast)
        read-string
       (tree-contains? obj)))
 
@@ -55,14 +55,14 @@
                            (replace-sexp-in-ast-node old new)
                            (parsley-rec-contains old))))))
 
-  (is (= (parsley-node-to-string
+  (is (= (parsley-to-string
           (replace-sexp-in-ast-node
            '(inc b)
            '(arr b)
            (parse "(defn a [b] (inc b))")))
          "(defn a [b] (arr b))"))
 
-  (is (= (parsley-node-to-string
+  (is (= (parsley-to-string
           (replace-sexp-in-ast-node
            '(re-split #"," s)
            '(string-split s)
@@ -97,7 +97,7 @@
                          (replace-symbol-in-ast-node new old))
                         parsed))))
 
-  (is (= (parsley-node-to-string
+  (is (= (parsley-to-string
           (replace-symbol-in-ast-node 'a 'z
                                       (parse "(defn b [c] (a 1 2))")))
          "(defn b [c] (z 1 2))")))

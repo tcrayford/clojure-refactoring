@@ -55,16 +55,16 @@
 
 (declare parsley-walk)
 
-(defn- replace-content [f {tag :tag content
-                           :content :as ast}]
-  (assoc ast
-    :content
-    (replace-when
-     (complement string?)
-     (if (composite-tag? tag)
-       #(parsley-walk f %)
-       f)
-     content)))
+(defn- replace-content [f ast]
+  (let [{tag :tag content :content} ast]
+   (assoc ast
+     :content
+     (replace-when
+      (complement string?)
+      (if (composite-tag? tag)
+        #(parsley-walk f %)
+        f)
+      content))))
 
 (defn parsley-walk [f ast]
      (if (map? ast)
@@ -72,14 +72,14 @@
         (replace-content f ast))
        (vec (map #(parsley-walk f %) ast))))
 
-(defn- parsley-sub-nodes [ast]
+(defn parsley-sub-nodes [ast]
   (tree-seq #(or (sequential? %)
                  (composite-tag? %))
             #(if (sequential? %)
                (seq %)
                (:content %)) ast))
 
-(defn parsley-node-to-string [ast]
+(defn parsley-to-string [ast]
   (apply str (filter string? (parsley-sub-nodes ast))))
 
 (defn- gensym? [s]
@@ -103,7 +103,7 @@
   (try
     (let [ex (munge-node exp)]
       (= ex (munge-node
-             (read-string (parsley-node-to-string ast)))))
+             (read-string (parsley-to-string ast)))))
     (catch Exception e nil)))
 
 (defn- replace-symbol [node old new]

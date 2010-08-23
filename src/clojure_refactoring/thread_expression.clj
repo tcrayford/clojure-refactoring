@@ -20,8 +20,6 @@ based on what type of threading is going to be"
         (threading-fns-from-type thread-type)]
     `(~(position-f node) ~(all-but-position-f node) ~@new-node)))
 
-;; TODO: more robust error checking. If we can't thread a function
-;; throw an exception instead of trying it anyway
 (defn not-last-threading-node? [node position-f]
   (and (list? (position-f node))
        (list? (position-f (position-f node)))))

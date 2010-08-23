@@ -6,7 +6,7 @@
   (let [ast (parse node)
         old (symbol old-name)
         new (symbol new-name)]
-    (str (parsley-node-to-string
+    (str (parsley-to-string
           (replace-sexp-in-ast-node
            old
            new

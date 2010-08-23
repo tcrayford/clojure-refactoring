@@ -21,7 +21,7 @@
 
 (defn expand-sub-nodes [tree]
   (if (map? tree)
-  (interleave (keys tree) (vals tree))
+    (interleave (keys tree) (vals tree))
     (seq tree)))
 
 (defn sub-nodes [tree]
@@ -103,7 +103,8 @@
 
 (defn contains-binding-nodes? [node]
   (some identity
-        (for [sym binding-forms] (tree-contains? (rest node) sym))))
+        (for [sym binding-forms]
+          (tree-contains? (rest node) sym))))
 
 (defn last-binding-form? [node]
   "Returns true if there are no binding nodes inside node"

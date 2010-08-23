@@ -34,7 +34,7 @@ Works for all binding forms in core/binding-forms"
   `(~'defn ~(symbol name) ~args ~body))
 
 (defn remove-extracted-function [extract-string fn-string new-fun]
-  (parsley-node-to-string
+  (parsley-to-string
    (replace-sexp-in-ast-node (read-string extract-string)
                         (fn-call new-fun)
                         (parse fn-string))))

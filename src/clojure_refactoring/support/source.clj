@@ -45,9 +45,9 @@ Example: (get-source-from-var 'filter)"
                      (.getCanonicalPath f)
                      (parse source)))))
 
-(defn in-time? [cached]
-  (= (.lastModified (new-file (:file cached)))
-     (:time cached)))
+(defn in-time? [{loaded-time :time, file :file}]
+  (= (.lastModified (new-file file))
+     loaded-time))
 
 (defn cache [v]
   (if-let [x (new-cached-source v)]

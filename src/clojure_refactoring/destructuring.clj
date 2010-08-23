@@ -35,36 +35,37 @@ TODO: this needs a better name"
               (assoc (get binding-map m {}) (key->sym key) key))))
    {} lookups))
 
-(defn destructured-binding-vec [old-vec lookups]
+(defn- destructured-binding-vec [old-vec lookups]
   "Replaces each key in the binding map found in old-vec with the value\nfrom the binding map"
   (postwalk-replace (lookups->binding-map lookups) old-vec))
 
 ;; TODO: refactor all code below this line with a parsley monad
-(defn replace-lookups-with-destructured-symbols [lookups ast]
+(defn- replace-lookups-with-destructured-symbols [lookups ast]
   (reduce
-    (fn [ast lookup]
-      (replace-sexp-in-ast-node
-        lookup
-        (key->sym (first (lookup->canoninical-form lookup)))
-        ast))
-    ast
-    lookups))
+   (fn [ast lookup]
+     (replace-sexp-in-ast-node
+      lookup
+      (key->sym (first (lookup->canoninical-form lookup)))
+      ast))
+   ast
+   lookups))
 
 (defn add-binding-map [lookups root-node root-ast]
   "Takes a set of lookups and a function node, and
 adds a binding map made from the lookups to the root node"
   (let [args (fn-args root-node)]
-    (replace-sexp-in-ast-node args
-                         (destructured-binding-vec
-                          args lookups)
-                         root-ast)))
+    (replace-sexp-in-ast-node
+     args
+     (destructured-binding-vec
+      args lookups)
+     root-ast)))
 
 (defn destructure-map [fn-code name]
   "Destructures all calls to map called name inside a function node"
   (let [root-ast (parse fn-code)
         root-node (read-string fn-code)
         lookups (find-lookups root-node)]
-    (str (parsley-node-to-string
+    (str (parsley-to-string
           (replace-lookups-with-destructured-symbols
             lookups
             (add-binding-map lookups root-node root-ast)))
