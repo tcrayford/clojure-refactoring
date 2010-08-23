@@ -5,4 +5,6 @@
                  [tcrayford_parsley/parsley "0.1.0"]]
   :dev-dependencies [[swank-clojure "1.2.1"]
                      [criterium "0.0.1-SNAPSHOT"]
-                     [radagast "1.0.0"]])
+                     [lein-difftest "1.3.0"]
+                     [radagast "1.0.0"]]
+  :hooks [leiningen.hooks.difftest])

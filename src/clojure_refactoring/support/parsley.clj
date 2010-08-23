@@ -125,3 +125,19 @@
          new-ast
          node))
      ast)))
+
+(def parsley-empty-map {:tag :map :content (list "{" "}") })
+
+(def parsley-whitespace
+     '{:tag :whitespace :content (" ")})
+
+(defn parsley-tree-replace [old new ast]
+  (parsley-walk
+   (fn [node]
+     (if (= node old)
+       new
+       node))
+   ast))
+
+(defn parsley-get-first-node [ast]
+  (if (map? ast) ast (first ast)))
