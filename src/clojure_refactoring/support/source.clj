@@ -1,9 +1,10 @@
 (ns clojure-refactoring.support.source
   (:use clojure.contrib.monads)
-  (:use [clojure-refactoring.support core parsley paths])
+  (:use [clojure-refactoring.support core parsley paths namespaces])
   (:import (clojure.lang RT)
            (java.io LineNumberReader InputStreamReader PushbackReader)))
 
+;; A map from vars to CachedSource records.
 (defonce source-cache (atom {}))
 
 (defrecord CachedSource [time source file parsley])
@@ -45,9 +46,13 @@ Example: (get-source-from-var 'filter)"
                      (.getCanonicalPath f)
                      (parse source)))))
 
-(defn in-time? [{loaded-time :time, file :file}]
-  (= (.lastModified (new-file file))
-     loaded-time))
+(defn in-time? [v {last-modified :time }]
+  (if-let [cached-time (get-cached-time (.ns v))]
+    (= cached-time
+       last-modified)))
+(with-out-str
+  (time
+   (map parsley-sub-nodes (map :parsley (vals @source-cache)))))
 
 (defn cache [v]
   (if-let [x (new-cached-source v)]
@@ -59,7 +64,7 @@ Example: (get-source-from-var 'filter)"
 
 (defn get-entry-from-cache [v]
   (if-let [cached (@source-cache v)]
-    (if (and (:file cached) (in-time? cached))
+    (if (and (:file cached) (in-time? v cached))
       cached
       (cache v))
     (cache v)))
@@ -67,3 +72,7 @@ Example: (get-source-from-var 'filter)"
 (defn get-source-from-cache [v]
   (if-let [entry (get-entry-from-cache v)]
     (:source entry)))
+
+(defn foo [b] (inc b))
+
+(defn what [b] (foo b))

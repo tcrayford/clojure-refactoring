@@ -3,6 +3,7 @@
   (:import clojure-refactoring.support.source.CachedSource)
   (:use [clojure-refactoring.support core paths])
   (:use clojure.test clojure.contrib.mock)
+  (:require [clojure-refactoring.support.namespaces :as namespaces])
   (:use clojure.contrib.def)
   (:require clojure-refactoring.support.replace-test))
 
@@ -18,20 +19,23 @@
      (do ~@exprs)
      (not= @~reference intial#)))
 
+(def ns-cache-has-one-entry)
+
 (defn proxy-file [time]
   (proxy [java.io.File] ["~/"] (lastModified [] time)
          (getCanonicalPath [] "absolute-path")))
 
 (deftest in_time
   (testing "true when last modified is equal to time"
-    (expect [new-file (returns (proxy-file 0))]
-            (is (in-time? (CachedSource. 0
+    (binding [namespaces/ns-cache (atom {'clojure-refactoring.support.source-test 0})]
+            ;; Given ns-cache has one entry and it's in time
+            (is (in-time? #'a (CachedSource. 0
                                          ""
                                          "~/"
                                          {})))))
   (testing "false when last modified is greater than original time"
     (expect [new-file (returns (proxy-file 1))]
-            (is (not (in-time? (CachedSource. 0
+            (is (not (in-time? #'a (CachedSource. 0
                                               ""
                                               "~/"
                                               {})))))))
@@ -56,14 +60,15 @@
       (expect [get-source-from-var (returns "(+ 1 2)")
                new-file (returns (proxy-file 1))
                absolute-file-from-var (returns (proxy-file 1))]
-              (is (= (get-source-from-cache 'a) '(+ 1 2))))))
+              (is (= (get-source-from-cache #'a) '(+ 1 2))))))
 
   (testing "if the cache is valid, return the cached value"
-    (binding [source-cache (atom {'a (CachedSource. 0 "(+ a b)" "~/" {})})]
-      (expect [get-source-from-var (returns "(+ 1 2)")
-               file-from-var (returns "filename")
-               new-file (returns (proxy-file 0))]
-              (is (= (get-source-from-cache 'a) "(+ a b)"))))))
+    (binding [source-cache
+              (atom {#'a (CachedSource. 0 "(+ a b)" "~/" {})})]
+      (expect [get-source-from-var (times 0)
+               namespaces/force-ns-name (returns 'a)
+               namespaces/get-cached-time (returns 0)]
+              (is (= (get-source-from-cache #'a) "(+ a b)"))))))
 
 (deftest caching
   (expect [get-source-from-var (times 1 (returns "(+ 1 2)"))

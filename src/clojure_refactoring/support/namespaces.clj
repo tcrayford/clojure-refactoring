@@ -2,11 +2,11 @@
   (:use [clojure.contrib.find-namespaces :only [find-namespaces-in-dir]])
   (:use [clojure-refactoring.support core paths]))
 
-(defn find-and-load [ns]
-  (if (find-ns ns)
-    (find-ns ns)
-    (do (require ns)
-        (find-ns ns))))
+(defn find-and-load [namespace]
+  (if (find-ns namespace)
+    (find-ns namespace)
+    (do (require namespace)
+        (find-ns namespace))))
 
 (defn find-ns-in-user-dir []
   (->> (java.io.File. (System/getProperty "user.dir"))
@@ -14,37 +14,40 @@
        (map find-and-load)
        (remove nil?)))
 
-(defn does-ns-refer-to-var? [ns v]
+(defn does-ns-refer-to-var? [namespace v]
   (when v
-    (= (ns-resolve ns (.sym v)) v)))
+    (= (ns-resolve namespace (.sym v)) v)))
 
 (defonce ns-cache (atom {})) ;; a mapping of namespace-symbols to last
 ;; modified times
 
-(defn- extract-filename [ns]
+(defn- extract-filename [namespace]
   (slime-find-file
    (str
     (.replaceAll
-     (.replaceAll (name ns) "-" "_")
+     (.replaceAll (name namespace) "-" "_")
      "\\."
      "/")
     ".clj")))
 
-(defn force-ns-name [ns]
-  (if (symbol? ns)
-    ns
-    (ns-name ns)))
+(defn force-ns-name [namespace]
+  (if (symbol? namespace)
+    namespace
+    (ns-name namespace)))
 
-(defn filename-from-ns [ns]
-  (extract-filename (force-ns-name ns)))
+(defn filename-from-ns [namespace]
+  (extract-filename (force-ns-name namespace)))
 
-(defn last-modified [ns]
-  (when-let [a (filename-from-ns ns)]
+(defn last-modified [namespace]
+  (when-let [a (filename-from-ns namespace)]
     (.lastModified (java.io.File. a))))
 
-(defn ns-in-time? [ns]
-  (if-let [cached-time (@ns-cache (force-ns-name ns))]
-    (= cached-time (last-modified ns))))
+(defn get-cached-time [namespace]
+  (@ns-cache (force-ns-name namespace)))
+
+(defn ns-in-time? [namespace]
+  (if-let [cached-time get-cached-time]
+    (= cached-time (last-modified namespace))))
 
 (defn reload [ns]
   (do (swap! ns-cache assoc ns (last-modified ns))
