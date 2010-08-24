@@ -217,8 +217,7 @@
        (clojure-refactoring-call-with-string-args
         "destructuring"
         "destructure-map"
-        defn
-        var-name)))))
+        defn)))))
 
 (defun get-from-alist (key alist)
   (car (cdr (assoc key alist))))
