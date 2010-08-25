@@ -28,3 +28,7 @@
                  (keys (ns-publics 'clojure.core))))]
     (if result result
         (random-sexp-from-core))))
+
+(defn proxy-file [time]
+  (proxy [java.io.File] ["~/"] (lastModified [] time)
+         (getCanonicalPath [] "absolute-path")))

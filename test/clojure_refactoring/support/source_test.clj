@@ -1,11 +1,12 @@
 (ns clojure-refactoring.support.source-test
   (:use clojure-refactoring.support.source :reload)
-  (:import clojure-refactoring.support.source.CachedSource)
-  (:use [clojure-refactoring.support core paths])
-  (:use clojure.test clojure.contrib.mock)
-  (:require [clojure-refactoring.support.namespaces :as namespaces])
-  (:use clojure.contrib.def)
-  (:require clojure-refactoring.support.replace-test))
+  (:import clojure-refactoring.support.source.NameSpaceCacheEntry)
+  (:use clojure-refactoring.support.parsley)
+  (:use clojure-refactoring.test-helpers)
+  (:use clojure.test)
+  (:require clojure-refactoring.support.replace)
+  (:require clojure-refactoring.support.replace-test)
+  (:use clojure.contrib.mock))
 
 (use-fixtures :once #(time (%)))
 
@@ -19,65 +20,76 @@
      (do ~@exprs)
      (not= @~reference intial#)))
 
-(def ns-cache-has-one-entry)
+(use-fixtures :once #(time (%)))
 
-(defn proxy-file [time]
-  (proxy [java.io.File] ["~/"] (lastModified [] time)
-         (getCanonicalPath [] "absolute-path")))
-
-(deftest in_time
-  (testing "true when last modified is equal to time"
-    (binding [namespaces/ns-cache (atom {'clojure-refactoring.support.source-test 0})]
-            ;; Given ns-cache has one entry and it's in time
-            (is (in-time? #'a (CachedSource. 0
-                                         ""
-                                         "~/"
-                                         {})))))
-  (testing "false when last modified is greater than original time"
-    (expect [new-file (returns (proxy-file 1))]
-            (is (not (in-time? #'a (CachedSource. 0
-                                              ""
-                                              "~/"
-                                              {})))))))
-
-(deftest absolute_file_from_var
-  (expect [file-from-var (times 1 (returns "filename"))
-           new-file (times 1 (returns (proxy-file 0)))
-           slime-find-file (times 1 (returns ""))]
-          (is (absolute-file-from-var #'a))))
-
-(deftest new_cached_source
-  (testing "empty cache means we run get-source-from-var"
-   (binding [source-cache (atom {})]
-     (expect [get-source-from-var (times 1 (returns "(+ 1 2)"))
-              absolute-file-from-var (returns (proxy-file 0))]
-             (is (= (:source (new-cached-source 'a))
-                    '(+ 1 2)))))))
-
-(deftest get_source_from_cache
-  (testing "if the cache is invalid, reload the source"
-    (binding [source-cache (atom {'a (CachedSource. 0 "(+ a b)" "~/" {})})]
-      (expect [get-source-from-var (returns "(+ 1 2)")
-               new-file (returns (proxy-file 1))
-               absolute-file-from-var (returns (proxy-file 1))]
-              (is (= (get-source-from-cache #'a) '(+ 1 2))))))
-
-  (testing "if the cache is valid, return the cached value"
-    (binding [source-cache
-              (atom {#'a (CachedSource. 0 "(+ a b)" "~/" {})})]
-      (expect [get-source-from-var (times 0)
-               namespaces/force-ns-name (returns 'a)
-               namespaces/get-cached-time (returns 0)]
-              (is (= (get-source-from-cache #'a) "(+ a b)"))))))
+(def a nil) ;; used to test does-ns-refer-to-var? below.
 
 (deftest caching
-  (expect [get-source-from-var (times 1 (returns "(+ 1 2)"))
-           absolute-file-from-var (times 1 (returns (proxy-file 0)))]
-          (cache #'a))
-  (expect [get-source-from-var (returns "(+ 1 2)")
-           absolute-file-from-var (returns (proxy-file 0))]
-          (binding [source-cache (atom {})]
-            (is (modified? source-cache :during (cache #'a)))))
-  (expect [get-source-from-var (times 1 (returns "(+ 1 2)"))
-           absolute-file-from-var (times 1 (returns (proxy-file 0)))]
-          (is (cache-source #'a))))
+  (testing "cache with an entry in time"
+   (binding [ns-cache (atom {'a (NameSpaceCacheEntry. 0
+                                                      (parse "(+ 1 2)")
+                                                      ["a"])})]
+     (expect [last-modified (times 1 (returns 0))
+              filename-from-ns (returns "")
+              slurp (returns "")
+              new-ns-entry (times 0)]
+             (parsley-from-cache 'a))))
+
+  (testing "cache with an entry not in time"
+   (binding [ns-cache (atom {'a (NameSpaceCacheEntry. 0
+                                                      (parse "(+ 1 2)")
+                                                      ["a"])})]
+     (expect [last-modified (times 1 (returns 1))
+              filename-from-ns (returns "")
+              slurp (returns "")
+              new-ns-entry (times 1 (returns nil))]
+             (entry-from-ns-cache 'a))))
+  (testing "empty cache"
+    (binding [ns-cache (atom {})]
+      (expect [filename-from-ns (returns "")
+               slurp (returns "")
+               new-ns-entry (times 1)]
+              (entry-from-ns-cache 'a)))))
+
+(deftest parsley_extract_symbols
+  (is (= (extract-symbols (parse "(+ 1 2)")) #{"+"})))
+
+(deftest filename_from_ns
+  (let [path "clojure_refactoring/support/namespaces.clj"]
+    (expect [clojure-refactoring.support.paths/slime-find-file
+             (returns path
+                      (has-args [#(= path %)] (times 1)))]
+            (is (= (filename-from-ns 'clojure-refactoring.support.namespaces)
+                   path)))))
+
+(deftest all_ns_that_refer_to
+  (testing "it requires all of them"
+    (expect [find-ns-in-user-dir (returns '[a])
+             require-and-return (times 1 (returns 'a))
+             does-ns-refer-to-var? (returns true)
+             clojure-refactoring.support.paths/slime-find-file (returns "")]
+            (doall (all-ns-that-refer-to 'b))))
+  (testing "it is empty when there are no namespaces that resolve the var"
+    (expect [find-ns-in-user-dir (returns '[a])
+             require-and-return (returns 'a)
+             does-ns-refer-to-var? (returns false)]
+            (is (empty? (all-ns-that-refer-to 'a))))))
+
+(deftest does_ns_refer_to_var
+  (let [this-ns (find-ns 'clojure-refactoring.support.source-test)]
+    (is (does-ns-refer-to-var? this-ns #'a))
+    (testing "same named var in another ns"
+      (is (not (does-ns-refer-to-var?
+                this-ns
+                (find-var
+                 'clojure-refactoring.support.replace-test/a)))))
+    (testing "var named something that doesn't exist in the current ns"
+      (is (not (does-ns-refer-to-var?
+                this-ns
+                (find-var
+                 'clojure-refactoring.support.replace/line-from-var)))))
+    (testing "non existent var"
+      (is (not (does-ns-refer-to-var?
+                this-ns
+                (find-var
+                 'clojure-refactoring.support.source-test/boo)))))))

@@ -1,7 +1,7 @@
 (ns clojure-refactoring.support.replace-test
   (:use clojure-refactoring.support.replace :reload)
   (:use [clojure-refactoring.support source parsley
-         namespaces paths vars])
+         paths])
   (:use clojure.test)
   (:use clojure.contrib.mock))
 
@@ -21,29 +21,29 @@
 (defn replacement-map-for-tests []
   (build-replacement-map #'a replace-test-fn))
 
-(deftest build_replacement_map
-  (testing "it has the right attributes"
-    (expect [get-entry-from-cache (times 1 (returns (parse "(+ a 1)")))]
-            (let [m (replacement-map-for-tests)]
-              (is (:file m))
-              (is (:var-name m))
-              (is (:line m))
-              (is (:new-source m)))))
-  (testing "populates the attributes correctly"
-    (expect [get-entry-from-cache (times 1 (returns (parse "(+ a 1)")))]
-            (is (= (:new-source (replacement-map-for-tests)) "a")))
-    (expect [get-entry-from-cache (returns (parse "(+ a 1)"))
-             slime-file-from-var (times 1 (returns "foo"))]
-            (is (= (:file (replacement-map-for-tests)) "foo")))
-    (expect [get-entry-from-cache
-             (returns (parse "(+ a 1)"))
-             line-from-var
-             (returns 1)]
-            (is (= (:line (replacement-map-for-tests)) 1)))))
+;; (deftest build_replacement_map
+;;   (testing "it has the right attributes"
+;;     (expect [get-entry-from-cache (times 1 (returns (parse "(+ a 1)")))]
+;;             (let [m (replacement-map-for-tests)]
+;;               (is (:file m))
+;;               (is (:var-name m))
+;;               (is (:line m))
+;;               (is (:new-source m)))))
+;;   (testing "populates the attributes correctly"
+;;     (expect [get-entry-from-cache (times 1 (returns (parse "(+ a 1)")))]
+;;             (is (= (:new-source (replacement-map-for-tests)) "a")))
+;;     (expect [get-entry-from-cache (returns (parse "(+ a 1)"))
+;;              slime-file-from-var (times 1 (returns "foo"))]
+;;             (is (= (:file (replacement-map-for-tests)) "foo")))
+;;     (expect [get-entry-from-cache
+;;              (returns (parse "(+ a 1)"))
+;;              line-from-var
+;;              (returns 1)]
+;;             (is (= (:line (replacement-map-for-tests)) 1)))))
 
-(deftest replace_callers
-  (expect
-   [vars-who-call (returns [#'a])
-    map-to-alist (times 1 (returns :replacement-alist))
-    build-replacement-map (times 1 (returns :replacement-map))]
-   (is (= (replace-callers #'a replace-test-fn) [:replacement-alist]))))
+;; (deftest replace_callers
+;;   (expect
+;;    [vars-who-call (returns [#'a])
+;;     map-to-alist (times 1 (returns :replacement-alist))
+;;     build-replacement-map (times 1 (returns :replacement-map))]
+;;    (is (= (replace-callers #'a replace-test-fn) [:replacement-alist]))))

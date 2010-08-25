@@ -2,17 +2,23 @@
   (:use clojure-refactoring.support.parsley :reload)
   (:use clojure-refactoring.test-helpers)
   (:use clojure.test)
-  (:use clojure-refactoring.support.core)
+  (:use [clojure-refactoring.support core source])
   (:require [clojurecheck.core :as cc]))
 
 (use-fixtures :once #(time (%)))
-
 
 (deftest parsley_to_string
   (cc/property "parsley to string is an inverse of parsing"
                [s random-sexp-from-core]
                (is (= (parsley-to-string (parse s))
-                      s))))
+                      s)))
+  (testing "parsley-to-string once called on a file gives
+               the same result as reading that file"
+    (for [namespace (find-ns-in-user-dir)]
+      (let [slurped (slurp
+                     (filename-from-ns namespace))]
+        (is (= (parsley-to-string (parse slurped))
+               slurped))))))
 
 (defn parsley-rec-contains [obj ast]
   "Works out if a parsley-ast contains a sexp object"

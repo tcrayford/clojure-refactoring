@@ -1,6 +1,6 @@
 (ns clojure-refactoring.support.replace
   (:use [clojure-refactoring.support
-         source core paths vars])
+         source core paths])
   (:use [clojure-refactoring.support.parsley
          :only [parsley-to-string]]))
 
@@ -13,7 +13,7 @@
 (defn build-replacement-map [v f]
   "Builds a replacement for a var (to be sent to emacs) by calling f on the parsley tree
 from that var."
-  {:file (slime-file-from-var v)
+  #_{:file (slime-file-from-var v)
    :var-name (.sym v)
    :line (line-from-var v)
    :new-source (parsley-to-string
@@ -21,8 +21,8 @@ from that var."
 
 (defn replace-vars [vars f]
   "Replaces vars by calling f on each one."
-  (map #(map-to-alist (build-replacement-map % f)) vars))
+  #_(map #(map-to-alist (build-replacement-map % f)) vars))
 
 (defn replace-callers [v f]
   "Replaces all callers of a var by calling a function on them."
-  (replace-vars (vars-who-call v) f))
+  #_(replace-vars (vars-who-call v) f))
