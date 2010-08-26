@@ -33,7 +33,8 @@
   (= (count seq) n))
 
 (def binding-forms
-     #{'let 'fn 'binding 'for 'doseq 'dotimes 'defn 'loop 'defmacro})
+     #{'let 'fn 'binding 'for 'doseq 'dotimes 'defn 'loop 'defmacro
+       'if-let 'when-let})
 
 (defn binding-node? [[node-type]]
   "Checks if a node is a binding node"

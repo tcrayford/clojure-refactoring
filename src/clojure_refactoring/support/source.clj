@@ -46,12 +46,9 @@
 (defonce new-namespace-cache (atom {})) ;; a mapping of namespace
 ;; names to namespace cache entries
 
-(defrecord NameSpaceCacheEntry [time parsley symbols])
+(defrecord NameSpaceCacheEntry [time parsley])
 ;; Time is the time this cache entry was created, parsley is the
-;; result of calling parsley after slurping the fil, symbols is a set
-;; of parsley symbols
-
-(defn parse-from-ns [namespace-name])
+;; result of calling parsley after slurping the file
 
 (defn parsley-symbol? [ast]
   (and (map? ast)
@@ -70,16 +67,18 @@
     (let [slurped (slurp f)
           parsed (parse slurped)]
       (NameSpaceCacheEntry. (.lastModified (java.io.File. f))
-                            parsed
-                            (extract-symbols parsed)))))
+                            parsed))))
+
+(defn cache-entry-in-time? [namespace-name cached]
+  (= (last-modified namespace-name) (:time cached)))
 
 (defn ns-in-time? [namespace-name]
   (if-let [cached (@ns-cache namespace-name)]
-   (= (last-modified namespace-name) (:time cached))))
+   (cache-entry-in-time? namespace-name cached)))
 
 (defn entry-from-ns-cache [namespace-name]
   (if-let [cached (@ns-cache namespace-name)]
-    (if (= (last-modified namespace-name) (:time cached))
+    (if (cache-entry-in-time? namespace-name cached)
       cached
       (new-ns-entry namespace-name))
     (new-ns-entry namespace-name)))

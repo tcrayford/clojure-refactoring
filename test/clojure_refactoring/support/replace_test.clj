@@ -36,7 +36,7 @@
 
 (deftest replace_callers
   (expect
-   [namespaces-who-refer-to (returns [a])
+   [namespaces-who-refer-to (returns ['a])
     map-to-alist (times 1 (returns :replacement-alist))
     build-replacement-map (times 1 (returns :replacement-map))]
-   (is (= (replace-callers a replace-test-fn) [:replacement-alist]))))
+   (is (= (replace-callers 'a replace-test-fn) [:replacement-alist]))))

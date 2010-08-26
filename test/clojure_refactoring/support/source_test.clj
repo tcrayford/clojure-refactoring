@@ -27,18 +27,16 @@
 (deftest caching
   (testing "cache with an entry in time"
    (binding [ns-cache (atom {'a (NameSpaceCacheEntry. 0
-                                                      (parse "(+ 1 2)")
-                                                      ["a"])})]
-     (expect [last-modified (times 1 (returns 0))
+                                                      (parse "(+ 1 2)"))})]
+     (expect [cache-entry-in-time? (times 1 (returns true))
               filename-from-ns (returns "")
               new-ns-entry (times 0)]
              (parsley-from-cache 'a))))
 
   (testing "cache with an entry not in time"
    (binding [ns-cache (atom {'a (NameSpaceCacheEntry. 0
-                                                      (parse "(+ 1 2)")
-                                                      ["a"])})]
-     (expect [last-modified (times 1 (returns 1))
+                                                      (parse "(+ 1 2)"))})]
+     (expect [cache-entry-in-time? (times 1 (returns false))
               filename-from-ns (returns "")
               slurp (returns "")
               new-ns-entry (times 1 (returns nil))]
@@ -67,12 +65,12 @@
              require-and-return (times 1 (returns 'a))
              does-ns-refer-to-var? (returns true)
              clojure-refactoring.support.paths/slime-find-file (returns "")]
-            (doall (all-ns-that-refer-to 'b))))
+            (doall (namespaces-who-refer-to 'b))))
   (testing "it is empty when there are no namespaces that resolve the var"
     (expect [find-ns-in-user-dir (returns '[a])
              require-and-return (returns 'a)
              does-ns-refer-to-var? (returns false)]
-            (is (empty? (all-ns-that-refer-to 'a))))))
+            (is (empty? (namespaces-who-refer-to 'a))))))
 
 (deftest does_ns_refer_to_var
   (let [this-ns (find-ns 'clojure-refactoring.support.source-test)]
