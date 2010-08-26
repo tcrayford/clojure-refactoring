@@ -10,8 +10,6 @@
 (defn replace-test-fn [top-level-node]
   (parse "a"))
 
-(def a nil) ;; needed so we can use the var below
-
 (deftest map_to_alist
   (testing "empty map gives an empty alist"
     (is (= (map-to-alist {}) '())))
@@ -19,31 +17,26 @@
     (is (= (map-to-alist {:a 1}) '((:a 1))))))
 
 (defn replacement-map-for-tests []
-  (build-replacement-map #'a replace-test-fn))
+  (build-replacement-map 'a replace-test-fn))
 
-;; (deftest build_replacement_map
-;;   (testing "it has the right attributes"
-;;     (expect [get-entry-from-cache (times 1 (returns (parse "(+ a 1)")))]
-;;             (let [m (replacement-map-for-tests)]
-;;               (is (:file m))
-;;               (is (:var-name m))
-;;               (is (:line m))
-;;               (is (:new-source m)))))
-;;   (testing "populates the attributes correctly"
-;;     (expect [get-entry-from-cache (times 1 (returns (parse "(+ a 1)")))]
-;;             (is (= (:new-source (replacement-map-for-tests)) "a")))
-;;     (expect [get-entry-from-cache (returns (parse "(+ a 1)"))
-;;              slime-file-from-var (times 1 (returns "foo"))]
-;;             (is (= (:file (replacement-map-for-tests)) "foo")))
-;;     (expect [get-entry-from-cache
-;;              (returns (parse "(+ a 1)"))
-;;              line-from-var
-;;              (returns 1)]
-;;             (is (= (:line (replacement-map-for-tests)) 1)))))
+(deftest build_replacement_map
+  (testing "it has the right attributes"
+    (expect [parsley-from-cache (returns (parse "(+ a 1)"))
+             filename-from-ns  (returns "")]
+            (let [m (replacement-map-for-tests)]
+              (is (:file m))
+              (is (:new-source m)))))
+  (testing "populates the attributes correctly"
+      (expect [parsley-from-cache (times 1 (returns (parse "(+ a 1)")))
+               filename-from-ns (returns "")]
+              (is (= (:new-source (replacement-map-for-tests)) "a")))
+      (expect [parsley-from-cache (returns (parse "(+ a 1)"))
+               filename-from-ns (returns "foo")]
+              (is (= (:file (replacement-map-for-tests)) "foo")))))
 
-;; (deftest replace_callers
-;;   (expect
-;;    [vars-who-call (returns [#'a])
-;;     map-to-alist (times 1 (returns :replacement-alist))
-;;     build-replacement-map (times 1 (returns :replacement-map))]
-;;    (is (= (replace-callers #'a replace-test-fn) [:replacement-alist]))))
+(deftest replace_callers
+  (expect
+   [namespaces-who-refer-to (returns [a])
+    map-to-alist (times 1 (returns :replacement-alist))
+    build-replacement-map (times 1 (returns :replacement-map))]
+   (is (= (replace-callers a replace-test-fn) [:replacement-alist]))))

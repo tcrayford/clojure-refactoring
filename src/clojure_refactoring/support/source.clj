@@ -87,8 +87,11 @@
 (defn parsley-from-cache [namespace-name]
   (:parsley entry-from-ns-cache))
 
+(defn add-to-ns-cache! [ns]
+  (swap! ns-cache assoc (force-ns-name ns) (new-ns-entry ns)))
+
 (defn reload [ns]
-  (do (swap! ns-cache assoc (force-ns-name ns) (new-ns-entry ns))
+  (do (add-to-ns-cache! ns)
       (require ns :reload)
       ns))
 
@@ -102,7 +105,7 @@
   (pmap #(require-and-return %)
         (find-ns-in-user-dir)))
 
-(defn all-ns-that-refer-to [v]
+(defn namespaces-who-refer-to [v]
   (->> (find-ns-in-user-dir)
        (map require-and-return)
        (filter #(does-ns-refer-to-var? % v))))

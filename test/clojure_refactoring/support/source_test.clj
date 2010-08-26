@@ -31,7 +31,6 @@
                                                       ["a"])})]
      (expect [last-modified (times 1 (returns 0))
               filename-from-ns (returns "")
-              slurp (returns "")
               new-ns-entry (times 0)]
              (parsley-from-cache 'a))))
 

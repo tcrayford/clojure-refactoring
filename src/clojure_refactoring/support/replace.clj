@@ -10,19 +10,16 @@
 
 (def line-from-var (comp :line meta))
 
-(defn build-replacement-map [v f]
-  "Builds a replacement for a var (to be sent to emacs) by calling f on the parsley tree
-from that var."
-  #_{:file (slime-file-from-var v)
-   :var-name (.sym v)
-   :line (line-from-var v)
+(defn build-replacement-map [ns f]
+  "Builds a replacement map for emacs for a given namespace"
+  {:file (filename-from-ns ns)
    :new-source (parsley-to-string
-                (f (:parsley (get-entry-from-cache v))))})
+                (f (:parsley (parsley-from-cache ns))))})
 
-(defn replace-vars [vars f]
+(defn replace-namespaces [namespaces f]
   "Replaces vars by calling f on each one."
-  #_(map #(map-to-alist (build-replacement-map % f)) vars))
+  (map #(map-to-alist (build-replacement-map % f)) namespaces))
 
 (defn replace-callers [v f]
   "Replaces all callers of a var by calling a function on them."
-  #_(replace-vars (vars-who-call v) f))
+  (replace-namespaces (namespaces-who-refer-to v) f))
