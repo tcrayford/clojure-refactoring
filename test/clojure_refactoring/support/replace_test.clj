@@ -3,6 +3,7 @@
   (:use [clojure-refactoring.support source parsley
          paths])
   (:use clojure.test)
+  (:use clojure-refactoring.test-helpers)
   (:use clojure.contrib.mock))
 
 (use-fixtures :once #(time (%)))
@@ -40,3 +41,11 @@
     map-to-alist (times 1 (returns :replacement-alist))
     build-replacement-map (times 1 (returns :replacement-map))]
    (is (= (replace-callers 'a replace-test-fn) [:replacement-alist]))))
+
+(deftest replace_namespaces
+  (doseq [namespace (find-ns-in-user-dir)]
+    (let [source (slurp (filename-from-ns namespace))]
+      (is (= source
+             (:new-source (build-replacement-map namespace identity)))))))
+
+

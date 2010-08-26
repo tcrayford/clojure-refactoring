@@ -84,7 +84,7 @@
     (new-ns-entry namespace-name)))
 
 (defn parsley-from-cache [namespace-name]
-  (:parsley entry-from-ns-cache))
+  (:parsley (entry-from-ns-cache namespace-name)))
 
 (defn add-to-ns-cache! [ns]
   (swap! ns-cache assoc (force-ns-name ns) (new-ns-entry ns)))

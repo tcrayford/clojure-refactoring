@@ -14,7 +14,7 @@
   "Builds a replacement map for emacs for a given namespace"
   {:file (filename-from-ns ns)
    :new-source (parsley-to-string
-                (f (:parsley (parsley-from-cache ns))))})
+                (map f (parsley-from-cache ns)))})
 
 (defn replace-namespaces [namespaces f]
   "Replaces vars by calling f on each one."
