@@ -43,9 +43,6 @@
 (defonce ns-cache (atom {})) ;; a mapping of namespace-symbols to
 ;; cache entries
 
-(defonce new-namespace-cache (atom {})) ;; a mapping of namespace
-;; names to namespace cache entries
-
 (defrecord NameSpaceCacheEntry [time parsley])
 ;; Time is the time this cache entry was created, parsley is the
 ;; result of calling parsley after slurping the file
