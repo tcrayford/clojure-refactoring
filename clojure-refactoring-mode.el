@@ -229,8 +229,7 @@
           (find-file (get-from-alist :file replace)))
         (goto-char (point-min))
         (erase-buffer)
-        (insert (get-from-alist :new-source replace))
-        (save-current-buffer))))
+        (insert (get-from-alist :new-source replace)))))
 
 (defun clojure-refactoring-process-global-replacements (replacements)
   (save-window-excursion
