@@ -163,14 +163,13 @@
           new-name))))))
 
 (defun clojure-refactoring-reload-all-user-ns ()
-  (clojure-refactoring-eval-sync "(require 'clojure-refactoring.support.namespaces)(clojure-refactoring.support.namespaces/reload-all-user-ns)"))
+  (clojure-refactoring-eval-sync "(require 'clojure-refactoring.support.source)(clojure-refactoring.support.source/reload-all-user-ns)"))
 
 (defun clojure-refactoring-global-rename ()
   (interactive)
   (let ((old-name (clojure-refactoring-read-symbol-at-point))
         (new-name (read-from-minibuffer "New name: ")))
     (save-some-buffers 't)
-    (clojure-refactoring-reload-all-user-ns)
     (let ((expr (format "(require 'clojure-refactoring.rename) (ns clojure-refactoring.rename) (global-rename '%s '%s '%s)"
                         (slime-current-package) old-name new-name)))
       (clojure-refactoring-process-global-replacements
@@ -229,9 +228,7 @@
             nil
           (find-file (get-from-alist :file replace)))
         (goto-char (point-min))
-        (forward-line (1- (get-from-alist :line replace)))
-        (beginning-of-line)
-        (forward-kill-sexp)
+        (erase-buffer)
         (insert (get-from-alist :new-source replace))
         (save-current-buffer))))
 

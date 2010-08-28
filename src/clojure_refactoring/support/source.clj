@@ -2,8 +2,6 @@
   (:use [clojure.contrib.find-namespaces :only [find-namespaces-in-dir]])
   (:use [clojure-refactoring.support core paths parsley]))
 
-(declare ns-cache)
-
 (defn find-and-load [namespace]
   (if (find-ns namespace)
     (find-ns namespace)
@@ -14,10 +12,6 @@
   (->> (java.io.File. (System/getProperty "user.dir"))
        find-namespaces-in-dir
        (map find-and-load)))
-
-(defn does-ns-refer-to-var? [namespace v]
-  (when v
-    (= (ns-resolve namespace (.sym v)) v)))
 
 (defn- extract-filename [namespace]
   (slime-find-file
@@ -71,7 +65,7 @@
 
 (defn ns-in-time? [namespace-name]
   (if-let [cached (@ns-cache namespace-name)]
-   (cache-entry-in-time? namespace-name cached)))
+    (cache-entry-in-time? namespace-name cached)))
 
 (defn entry-from-ns-cache [namespace-name]
   (if-let [cached (@ns-cache namespace-name)]
@@ -80,8 +74,8 @@
       (new-ns-entry namespace-name))
     (new-ns-entry namespace-name)))
 
-(defn parsley-from-cache [namespace-name]
-  (:parsley (entry-from-ns-cache namespace-name)))
+(def parsley-from-cache
+     (comp :parsley entry-from-ns-cache))
 
 (defn add-to-ns-cache! [ns]
   (swap! ns-cache assoc (force-ns-name ns) (new-ns-entry ns)))
@@ -92,16 +86,22 @@
       ns))
 
 (defn require-and-return [ns]
-  (do
-    (if (ns-in-time? ns)
-      (reload (ns-name ns)))
-    ns))
+  (do (when-not (ns-in-time? ns)
+        (reload (ns-name ns)))
+      ns))
 
 (defn reload-all-user-ns []
   (pmap #(require-and-return %)
         (find-ns-in-user-dir)))
 
+(defn does-ns-refer-to-var? [namespace v]
+  (when v
+    (and (= (ns-resolve namespace (.sym v)) v)
+         (->> (parsley-from-cache namespace)
+              (parsley-sub-nodes)
+              (some #{(ast-symbol (.sym v))})))))
+
 (defn namespaces-who-refer-to [v]
   (->> (find-ns-in-user-dir)
-       (map require-and-return)
+       (pmap require-and-return)
        (filter #(does-ns-refer-to-var? % v))))
