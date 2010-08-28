@@ -96,10 +96,7 @@
 
 (defn does-ns-refer-to-var? [namespace v]
   (when v
-    (and (= (ns-resolve namespace (.sym v)) v)
-         (->> (parsley-from-cache namespace)
-              (parsley-sub-nodes)
-              (some #{(ast-symbol (.sym v))})))))
+    (= (ns-resolve namespace (.sym v)) v)))
 
 (defn namespaces-who-refer-to [v]
   (->> (find-ns-in-user-dir)

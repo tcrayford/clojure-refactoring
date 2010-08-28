@@ -10,13 +10,13 @@
 
 (deftest renames-basic-function-call
   (is (= (rename "(defn a [b] (+ b 1))" "a" "c")
-         "(defn c [b] (+ b 1))\n"))
+         "(defn c [b] (+ b 1))"))
   (is (= (rename "(defn c [d] (+ d 2))" "c" "z")
-         "(defn z [d] (+ d 2))\n")))
+         "(defn z [d] (+ d 2))")))
 
 (deftest renames-recursive-function-call
   (is (= (rename "(defn f [n] (if (<= n 1) 1 (f (dec n))))" "f" "fact")
-         "(defn fact [n] (if (<= n 1) 1 (fact (dec n))))\n")))
+         "(defn fact [n] (if (<= n 1) 1 (fact (dec n))))")))
 
 (deftest renaming_fn
   (testing "it replaces occurences of the var name"

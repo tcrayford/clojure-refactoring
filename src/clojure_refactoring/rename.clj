@@ -6,11 +6,11 @@
   (let [ast (parse node)
         old (symbol old-name)
         new (symbol new-name)]
-    (str (parsley-to-string
-          (replace-sexp-in-ast-node
-           old
-           new
-           ast)) "\n")))
+    (parsley-to-string
+     (replace-symbol-in-ast-node
+      old
+      new
+      ast))))
 
 (defn renaming-fn [old-var new-sym]
   "Returns a function for renaming nodes"

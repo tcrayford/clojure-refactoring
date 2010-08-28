@@ -12,13 +12,17 @@
 
 (defn build-replacement-map [ns f]
   "Builds a replacement map for emacs for a given namespace"
-  {:file (filename-from-ns ns)
-   :new-source (parsley-to-string
-                (map f (parsley-from-cache ns)))})
+  (let [replacement (map f (parsley-from-cache ns))]
+    (if (= (parsley-from-cache ns) replacement)
+      nil
+     {:file (filename-from-ns ns)
+      :new-source (parsley-to-string
+                   replacement)})))
 
 (defn replace-namespaces [namespaces f]
   "Replaces vars by calling f on each one."
-  (map #(map-to-alist (build-replacement-map % f)) namespaces))
+  (remove empty?
+          (map #(map-to-alist (build-replacement-map % f)) namespaces)))
 
 (defn replace-callers [v f]
   "Replaces all callers of a var by calling a function on them."
