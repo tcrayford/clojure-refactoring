@@ -41,18 +41,6 @@
 ;; Time is the time this cache entry was created, parsley is the
 ;; result of calling parsley after slurping the file
 
-(defn parsley-symbol? [ast]
-  (and (map? ast)
-       (= (:tag ast) :atom)
-       (symbol?
-        (read-string (apply str (:content ast))))))
-
-(defn extract-symbols [parsed]
-  (->> (parsley-sub-nodes parsed)
-       (filter parsley-symbol?)
-       (map (comp first :content))
-       (into #{})))
-
 (defn new-ns-entry [namespace]
   (when-let [f (filename-from-ns namespace)]
     (let [slurped (slurp f)

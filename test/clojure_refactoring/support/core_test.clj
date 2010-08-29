@@ -14,7 +14,7 @@
 (use-fixtures :once fixture #(time (%)))
 
 (deftest fn_args
-  (is (= (fn-args test-fn-node) ['msg])))
+  (is (= (bindings test-fn-node) ['msg])))
 
 (deftest sub_nodes
   (is (= (sub-nodes '(defn a [b] (+ b 1)))
@@ -28,8 +28,8 @@
   (is (defn? '(defn foo [] 1))))
 
 (deftest binding_form
-  (is (= (extract-binding-form '(let [b 2] b)) '[b 2]))
-  (is (= (extract-binding-form '(defn foo [a] a)) '[a])))
+  (is (= (bindings '(let [b 2] b)) '[b 2]))
+  (is (= (bindings '(defn foo [a] a)) '[a])))
 
 (deftest unique_vec
   (is (= (unique-vec [1 2 3 1 2 3]) [1 2 3])))

@@ -48,9 +48,6 @@
                new-ns-entry (times 1)]
               (entry-from-ns-cache 'a)))))
 
-(deftest parsley_extract_symbols
-  (is (= (extract-symbols (parse "(+ 1 2)")) #{"+"})))
-
 (deftest filename_from_ns
   (let [path "clojure_refactoring/support/namespaces.clj"]
     (expect [clojure-refactoring.support.paths/slime-find-file

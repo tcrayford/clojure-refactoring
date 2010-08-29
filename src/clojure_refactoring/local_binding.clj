@@ -12,7 +12,7 @@ TODO: doesn't work for multiple arity functions"
   (conj binding-node var-name value))
 
 (defn is-node-the-binding-form? [top-level node]
-  (= node (extract-binding-form top-level)))
+  (= node (bindings top-level)))
 
 (defn modify-existing-let-block [form value var-name]
   (postwalk

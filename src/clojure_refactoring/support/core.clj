@@ -44,13 +44,9 @@
   "Returns every other item of coll"
   (take-nth 2 coll))
 
-(defn fn-args [node]
+(defn bindings [node]
   "Returns the function arguments from a top-level defn node"
   (find-first vector? node))
-
-(defn extract-binding-form [node]
-  "Returns a vector of bindings iff the node is a binding node. Won't work with multiple arity defns"
-  (fn-args node))
 
 (defn unique-vec [coll]
   "Strips all duplicates from coll and forces it into a vector"
@@ -59,8 +55,8 @@
 (defn bound-symbols [node]
   "Returns a vector of the bound symbols inside node"
   (if (defn? node)
-    (extract-binding-form node)
-    (evens (extract-binding-form node))))
+    (bindings node)
+    (evens (bindings node))))
 
 (defn rec-matches? [f coll]
   "True if the result of applying f on any sub-element of coll is true"

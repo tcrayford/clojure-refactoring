@@ -18,7 +18,7 @@ TODO: doesn't handle destructuring properly"
   "Returns a function call to a function
 using the names in the function's arguments.
 TODO: Won't work for multiple arity functions"
-  (conj (for [arg (fn-args fn-node)] arg) (fn-name fn-node)))
+  (conj (for [arg (bindings fn-node)] arg) (fn-name fn-node)))
 
 (defn arg-occurences [f-node extracted-node]
   "Finds the bindings from f-node that are also in the extracted node.

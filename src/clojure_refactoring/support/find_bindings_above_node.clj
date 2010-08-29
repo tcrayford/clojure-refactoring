@@ -36,7 +36,7 @@ contains expr"
   "Munges anonymous fn args out of a node. Always returns the same
 value for a given node"
   (replace-in-sexp
-   (fn-args node)
+   (bindings node)
    (map symbol-from-num (iterate inc 1))
    node))
 

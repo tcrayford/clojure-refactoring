@@ -50,6 +50,11 @@
 (defn ast-symbol [sym]
   {:tag :atom, :content (list (name sym))})
 
+(def parsley-empty-map {:tag :map :content (list "{" "}") })
+
+(def parsley-whitespace
+     '{:tag :whitespace :content (" ")})
+
 (def composite-tag? (complement
                      #{:atom :regex :space :var :char :string}))
 
@@ -88,38 +93,6 @@
 (defn parsley-to-string [ast]
   (apply str (filter string? (parsley-sub-nodes ast))))
 
-(defn- gensym? [s]
-  (and (symbol? s)
-       (or (.contains (name s) "__auto__")
-           (.contains (name s) "p__"))))
-
-(defn- munged-gensym [n]
-  (symbol (str "gensym-" n)))
-
-(defn- munge-gensyms [sexp]
-  (replace-in-sexp
-   (filter gensym? (sub-nodes sexp))
-   (map munged-gensym (iterate inc 0))
-   sexp))
-
-(def munge-node ;;To replace stuff that read-string changes
-     (comp munge-gensyms munge-anonymous-fns maybe-replace-regex))
-
-(defn- replace-symbol [node old new]
-  (if (= node (ast-symbol old))
-    (ast-symbol new)
-    node))
-
-(defn replace-symbol-in-ast-node [old new ast]
-  (parsley-walk
-   #(replace-symbol % old new)
-   ast))
-
-(def parsley-empty-map {:tag :map :content (list "{" "}") })
-
-(def parsley-whitespace
-     '{:tag :whitespace :content (" ")})
-
 (defn parsley-tree-replace [old new ast]
   (parsley-walk
    (fn [node]
@@ -127,6 +100,9 @@
        new
        node))
    ast))
+
+(defn replace-symbol-in-ast-node [old new ast]
+  (parsley-tree-replace (ast-symbol old) (ast-symbol new) ast))
 
 (defn parsley-get-first-node [ast]
   (if (map? ast) ast (first ast)))
