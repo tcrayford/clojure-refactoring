@@ -2,8 +2,7 @@
   (:use clojure-refactoring.support.parsley :reload)
   (:use clojure-refactoring.test-helpers)
   (:use clojure.test)
-  (:use [clojure-refactoring.support core source])
-  (:require [clojurecheck.core :as cc]))
+  (:use [clojure-refactoring.support core source paths]))
 
 (use-fixtures :once #(time (%)))
 

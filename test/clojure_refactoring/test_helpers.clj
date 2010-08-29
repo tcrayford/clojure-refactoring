@@ -1,6 +1,7 @@
 (ns clojure-refactoring.test-helpers
   (:use clojure.test)
   (:use [clojure.contrib.def :only [defalias]])
+  (:use clojure.contrib.mock)
   (:require [clojurecheck.core :as cc])
   (:require [clojure.contrib.repl-utils :as repl-utils]))
 
@@ -36,3 +37,11 @@
   `(let [intial# @~reference]
      (do ~@exprs)
      (not= @~reference intial#)))
+
+(defmacro fact [desc test provided]
+  `(expect ~(second provided)
+           ~test))
+
+(defalias know fact)
+
+(defalias with binding)

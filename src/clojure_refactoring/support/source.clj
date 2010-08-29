@@ -13,23 +13,6 @@
        find-namespaces-in-dir
        (map find-and-load)))
 
-(defn- extract-filename [namespace]
-  (slime-find-file
-   (str
-    (.replaceAll
-     (.replaceAll (name namespace) "-" "_")
-     "\\."
-     "/")
-    ".clj")))
-
-(defn force-ns-name [namespace]
-  (if (symbol? namespace)
-    namespace
-    (ns-name namespace)))
-
-(defn filename-from-ns [namespace]
-  (extract-filename (force-ns-name namespace)))
-
 (defn last-modified [namespace]
   (when-let [a (filename-from-ns namespace)]
     (.lastModified (java.io.File. a))))
@@ -55,7 +38,7 @@
   (if-let [cached (@ns-cache namespace-name)]
     (cache-entry-in-time? namespace-name cached)))
 
-(defn entry-from-ns-cache [namespace-name]
+(defn entry-from-cache [namespace-name]
   (if-let [cached (@ns-cache namespace-name)]
     (if (cache-entry-in-time? namespace-name cached)
       cached
@@ -63,7 +46,7 @@
     (new-ns-entry namespace-name)))
 
 (def parsley-from-cache
-     (comp :parsley entry-from-ns-cache))
+     (comp :parsley entry-from-cache))
 
 (defn add-to-ns-cache! [ns]
   (swap! ns-cache assoc (force-ns-name ns) (new-ns-entry ns)))

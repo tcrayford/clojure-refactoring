@@ -21,7 +21,21 @@
     file
     (slime-find-resource file)))
 
-(def file-from-var (comp :file meta))
+(defn extract-filename [namespace]
+  (str
+   (.replaceAll
+    (.replaceAll (name namespace) "-" "_")
+    "\\."
+    "/")
+   ".clj"))
 
-(defn slime-file-from-var [v]
-  (slime-find-file (file-from-var v)))
+(defn force-ns-name [namespace]
+  (if (symbol? namespace)
+    namespace
+    (ns-name namespace)))
+
+(defn filename-from-ns [namespace]
+  (-> namespace
+      force-ns-name
+      extract-filename
+      slime-find-file))
