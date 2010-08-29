@@ -4,19 +4,6 @@
         [clojure-refactoring.support core parsley])
   (:use [clojure.contrib.seq-utils :only [find-first]]))
 
-(defn parsley-keyword? [ast]
-  (and (= (:tag ast) :atom)
-       (= (first (apply str (:content ast))) \:)))
-
-(defn ignored-node? [ast]
-  (or (string? ast)
-      (= (:tag ast) :whitespace)
-      (= (:tag ast) :comment)))
-
-;;TODO: needs a better name
-(defn relevant-content [ast]
-  (remove ignored-node? (:content ast)))
-
 (defn parsley-map-lookup? [ast]
   (let [content (relevant-content ast)]
     (and (= (:tag ast) :list)

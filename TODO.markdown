@@ -1,6 +1,7 @@
 0.5 or later
 ---
-Inline function. Threading to use parsley, find bindings above node to use parsley.
+Inline function. Threading to use parsley, find bindings above node to
+use parsley. Extract fn to use parsley all the way through.
 
 
 Ideas:

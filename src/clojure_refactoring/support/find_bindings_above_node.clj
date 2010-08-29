@@ -1,58 +1,43 @@
 (ns clojure-refactoring.support.find-bindings-above-node
-  (:use clojure-refactoring.support.core)
+  (:use [clojure-refactoring.support core parsley])
   (:use clojure.walk))
 
-(defn add-multiple-keys [m]
-  "Pull everything out of a binding map that is a symbol"
-  (distinct
-   (filter symbol? (sub-nodes m))))
+(defn tag= [x ast]
+  (= (:tag ast) x))
 
-(defn- extract-destructured-map [m]
-  "Extracts destructuring from map"
-  (if (map? m)
-    (add-multiple-keys m)
-    m))
+(defn parsley-binding-node? [ast]
+  (and (map? ast)
+       (tag= :list ast)
+       (binding-forms
+        (symbol (apply str
+                       (:content (second (:content ast))))))))
 
-(def extract-destructured-maps ;;Extracts all symbols out of destructured maps
-     (comp flatten (partial map extract-destructured-map)))
+(def parse1 (comp first parse))
 
-(def remove-unwanted-binding-atoms
-     (comp unique-vec flatten
-           extract-destructured-maps))
+(def sexp->parsley (comp parse1 format-code))
+
+(defn first-vector [ast]
+  (first (filter #(tag= :vector %) (:content ast))))
+
+(defn extract-binding-syms [ast]
+  (if (#{"defmacro" "fn" "defn"}
+       (first (:content (second (:content ast)))))
+    (relevant-content (first-vector ast))
+    (evens (relevant-content (first-vector ast)))) )
+
+(defn parsley-extract-symbols-from-binding-node [ast]
+  (->> (extract-binding-syms ast)
+       parsley-sub-nodes
+       (filter parsley-symbol?)))
 
 (defn binding-node-that-contains? [node expr]
-  "Returns true if node is a binding node that
-contains expr"
-  (and (seq? node)
-       (binding-node? node)
-       (tree-contains? node expr)))
-
-(defn symbol-from-num [n]
-  "Produces a symbol from a number by prepending
-% to it"
-  (str "%" n))
-
-(defn munge-anonymous-fn [node]
-  "Munges anonymous fn args out of a node. Always returns the same
-value for a given node"
-  (replace-in-sexp
-   (bindings node)
-   (map symbol-from-num (iterate inc 1))
-   node))
-
-(defn anonymous-fn? [node]
-  "Returns true if node is an anonymous function"
-  (and (seq? node) (= (first node) 'fn*)))
-
-(defn munge-anonymous-fns [node]
-  "Replaces all anonymous fns in a node with munged versions"
-  (tree-replace-when anonymous-fn? munge-anonymous-fn node))
+  (and (parsley-tree-contains node expr)
+       (parsley-binding-node? expr)))
 
 (defn find-bindings-above-node [node expr]
-  "Finds all binding expressions above expr in a particular node"
-  (let [munged-node (munge-anonymous-fns node)
-        munged-expr (munge-anonymous-fns expr)]
-    (->> (sub-nodes munged-node)
-         (filter #(binding-node-that-contains? % munged-expr))
-         (map (comp extract-destructured-maps bound-symbols))
-         remove-unwanted-binding-atoms)))
+  (->> (parsley-sub-nodes node)
+       (filter parsley-binding-node?)
+       (filter #(parsley-tree-contains % expr))
+       (mapcat parsley-extract-symbols-from-binding-node)
+       (map (comp symbol first :content))
+       unique-vec))

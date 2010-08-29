@@ -1,6 +1,5 @@
 (ns clojure-refactoring.support.parsley
   (:require [net.cgrand.parsley.glr :as core])
-  (:use [clojure-refactoring.support.find-bindings-above-node :only [munge-anonymous-fns]])
   (:use clojure.walk)
   (:use clojure-refactoring.support.core)
   (:use net.cgrand.parsley))
@@ -90,6 +89,9 @@
                (seq %)
                (:content %)) ast))
 
+(defn parsley-tree-contains [ast obj]
+  (some #{obj} (parsley-sub-nodes ast)))
+
 (defn parsley-to-string [ast]
   (apply str (filter string? (parsley-sub-nodes ast))))
 
@@ -106,3 +108,23 @@
 
 (defn parsley-get-first-node [ast]
   (if (map? ast) ast (first ast)))
+
+(defn parsley-symbol? [ast]
+  (and (map? ast)
+       (= (:tag ast) :atom)
+       (symbol?
+        (read-string (apply str (:content ast))))))
+
+(defn parsley-keyword? [ast]
+  (and (= (:tag ast) :atom)
+       (= (first (apply str (:content ast))) \:)))
+
+(defn ignored-node? [ast]
+  (or (string? ast)
+      (= (:tag ast) :whitespace)
+      (= (:tag ast) :comment)))
+
+;;TODO: needs a better name
+(defn relevant-content [ast]
+  (remove ignored-node? (:content ast)))
+

@@ -27,7 +27,9 @@ Works for all binding forms in core/binding-forms"
    (filter
     #(not= % nil)
     (find-occurences
-     (find-bindings-above-node f-node extracted-node)
+     (find-bindings-above-node
+      (sexp->parsley f-node)
+      (sexp->parsley extracted-node))
      extracted-node))))
 
 (defn make-fn-node [name args body]
