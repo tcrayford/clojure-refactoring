@@ -1,5 +1,6 @@
 (ns clojure-refactoring.test-helpers
   (:use clojure.test)
+  (:use [clojure.contrib.def :only [defalias]])
   (:require [clojurecheck.core :as cc])
   (:require [clojure.contrib.repl-utils :as repl-utils]))
 
@@ -15,13 +16,6 @@
   (symbol (reduce str (take (inc (rand 10))
                             (repeatedly random-symbol-char)))))
 
-(defn random-sexp [& args]
-  (into () (take (inc (rand 10))
-                 (repeatedly random-symbol))))
-
-(defn random-sexp-with-comments [& args]
-  (str (pr-str (random-sexp)) ";;" (random-symbol) ))
-
 (defn random-sexp-from-core [& args]
   (let [result (memoized-get-source
                 (rand-nth
@@ -32,3 +26,13 @@
 (defn proxy-file [time]
   (proxy [java.io.File] ["~/"] (lastModified [] time)
          (getCanonicalPath [] "absolute-path")))
+
+(defalias prop cc/property)
+
+(defmacro modified? [reference & exprs]
+  "Checks if a reference is modified whilst running exprs.
+   Use can be made readable by doing
+   (modified reference :during expr)"
+  `(let [intial# @~reference]
+     (do ~@exprs)
+     (not= @~reference intial#)))

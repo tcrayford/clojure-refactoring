@@ -24,9 +24,6 @@
   (is (= (sub-nodes #{:a :b})
          '(#{:a :b} :a :b))))
 
-(deftest is_defn?
-  (is (defn? '(defn foo [] 1))))
-
 (deftest binding_form
   (is (= (bindings '(let [b 2] b)) '[b 2]))
   (is (= (bindings '(defn foo [a] a)) '[a])))
@@ -34,29 +31,14 @@
 (deftest unique_vec
   (is (= (unique-vec [1 2 3 1 2 3]) [1 2 3])))
 
-(deftest bound_symbols
-  (is (= (bound-symbols '(let [b 2] b)) '[b]))
-  (is (= (bound-symbols '(defn foo [a b] (+ a b))) '[a b])))
-
 (deftest rec_contains?
   (is  (tree-contains? '(let [a 1] (let [b 2] (+ a b))) '(+ a b)))
   (is  (tree-contains? '(let [a 1] (+ a 2)) '(+ a 2)) true)
   (is (not (tree-contains? '(let [a 1] (if (= b a) true 0)) '(= b 12))))
-  (is  (tree-contains? '(let [a 1] (if (= b a) true 0)) 'true))
-  (is (tree-contains? '(defn what [s] (re-split #"," s))
-                     '(re-split #"," s))))
-
-(deftest maybe_replace_regex_with_string
-  (is (= (.toString #",") (maybe-replace-with-string #","))))
+  (is  (tree-contains? '(let [a 1] (if (= b a) true 0)) 'true)))
 
 (deftest binding_node?
   (is (= (binding-node? '(let [a 1] a)) 'let))
   (is (= (binding-node? '(defn myfn [a] (+ 1 a))) 'defn))
   (is (= (binding-node? '(let [a 1] (let [b 2] (+ a b)))) 'let))
   (is (= (binding-node? (nth '(let [a 1] (let [b 2] (+ a b))) 2)) 'let)))
-
-(deftest last_binding_form?
-  (is (last-binding-form? '(let [a 1] a)))
-  (is (not (last-binding-form? '(+ 1 2))))
-  (is (not (last-binding-form? '(let [a 1] (fn [z] (+ z a))))))
-  (is (not (last-binding-form? '(let [a 1 (let [b 2] (+ a b))])))))

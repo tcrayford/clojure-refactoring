@@ -21,19 +21,11 @@
   (build-replacement-map 'a replace-test-fn))
 
 (deftest build_replacement_map
-  (testing "it has the right attributes"
-    (expect [parsley-from-cache (returns (parse "(+ a 1)"))
-             filename-from-ns  (returns "")]
-            (let [m (replacement-map-for-tests)]
-              (is (:file m))
-              (is (:new-source m)))))
   (testing "populates the attributes correctly"
-      (expect [parsley-from-cache (times 2 (returns (parse "(+ a 1)")))
-               filename-from-ns (returns "")]
-              (is (= (:new-source (replacement-map-for-tests)) "a")))
-      (expect [parsley-from-cache (returns (parse "(+ a 1)"))
-               filename-from-ns (returns "foo")]
-              (is (= (:file (replacement-map-for-tests)) "foo")))))
+    (expect [parsley-from-cache (returns (parse "(+ a 1)"))
+             filename-from-ns (returns "foo")]
+            (is (= (:new-source (replacement-map-for-tests)) "a"))
+            (is (= (:file (replacement-map-for-tests)) "foo")))))
 
 (deftest replace_callers
   (expect
@@ -42,7 +34,7 @@
     build-replacement-map (times 1 (returns :replacement-map))]
    (is (= (replace-callers 'a replace-test-fn) [[:replacement-alist]]))))
 
-(deftest replace_namespaces
+(deftest replace_returns_nil_if_it_does_nothing
   (doseq [namespace (find-ns-in-user-dir)]
     (let [source (slurp (filename-from-ns namespace))]
       (is (nil?

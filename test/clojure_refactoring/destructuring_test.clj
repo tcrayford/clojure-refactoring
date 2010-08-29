@@ -6,7 +6,7 @@
 (use-fixtures :once #(time (%)))
 
 (deftest parlsey_keyword
- (is (parsley-keyword? (first (parse ":a")))))
+  (is (parsley-keyword? (first (parse ":a")))))
 
 (deftest removing-whitespace
   (is (empty? (remove ignored-node?
@@ -14,9 +14,9 @@
 
 (deftest parsley_map_lookup
   (testing "map lookups"
-   (are [s] (parsley-map-lookup? (first (parse s)))
-        "(:a a)"
-        "(b :foo)"))
+    (are [s] (parsley-map-lookup? (first (parse s)))
+         "(:a a)"
+         "(b :foo)"))
 
   (are [s] (not (parsley-map-lookup? (first (parse s))))
        "(a (:a a))"
@@ -29,10 +29,9 @@
          '{:tag :atom :content ("a")})))
 
 (deftest parsley_find_map_lookups
-  (is (=
-       (map parsley-to-string
-            (parsley-find-lookups (parse "(defn a [b] (:a b))")))
-       '("(:a b)"))))
+  (is (= (map parsley-to-string
+              (parsley-find-lookups (parse "(defn a [b] (:a b))")))
+         '("(:a b)"))))
 
 (deftest parsley_lookup_to_proper_form
   (is (= (parsley-to-string (parsley-lookup-to-canoninical-form
@@ -46,7 +45,7 @@
                               '{:tag :atom :content ("b")})))))
 
 (deftest parsley_lookups_to_binding_map
-  (is (get (lookups-to-binding-map (parsley-find-lookups (parse "(defn a [b] (:a b))")))
+  (is ((lookups-to-binding-map (parsley-find-lookups (parse "(defn a [b] (:a b))")))
            '{:tag :atom :content ("b")})))
 
 ;;Integration level tests below here.

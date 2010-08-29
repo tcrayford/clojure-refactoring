@@ -10,18 +10,6 @@
 
 (use-fixtures :once #(time (%)))
 
-(def a nil)
-
-(defmacro modified? [reference & exprs]
-  "Checks if a reference is modified whilst running exprs.
-   Use can be made readable by doing
-   (modified reference :during expr)"
-  `(let [intial# @~reference]
-     (do ~@exprs)
-     (not= @~reference intial#)))
-
-(use-fixtures :once #(time (%)))
-
 (def a nil) ;; used to test does-ns-refer-to-var? below.
 
 (deftest caching
@@ -56,13 +44,13 @@
             (is (= (filename-from-ns 'clojure-refactoring.support.namespaces)
                    path)))))
 
-(deftest all_ns_that_refer_to
+(deftest namespaces_who_refer_to
   (testing "it requires all of them"
     (expect [find-ns-in-user-dir (returns '[a])
              require-and-return (times 1 (returns 'a))
-             does-ns-refer-to-var? (returns true)
-             clojure-refactoring.support.paths/slime-find-file (returns "")]
+             does-ns-refer-to-var? (returns true)]
             (doall (namespaces-who-refer-to 'b))))
+
   (testing "it is empty when there are no namespaces that resolve the var"
     (expect [find-ns-in-user-dir (returns '[a])
              require-and-return (returns 'a)
@@ -77,11 +65,13 @@
                 this-ns
                 (find-var
                  'clojure-refactoring.support.replace-test/a)))))
+
     (testing "var named something that doesn't exist in the current ns"
       (is (not (does-ns-refer-to-var?
                 this-ns
                 (find-var
                  'clojure-refactoring.support.replace/line-from-var)))))
+
     (testing "non existent var"
       (is (not (does-ns-refer-to-var?
                 this-ns
