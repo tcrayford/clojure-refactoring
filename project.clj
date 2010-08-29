@@ -1,4 +1,4 @@
-(defproject clojure-refactoring "0.4.0"
+(defproject clojure-refactoring "0.4.1-SNAPSHOT"
   :description "Clojure side of a refactoring tool"
   :dependencies [[org.clojure/clojure "1.2.0"]
                  [org.clojure/clojure-contrib "1.2.0"]
