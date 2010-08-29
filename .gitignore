@@ -11,3 +11,4 @@ errors.markdown
 .cake/cake.pid
 .cake/project.log
 clojure-refactoring*.jar
+src/clojure_refactoring/code_analysis.clj
