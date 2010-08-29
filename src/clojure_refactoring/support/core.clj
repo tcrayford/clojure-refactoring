@@ -34,7 +34,7 @@
 
 (def binding-forms
      #{'let 'fn 'binding 'for 'doseq 'dotimes 'defn 'loop 'defmacro
-       'if-let 'when-let})
+       'if-let 'when-let 'defn-})
 
 (defn binding-node? [[node-type]]
   "Checks if a node is a binding node"
@@ -61,10 +61,6 @@
   (if (defn? node)
     (extract-binding-form node)
     (evens (extract-binding-form node))))
-
-(defn some-true? [coll]
-  "Returns true if anything in the collection is true"
-  (some #{true} coll))
 
 (defn rec-matches? [f coll]
   "True if the result of applying f on any sub-element of coll is true"
@@ -119,6 +115,7 @@
     obj))
 
 (defn replace-when [pred f coll]
+  "Replaces each element of coll if pred returns true on it."
   (map #(call-when pred f %) coll))
 
 (defn tree-replace-when [pred f coll]
@@ -128,13 +125,8 @@ by calling (f node)"
    #(call-when pred f %)
    coll))
 
-(defn replace-in-sexp [oldlist newlist sexp]
-  (reduce
-   (fn [new-sexp [old new]]
-     (postwalk-replace
-      {old new}
-      new-sexp))
-   sexp
-   (map vector
-        oldlist
-        newlist)))
+(defn replace-in-sexp [old new sexp]
+  "Walks over sexp, replacing each element from old with its corresponding element in new."
+  (postwalk-replace
+   (zipmap old new)
+   sexp))

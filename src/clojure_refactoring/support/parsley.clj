@@ -55,16 +55,22 @@
 
 (declare parsley-walk)
 
+(defn- replacement-for-composite [tag f]
+  (if (composite-tag? tag)
+    #(parsley-walk f %)
+    f))
+
+(defn- replacement-for-content [tag f content]
+  (replace-when
+    (complement string?)
+    (replacement-for-composite tag f)
+    content))
+
 (defn- replace-content [f ast]
   (let [{tag :tag content :content} ast]
    (assoc ast
      :content
-     (replace-when
-      (complement string?)
-      (if (composite-tag? tag)
-        #(parsley-walk f %)
-        f)
-      content))))
+     (replacement-for-content tag f content))))
 
 (defn parsley-walk [f ast]
      (if (map? ast)
@@ -99,13 +105,6 @@
 (def munge-node ;;To replace stuff that read-string changes
      (comp munge-gensyms munge-anonymous-fns maybe-replace-regex))
 
-(defn match-parsley [exp ast]
-  (try
-    (let [ex (munge-node exp)]
-      (= ex (munge-node
-             (read-string (parsley-to-string ast)))))
-    (catch Exception e nil)))
-
 (defn- replace-symbol [node old new]
   (if (= node (ast-symbol old))
     (ast-symbol new)
@@ -115,16 +114,6 @@
   (parsley-walk
    #(replace-symbol % old new)
    ast))
-
-(defn replace-sexp-in-ast-node [old new ast]
-  "Takes a partial ast and replaces old (as represented by a sexp) with new (also represented by a sexp)"
-  (let [new-ast (second (first (sexp (pr-str new))))]
-    (parsley-walk
-     (fn [{content :content :as node}]
-       (if (and (map? node) content (match-parsley old node))
-         new-ast
-         node))
-     ast)))
 
 (def parsley-empty-map {:tag :map :content (list "{" "}") })
 
