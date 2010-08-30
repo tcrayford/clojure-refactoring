@@ -9,10 +9,24 @@
     (with-pprint-dispatch *code-dispatch*
       (pprint node))))
 
-(defn contains-sub-nodes? [tree]
-  (or (sequential? tree)
-      (map? tree)
-      (set? tree)))
+;; Below stolen from arc
+(defn orf [& fns]
+  "Returns a function that ors across all of orf's arguments"
+  (fn [& args]
+    ((fn self [fs]
+       (and fs (or (apply (first fs) args) (self (next fs)))))
+     fns)))
+
+(defn andf [& fns]
+  "Returns a function that ands across all of and's arguments."
+  (fn [& args]
+    ((fn self [fs]
+       (if (not fs) true
+           (and (apply (first fs) args) (self (next fs)))))
+     fns)))
+
+(def contains-sub-nodes?
+  (orf sequential? map? set?))
 
 (defn expand-sub-nodes [tree]
   (if (map? tree)
@@ -77,3 +91,6 @@
   `(defn ~name ~args ~docstring
      (let ~(expand-args-with-parse1 args)
        ~@body)))
+
+(defn first= [x y]
+  (= (first x) y))

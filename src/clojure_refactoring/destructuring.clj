@@ -6,7 +6,7 @@
 
 (defn parsley-map-lookup? [ast]
   (let [content (relevant-content ast)]
-    (and (= (:tag ast) :list)
+    (and (tag= :list ast)
          (count= (filter parsley-keyword? content) 1)
          (count= content 2))))
 

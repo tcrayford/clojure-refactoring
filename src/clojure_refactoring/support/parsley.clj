@@ -68,28 +68,31 @@
 
 (defn- replacement-for-content [tag f content]
   (replace-when
-    (complement string?)
-    (replacement-for-composite tag f)
-    content))
+   (complement string?)
+   (replacement-for-composite tag f)
+   content))
 
 (defn- replace-content [f ast]
   (let [{tag :tag content :content} ast]
-   (assoc ast
-     :content
-     (replacement-for-content tag f content))))
+    (assoc ast
+      :content
+      (replacement-for-content tag f content))))
 
 (defn parsley-walk [f ast]
-     (if (map? ast)
-       (f
-        (replace-content f ast))
-       (vec (map #(parsley-walk f %) ast))))
+  (if (map? ast)
+    (f
+     (replace-content f ast))
+    (vec (map #(parsley-walk f %) ast))))
+
+(defn expand-ast-nodes [ast]
+  (if (sequential? ast)
+     (seq ast)
+     (:content ast)))
 
 (defn parsley-sub-nodes [ast]
-  (tree-seq #(or (sequential? %)
-                 (composite-tag? %))
-            #(if (sequential? %)
-               (seq %)
-               (:content %)) ast))
+  (tree-seq (orf sequential? composite-tag?)
+            expand-ast-nodes
+            ast))
 
 (defn parsley-tree-contains [ast obj]
   (some #{obj} (parsley-sub-nodes ast)))
@@ -99,10 +102,7 @@
 
 (defn parsley-tree-replace [old new ast]
   (parsley-walk
-   (fn [node]
-     (if (= node old)
-       new
-       node))
+   (fn [node] (if (= node old) new node))
    ast))
 
 (defn replace-symbol-in-ast-node [old new ast]
@@ -111,20 +111,25 @@
 (defn parsley-get-first-node [ast]
   (if (map? ast) ast (first ast)))
 
-(defn parsley-symbol? [ast]
-  (and (map? ast)
-       (= (:tag ast) :atom)
-       (symbol?
-        (read-string (str-join "" (:content ast))))))
+(defn tag= [x ast]
+  (= (:tag ast) x))
 
-(defn parsley-keyword? [ast]
-  (and (= (:tag ast) :atom)
-       (= (first (str-join "" (:content ast))) \:)))
+(def parsley-atom?
+     (partial tag= :atom))
 
-(defn ignored-node? [ast]
-  (or (string? ast)
-      (= (:tag ast) :whitespace)
-      (= (:tag ast) :comment)))
+(defn ast-content [ast]
+  (str-join "" (:content ast)))
+
+(def parsley-symbol?
+     (andf map? parsley-atom?
+           (comp symbol? read-string ast-content)))
+
+(def parsley-keyword?
+     (andf parsley-atom?
+           #(first= (ast-content %) \:)))
+
+(def ignored-node?
+     (orf string? #(tag= :whitespace %) #(tag= :comment %)))
 
 ;;TODO: needs a better name
 (defn relevant-content [ast]
@@ -148,9 +153,6 @@
 
 (def parsley-newline
      {:tag :whitespace :content '("\n")})
-
-(defn tag= [x ast]
-  (= (:tag ast) x))
 
 (def parse1 (comp first parse)) ;;parses one node
 
