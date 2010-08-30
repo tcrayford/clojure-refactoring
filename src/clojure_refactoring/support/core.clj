@@ -1,7 +1,7 @@
 (ns clojure-refactoring.support.core
-  (:use [clojure.contrib pprint])
-  (:use [clojure.contrib.seq-utils :only (find-first)])
-  (:use clojure.walk))
+  (:use [clojure.contrib pprint]
+        [clojure.contrib.seq-utils :only (find-first)]
+        [clojure.walk :only [postwalk-replace]]))
 
 (defn format-code [node]
   "Outputs code roughly how a human would format it."

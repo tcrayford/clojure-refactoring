@@ -1,14 +1,16 @@
 (ns clojure-refactoring.support.find-bindings-above-node-test
   (:use clojure-refactoring.support.find-bindings-above-node :reload)
-  (:use clojure-refactoring.support.parsley)
-  (:use clojure.test))
+  (:use clojure-refactoring.support.parsley
+        clojure.test))
 
 (use-fixtures :once #(time (%)))
 
 (defn find-bindings-above-sexp [node expr]
-  (find-bindings-above-node
-   (sexp->parsley node)
-   (sexp->parsley expr)))
+  (->> (find-bindings-above-node
+    (sexp->parsley node)
+    (sexp->parsley expr))
+       (map (comp symbol first :content))
+       vec))
 
 (deftest parsley_binding_node?
   (is (parsley-binding-node? (first (parse "(let [a 1] a)")))))

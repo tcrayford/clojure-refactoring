@@ -1,24 +1,25 @@
 (ns clojure-refactoring.extract-method
   (:use [clojure-refactoring.support core
          find-bindings-above-node parsley]
-        [clojure.contrib str-utils]))
+        clojure.set
+        [clojure.contrib.seq-utils :only [find-first]]))
 
 (defn find-occurences [args node]
   "Looks for any occurence of each element of args in the node
 TODO: doesn't handle destructuring properly"
-  (flatten (loop [arg-set (set args) node node]
-             (for [sub-node node]
-               (if (seq? sub-node)
-                 (find-occurences arg-set sub-node)
-                 (arg-set sub-node))))))
+  (intersection (set args) (set (parsley-sub-nodes node))))
 
-(defn fn-name [fn-node] (nth fn-node 1))
+(defn fn-name [fn-node]
+  (second (relevant-content fn-node)))
+
+(defn parsley-bindings [ast]
+  (relevant-content (find-first #(tag= :vector %) (:content ast))))
 
 (defn fn-call [fn-node]
   "Returns a function call to a function
 using the names in the function's arguments.
 TODO: Won't work for multiple arity functions"
-  (conj (for [arg (bindings fn-node)] arg) (fn-name fn-node)))
+  (parsley-list `(~(fn-name fn-node) ~@(parsley-bindings fn-node))))
 
 (defn arg-occurences [f-node extracted-node]
   "Finds the bindings from f-node that are also in the extracted node.
@@ -28,32 +29,37 @@ Works for all binding forms in core/binding-forms"
     #(not= % nil)
     (find-occurences
      (find-bindings-above-node
-      (sexp->parsley f-node)
-      (sexp->parsley extracted-node))
+      f-node
+      extracted-node)
      extracted-node))))
 
 (defn make-fn-node [name args body]
-  `(~'defn ~(symbol name) ~args ~body))
+  {:tag :list :content
+   (list
+    "(" (ast-symbol 'defn) (parse1 " ") (ast-symbol (symbol name))
+    (parse1 " ") (parsley-vector args) (parse "\n  ")
+    body ")")})
 
 (defn remove-extracted-function [extract-string fn-string new-fun]
   (->> (parsley-tree-replace
         (first (parse extract-string))
-        (first (parse (format-code (fn-call new-fun))))
+        (fn-call new-fun)
         (parse fn-string))
        parsley-to-string))
 
 (defn format-output [extract-string fn-string new-fun]
   "Formats the output for extract-method to print"
   (str
-   (format-code new-fun)
+   (parsley-to-string new-fun)
+   "\n"
    "\n"
    (remove-extracted-function extract-string fn-string new-fun)))
 
 (defn extract-method [fn-string extract-string new-name]
   "Extracts extract-string out of fn-string and replaces it with a
 function call to the extracted method. Only works on single arity root functions"
-  (let [function-node (read-string fn-string)
-        extract-node (read-string extract-string)
+  (let [function-node (parse1 fn-string)
+        extract-node (parse1 extract-string)
         args (arg-occurences function-node
                              extract-node)
         new-fun (make-fn-node new-name

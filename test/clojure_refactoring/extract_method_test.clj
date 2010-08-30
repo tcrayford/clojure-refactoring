@@ -1,29 +1,40 @@
 (ns clojure-refactoring.extract-method-test
-  (:use clojure-refactoring.extract-method
-        clojure-refactoring.support.core :reload)
-  (:use clojure.test clojure.contrib.str-utils))
+  (:use clojure-refactoring.extract-method :reload)
+  (:use clojure.test
+        [clojure-refactoring.support find-bindings-above-node
+         parsley]))
+
+(defn readall [str]
+  (read-string (str "(" str ")")))
 
 (use-fixtures :once #(time (%)))
 
+(defn fn-call-sexp [sexp]
+  (read-string (parsley-to-string (fn-call (sexp->parsley sexp)))))
+
+(defn fn-name-sexp [sexp]
+         (symbol (first (:content (fn-name (sexp->parsley sexp))))))
+
 (deftest fn_name
-  (is (= (fn-name '(defn a [c] c)) 'a)))
+  (is (= (fn-name-sexp '(defn a [c] c)) 'a)))
+
 
 (deftest fn_call
-  (is (= (fn-call '(defn a [b] (+ 1 2))) '(a b))))
+  (is (= (fn-call-sexp '(defn a [b] (+ 1 2))) '(a b))))
 
 (deftest remove_extracted_function
   (is (= (remove-extracted-function "(inc a)"
                                   "(defn b [a] (inc a))"
-                                  '(defn arr [a] (inc a)))
+                                  (parse1 "(defn arr [a] (inc a))"))
 "(defn b [a] (arr a))")))
-
 
 ;; Acceptance level testing below
 (deftest uses_variables_from_let
   (is (= (extract-method
           "(defn add [s]
 (let [a 1] (+ a 1)))" "(+ a 1)" "add-number")
-"(defn add-number [a] (+ a 1))
+"(defn add-number [a]
+  (+ a 1))
 
 (defn add [s]
 (let [a 1] (add-number a)))")))
@@ -35,7 +46,8 @@
 (for [x (re-split #\",\" s)] (Integer. x)))"
 "(Integer. x)"
 "to-i")
-"(defn to-i [x] (Integer. x))
+"(defn to-i [x]
+  (Integer. x))
 
 (defn add [s]
 (for [x (re-split #\",\" s)] (to-i x)))")
@@ -45,7 +57,8 @@
 (for [x (re-split #\",\" s)] (Integer. x)))"
 "(re-split #\",\" s)"
 "split-string")
-"(defn split-string [s] (re-split #\",\" s))
+"(defn split-string [s]
+  (re-split #\",\" s))
 
 (defn add [s]
 (for [x (split-string s)] (Integer. x)))"
@@ -56,4 +69,4 @@
           "(defn a [s] (if (.contains s \",\") 1 s))"
           "(if (.contains s \",\") 1 s)"
           "b")
-"(defn b [s] (if (.contains s \",\") 1 s))\n\n(defn a [s] (b s))")))
+"(defn b [s]\n  (if (.contains s \",\") 1 s))\n\n(defn a [s] (b s))")))

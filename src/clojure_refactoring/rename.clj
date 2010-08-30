@@ -1,6 +1,6 @@
 (ns clojure-refactoring.rename
-  (:use [clojure-refactoring.support core replace parsley])
-  (:use clojure.walk))
+  (:use [clojure-refactoring.support replace parsley]
+        clojure.walk))
 
 (defn rename [node old-name new-name]
   (let [ast (parse node)
@@ -22,6 +22,7 @@
 
 (defn global-rename [ns old-name new-name]
   "Sends a list of alists to emacs for processing as renames"
-  {:pre [(ns-resolve ns old-name)]}
+  #_{:pre [(do (find-ns ns)
+             (ns-resolve ns old-name))]}
   (let [old-var (ns-resolve ns old-name)]
     (replace-callers old-var (renaming-fn old-var new-name))))

@@ -1,8 +1,8 @@
 (ns clojure-refactoring.support.parsley
   (:require [net.cgrand.parsley.glr :as core])
-  (:use clojure.walk)
-  (:use clojure-refactoring.support.core)
-  (:use net.cgrand.parsley))
+  (:use clojure.walk
+        clojure-refactoring.support.core
+        net.cgrand.parsley))
 
 (defonce sexp
   (memoize
@@ -128,3 +128,21 @@
 (defn relevant-content [ast]
   (remove ignored-node? (:content ast)))
 
+(defn intersperse [coll item]
+  (interleave coll (repeat item)))
+
+(defn add-whitespace [coll]
+  (butlast (intersperse coll parsley-whitespace)))
+
+(defn coll-fn [tag start end]
+  (fn [coll]
+    {:tag tag :content `(~start ~@(add-whitespace coll) ~end)}))
+
+(def parsley-list
+     (coll-fn :list "(" ")"))
+
+(def parsley-vector
+     (coll-fn :vector "[" "]"))
+
+(def parsley-newline
+     {:tag :whitespace :content '("\n")})

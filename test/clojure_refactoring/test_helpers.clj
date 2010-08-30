@@ -1,7 +1,7 @@
 (ns clojure-refactoring.test-helpers
-  (:use clojure.test)
-  (:use [clojure.contrib.def :only [defalias]])
-  (:use clojure.contrib.mock)
+  (:use clojure.test
+        [clojure.contrib.def :only [defalias]]
+        clojure.contrib.mock)
   (:require [clojurecheck.core :as cc])
   (:require [clojure.contrib.repl-utils :as repl-utils]))
 

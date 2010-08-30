@@ -1,7 +1,7 @@
 (ns clojure-refactoring.support.replace
   (:use [clojure-refactoring.support
-         source core paths])
-  (:use [clojure-refactoring.support.parsley
+         source core paths]
+        [clojure-refactoring.support.parsley
          :only [parsley-to-string]]))
 
 (defn map-to-alist [m]

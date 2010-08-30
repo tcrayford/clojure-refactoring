@@ -1,8 +1,7 @@
 (ns clojure-refactoring.destructuring
-  (:use [clojure.contrib str-utils pprint]
-        clojure.walk
-        [clojure-refactoring.support core parsley])
-  (:use [clojure.contrib.seq-utils :only [find-first]]))
+  (:use clojure.walk
+        [clojure-refactoring.support core parsley]
+        [clojure.contrib.seq-utils :only [find-first]]))
 
 (defn parsley-map-lookup? [ast]
   (let [content (relevant-content ast)]

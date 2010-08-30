@@ -1,7 +1,6 @@
 (ns clojure-refactoring.thread-expression
   (:use [clojure-refactoring.support core parsley]
-        clojure.walk
-        [clojure.contrib str-utils]))
+        [clojure.walk :only [postwalk]]))
 
 (defn but-second [coll]
   (->> (first coll)

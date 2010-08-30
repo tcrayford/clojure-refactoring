@@ -1,7 +1,7 @@
 (ns clojure-refactoring.destructuring-test
   (:use clojure-refactoring.destructuring :reload)
-  (:use clojure-refactoring.support.parsley)
-  (:use clojure.test))
+  (:use clojure-refactoring.support.parsley
+        clojure.test))
 
 (use-fixtures :once #(time (%)))
 

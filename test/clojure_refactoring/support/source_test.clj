@@ -1,12 +1,12 @@
 (ns clojure-refactoring.support.source-test
   (:use clojure-refactoring.support.source :reload)
   (:import clojure-refactoring.support.source.NameSpaceCacheEntry)
-  (:use [clojure-refactoring.support.parsley :only [parse]])
-  (:use clojure-refactoring.test-helpers)
-  (:use clojure-refactoring.support.paths)
-  (:use clojure.test)
-  (:require [clojure-refactoring.support replace replace-test])
-  (:use clojure.contrib.mock))
+  (:use [clojure-refactoring.support.parsley :only [parse]]
+        clojure-refactoring.test-helpers
+        clojure-refactoring.support.paths
+        clojure.test
+        clojure.contrib.mock)
+  (:require [clojure-refactoring.support replace replace-test]))
 
 (use-fixtures :once #(time (%)))
 

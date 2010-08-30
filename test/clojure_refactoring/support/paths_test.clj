@@ -1,8 +1,8 @@
 (ns clojure-refactoring.support.paths-test
   (:use clojure-refactoring.support.paths :reload)
-  (:use clojure-refactoring.test-helpers)
-  (:use clojure.test)
-  (:use clojure.contrib.mock))
+  (:use clojure-refactoring.test-helpers
+        clojure.test
+        clojure.contrib.mock))
 
 (use-fixtures :once #(time (%)))
 

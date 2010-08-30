@@ -1,6 +1,5 @@
 (ns clojure-refactoring.support.find-bindings-above-node
-  (:use [clojure-refactoring.support core parsley])
-  (:use clojure.walk))
+  (:use [clojure-refactoring.support core parsley]))
 
 (defn tag= [x ast]
   (= (:tag ast) x))
@@ -23,21 +22,19 @@
   (if (#{"defmacro" "fn" "defn"}
        (first (:content (second (:content ast)))))
     (relevant-content (first-vector ast))
-    (evens (relevant-content (first-vector ast)))) )
+    (evens (relevant-content (first-vector ast)))))
 
-(defn parsley-extract-symbols-from-binding-node [ast]
+(defn extract-symbols-from-binding-node [ast]
   (->> (extract-binding-syms ast)
        parsley-sub-nodes
        (filter parsley-symbol?)))
 
 (defn binding-node-that-contains? [node expr]
-  (and (parsley-tree-contains node expr)
-       (parsley-binding-node? expr)))
+     (and (parsley-binding-node? node)
+          (parsley-tree-contains node expr)))
 
 (defn find-bindings-above-node [node expr]
   (->> (parsley-sub-nodes node)
-       (filter parsley-binding-node?)
-       (filter #(parsley-tree-contains % expr))
-       (mapcat parsley-extract-symbols-from-binding-node)
-       (map (comp symbol first :content))
-       unique-vec))
+       (filter #(binding-node-that-contains? % expr))
+       (mapcat extract-symbols-from-binding-node)
+       distinct))

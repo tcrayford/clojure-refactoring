@@ -1,8 +1,8 @@
 (ns clojure-refactoring.support.parsley-test
   (:use clojure-refactoring.support.parsley :reload)
-  (:use clojure-refactoring.test-helpers)
-  (:use clojure.test)
-  (:use [clojure-refactoring.support core source paths]))
+  (:use clojure-refactoring.test-helpers
+        clojure.test
+        [clojure-refactoring.support core source paths]))
 
 (use-fixtures :once #(time (%)))
 
@@ -64,3 +64,12 @@
         (let [parsed (parse s)]
           (is (= (parsley-walk identity parsed)
                  parsed)))))
+
+(deftest parsley_list
+  (is (= (parsley-list [1 2 3])
+'{:tag :list, :content ("(" 1 {:tag :whitespace, :content (" ")} 2 {:tag :whitespace, :content (" ")} 3 ")")})))
+
+(deftest parsley_vector
+  (is (= (parsley-vector [1 2 3])
+'{:tag :vector, :content ("[" 1 {:tag :whitespace, :content (" ")} 2 {:tag :whitespace, :content (" ")} 3 "]")})))
+

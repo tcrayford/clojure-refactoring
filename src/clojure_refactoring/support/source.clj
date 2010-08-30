@@ -1,6 +1,6 @@
 (ns clojure-refactoring.support.source
-  (:use [clojure.contrib.find-namespaces :only [find-namespaces-in-dir]])
-  (:use [clojure-refactoring.support core paths parsley]))
+  (:use [clojure.contrib.find-namespaces :only [find-namespaces-in-dir]]
+        [clojure-refactoring.support core paths parsley]))
 
 (defn find-and-load [namespace]
   (if (find-ns namespace)

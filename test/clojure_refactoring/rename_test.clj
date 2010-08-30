@@ -1,6 +1,6 @@
 (ns clojure-refactoring.rename-test
-  (:use clojure.test)
-  (:use clojure.contrib.mock)
+  (:use clojure.test
+        clojure.contrib.mock)
   (:require [clojure-refactoring.support.parsley :as parsley])
   (:use clojure-refactoring.rename :reload))
 

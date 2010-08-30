@@ -1,10 +1,10 @@
 (ns clojure-refactoring.support.replace-test
   (:use clojure-refactoring.support.replace :reload)
   (:use [clojure-refactoring.support source parsley
-         paths])
-  (:use clojure.test)
-  (:use clojure-refactoring.test-helpers)
-  (:use clojure.contrib.mock))
+         paths]
+        clojure.test
+        clojure-refactoring.test-helpers
+        clojure.contrib.mock))
 
 (use-fixtures :once #(time (%)))
 
