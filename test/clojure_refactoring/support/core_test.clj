@@ -42,3 +42,11 @@
   (is (= (binding-node? '(defn myfn [a] (+ 1 a))) 'defn))
   (is (= (binding-node? '(let [a 1] (let [b 2] (+ a b)))) 'let))
   (is (= (binding-node? (nth '(let [a 1] (let [b 2] (+ a b))) 2)) 'let)))
+
+(deftest orf-test
+  (is ((orf map? :a nil?) {:a 1}))
+  (is ((orf map? :b) {:a 1})))
+
+(deftest andf-test
+  (is ((andf map? :a) {:a 1}))
+  (is (not ((andf map? :b) {:a 1}))))

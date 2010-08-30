@@ -10,23 +10,16 @@
       (pprint node))))
 
 ;; Below stolen from arc
-(defn orf [& fns]
-  "Returns a function that ors across all of orf's arguments"
-  (fn [& args]
-    ((fn self [fs]
-       (and fs (or (apply (first fs) args) (self (next fs)))))
-     fns)))
+(defn make-predicater [f]
+  (fn [& fns] (fn [& args]
+      (f identity (map apply fns (repeat args))))))
 
-(defn andf [& fns]
-  "Returns a function that ands across all of and's arguments."
-  (fn [& args]
-    ((fn self [fs]
-       (if (not fs) true
-           (and (apply (first fs) args) (self (next fs)))))
-     fns)))
+(def orf (make-predicater some))
+
+(def andf (make-predicater every?))
 
 (def contains-sub-nodes?
-  (orf sequential? map? set?))
+     (orf sequential? map? set?))
 
 (defn expand-sub-nodes [tree]
   (if (map? tree)
