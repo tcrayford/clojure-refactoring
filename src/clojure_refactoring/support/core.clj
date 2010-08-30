@@ -66,3 +66,14 @@
   (postwalk-replace
    (zipmap old new)
    sexp))
+
+(defn expand-args-with-parse1 [args]
+  "Takes arguments from a function and returns a vector that
+  (in a let form) rebinds them by parsing them."
+  (->> (mapcat #(list % (list 'parse1 %)) args) vec))
+
+(defmacro defparsed-fn [name args docstring & body]
+  "Defines a function in which all of the args are rebound by parsing them using parse1."
+  `(defn ~name ~args ~docstring
+     (let ~(expand-args-with-parse1 args)
+       ~@body)))

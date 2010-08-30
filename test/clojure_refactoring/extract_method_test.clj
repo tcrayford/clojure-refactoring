@@ -22,11 +22,19 @@
 (deftest fn_call
   (is (= (fn-call-sexp '(defn a [b] (+ 1 2))) '(a b))))
 
+(defn remove-extracted-function-sexp [extracted toplevel new-fn]
+  (parsley-to-string
+   (call-extracted
+    (parse1 extracted)
+    (parse1 toplevel)
+    (parse1 new-fn))))
+
 (deftest remove_extracted_function
-  (is (= (remove-extracted-function "(inc a)"
-                                  "(defn b [a] (inc a))"
-                                  (parse1 "(defn arr [a] (inc a))"))
-"(defn b [a] (arr a))")))
+  (is (= (remove-extracted-function-sexp
+          "(inc a)"
+          "(defn b [a] (inc a))"
+          "(defn arr [a] (inc a))")
+         "(defn b [a] (arr a))")))
 
 ;; Acceptance level testing below
 (deftest uses_variables_from_let

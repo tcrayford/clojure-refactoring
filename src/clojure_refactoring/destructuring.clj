@@ -1,7 +1,8 @@
 (ns clojure-refactoring.destructuring
   (:use clojure.walk
         [clojure-refactoring.support core parsley]
-        [clojure.contrib.seq-utils :only [find-first]]))
+        [clojure.contrib.seq-utils :only [find-first]]
+        [clojure.contrib.str-utils :only [str-join]]))
 
 (defn parsley-map-lookup? [ast]
   (let [content (relevant-content ast)]
@@ -13,8 +14,8 @@
   (assoc kw-node
     :content
     (list
-     (apply str
-            (drop 1 (apply str (:content kw-node)))))))
+     (str-join ""
+            (drop 1 (first (:content kw-node)))))))
 
 (defn parsley-find-lookups [node]
   "Returns all the map lookups in a node as a set of parsley asts"
@@ -74,10 +75,6 @@
   "Replaces each key in the binding map found in old-vec with the value\nfrom the binding map"
   (postwalk-replace (lookups-to-binding-map lookups) old-vec))
 
-(defn parsley-fn-args [ast]
-  (find-first #(= (:tag %) :vector)
-              (:content (parsley-get-first-node ast))))
-
 (defn replace-lookups-with-destructured-symbols [lookups ast]
   ;;TODO: this bothers me, because we use this pattern of reduce
   ;;replacing stuff all over the place
@@ -95,10 +92,9 @@
         new-args (destructured-binding-vec args lookups)]
     (parsley-tree-replace args new-args root-ast)))
 
-(defn destructure-map [fn-code]
+(defparsed-fn destructure-map [root-ast]
   "Destructures all calls to maps"
-  (let [root-ast (parse fn-code)
-        lookups (parsley-find-lookups root-ast)]
+  (let [lookups (parsley-find-lookups root-ast)]
     (parsley-to-string
      (replace-lookups-with-destructured-symbols
        lookups

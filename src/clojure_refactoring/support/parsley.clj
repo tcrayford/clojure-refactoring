@@ -2,7 +2,9 @@
   (:require [net.cgrand.parsley.glr :as core])
   (:use clojure.walk
         clojure-refactoring.support.core
-        net.cgrand.parsley))
+        net.cgrand.parsley
+        [clojure.contrib.seq-utils :only [find-first]]
+        [clojure.contrib.str-utils :only [str-join]]))
 
 (defonce sexp
   (memoize
@@ -93,7 +95,7 @@
   (some #{obj} (parsley-sub-nodes ast)))
 
 (defn parsley-to-string [ast]
-  (apply str (filter string? (parsley-sub-nodes ast))))
+  (str-join "" (filter string? (parsley-sub-nodes ast))))
 
 (defn parsley-tree-replace [old new ast]
   (parsley-walk
@@ -113,11 +115,11 @@
   (and (map? ast)
        (= (:tag ast) :atom)
        (symbol?
-        (read-string (apply str (:content ast))))))
+        (read-string (str-join "" (:content ast))))))
 
 (defn parsley-keyword? [ast]
   (and (= (:tag ast) :atom)
-       (= (first (apply str (:content ast))) \:)))
+       (= (first (str-join "" (:content ast))) \:)))
 
 (defn ignored-node? [ast]
   (or (string? ast)
@@ -146,3 +148,20 @@
 
 (def parsley-newline
      {:tag :whitespace :content '("\n")})
+
+(defn tag= [x ast]
+  (= (:tag ast) x))
+
+(def parse1 (comp first parse)) ;;parses one node
+
+(def sexp->parsley (comp parse1 format-code))
+
+(defn first-vector [ast]
+  (first (filter #(tag= :vector %) (:content ast))))
+
+(defn parsley-fn-args [ast]
+  (first-vector
+   (parsley-get-first-node ast)))
+
+(def parsley-bindings
+     (comp relevant-content parsley-fn-args))
