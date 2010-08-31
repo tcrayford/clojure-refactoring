@@ -1,13 +1,17 @@
 0.5 or later
 ---
-Inline function. Threading to use parsley, find bindings above node to
-use parsley. Extract fn to use parsley all the way through.
+Inline function.
 
 
 Ideas:
-extract as local reworking (use parsley, make it work on non defn nodes). Fix multiple defn bodies problem (map over defn bodies)
+Fix multiple defn bodies problem (map over defn bodies)
 
 Watch files for reloading (using something like lazytest's watcher)
+
+0.4.1
+---
+
+Threading and extract as local to use parsley. Rework API for parsley.
 
 
 0.4
