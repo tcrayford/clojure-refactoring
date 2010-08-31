@@ -4,9 +4,6 @@
         [clojure-refactoring.support find-bindings-above-node
          parsley]))
 
-(defn readall [str]
-  (read-string (str "(" str ")")))
-
 (use-fixtures :once #(time (%)))
 
 (defn fn-call-sexp [sexp]
@@ -17,7 +14,6 @@
 
 (deftest fn_name
   (is (= (fn-name-sexp '(defn a [c] c)) 'a)))
-
 
 (deftest fn_call
   (is (= (fn-call-sexp '(defn a [b] (+ 1 2))) '(a b))))

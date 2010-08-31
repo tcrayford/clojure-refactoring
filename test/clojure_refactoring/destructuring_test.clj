@@ -5,9 +5,6 @@
 
 (use-fixtures :once #(time (%)))
 
-(deftest parlsey_keyword
-  (is (parsley-keyword? (first (parse ":a")))))
-
 (deftest removing-whitespace
   (is (empty? (remove ignored-node?
                       (parse " ")))))

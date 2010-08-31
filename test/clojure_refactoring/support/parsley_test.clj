@@ -6,6 +6,9 @@
 
 (use-fixtures :once #(time (%)))
 
+(deftest parlsey_keyword
+  (is (parsley-keyword? (first (parse ":a")))))
+
 (deftest parsley_to_string
   (prop "parsley to string composed with parse is identity"
         [s random-sexp-from-core]

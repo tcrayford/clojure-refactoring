@@ -5,10 +5,7 @@
 
 (use-fixtures :once #(time (%)))
 
-(deftest but_second
-  (is (= (but-second [1 2 3]) [1 3])))
-
-(deftest threaded?_test
+(deftest threaded?-test
   (is (threaded? '(->> foo bar arr)))
   (is (threaded? '(-> foo bar arr)))
   (is (not (threaded? '(arr barr arr))))

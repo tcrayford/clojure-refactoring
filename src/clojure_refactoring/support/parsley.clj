@@ -3,10 +3,11 @@
   (:use clojure.walk
         clojure-refactoring.support.core
         net.cgrand.parsley
+        [clojure.contrib.def :only [defonce-]]
         [clojure.contrib.seq-utils :only [find-first]]
         [clojure.contrib.str-utils :only [str-join]]))
 
-(defonce sexp
+(defonce- sexp
   (memoize
    (parser {:space [#{:whitespace :comment :discard}:*]
             :main :expr*}
@@ -48,6 +49,8 @@
 
 (def parse (comp second first sexp))
 
+(def parse1 (comp first parse)) ;;parses one node
+
 (defn ast-symbol [sym]
   {:tag :atom, :content (list (name sym))})
 
@@ -84,7 +87,7 @@
      (replace-content f ast))
     (vec (map #(parsley-walk f %) ast))))
 
-(defn expand-ast-nodes [ast]
+(defn- expand-ast-nodes [ast]
   (if (sequential? ast)
      (seq ast)
      (:content ast)))
@@ -100,6 +103,8 @@
 (defn parsley-to-string [ast]
   (str-join "" (filter string? (parsley-sub-nodes ast))))
 
+(def sexp->parsley (comp parse1 format-code))
+
 (defn parsley-tree-replace [old new ast]
   (parsley-walk
    (fn [node] (if (= node old) new node))
@@ -108,16 +113,16 @@
 (defn replace-symbol-in-ast-node [old new ast]
   (parsley-tree-replace (ast-symbol old) (ast-symbol new) ast))
 
-(defn parsley-get-first-node [ast]
+(defn- parsley-get-first-node [ast]
   (if (map? ast) ast (first ast)))
 
 (defn tag= [x ast]
   (= (:tag ast) x))
 
-(def parsley-atom?
-     (partial tag= :atom))
+(defn- parsley-atom? [ast]
+     (tag= :atom ast))
 
-(defn ast-content [ast]
+(defn- ast-content [ast]
   (str-join "" (:content ast)))
 
 (def parsley-symbol?
@@ -138,25 +143,18 @@
 (defn intersperse [coll item]
   (interleave coll (repeat item)))
 
-(defn add-whitespace [coll]
+(defn- add-whitespace [coll]
   (butlast (intersperse coll parsley-whitespace)))
 
-(defn coll-fn [tag start end]
+(defn- coll-fn [tag start end]
   (fn [coll]
     {:tag tag :content `(~start ~@(add-whitespace coll) ~end)}))
 
-(def parsley-list
-     (coll-fn :list "(" ")"))
+(def parsley-list (coll-fn :list "(" ")"))
 
-(def parsley-vector
-     (coll-fn :vector "[" "]"))
+(def parsley-vector (coll-fn :vector "[" "]"))
 
-(def parsley-newline
-     {:tag :whitespace :content '("\n")})
-
-(def parse1 (comp first parse)) ;;parses one node
-
-(def sexp->parsley (comp parse1 format-code))
+(def parsley-newline {:tag :whitespace :content '("\n")})
 
 (defn first-vector [ast]
   (first (filter #(tag= :vector %) (:content ast))))

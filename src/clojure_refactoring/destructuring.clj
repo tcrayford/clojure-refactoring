@@ -23,13 +23,13 @@
        (filter parsley-map-lookup?)
        set))
 
-(defn swap-first-with-last [ast]
+(defn- swap-first-with-last [ast]
   (let [[first-node last-node] (relevant-content ast)]
     (replace
      {first-node last-node, last-node first-node}
      (:content ast))))
 
-(defn parsley-swap-first-with-last [ast]
+(defn- parsley-swap-first-with-last [ast]
   (assoc
       ast
     :content
@@ -56,7 +56,7 @@
 (def relevant-content-from-canoninical-form
      (comp relevant-content parsley-lookup-to-canoninical-form))
 
-(defn add-lookup-to-binding-map [binding-map lookup]
+(defn- add-lookup-to-binding-map [binding-map lookup]
   "Adds a lookup (a node of the form (:a a)) to a binding map."
   (let [[key m] (relevant-content-from-canoninical-form lookup)]
     (assoc binding-map m
@@ -87,7 +87,7 @@
    ast
    lookups))
 
-(defn add-binding-map [lookups root-ast]
+(defn- add-binding-map [lookups root-ast]
   (let [args (parsley-fn-args root-ast)
         new-args (destructured-binding-vec args lookups)]
     (parsley-tree-replace args new-args root-ast)))

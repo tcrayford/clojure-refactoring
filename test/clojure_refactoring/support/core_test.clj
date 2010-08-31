@@ -28,9 +28,6 @@
   (is (= (bindings '(let [b 2] b)) '[b 2]))
   (is (= (bindings '(defn foo [a] a)) '[a])))
 
-(deftest unique_vec
-  (is (= (unique-vec [1 2 3 1 2 3]) [1 2 3])))
-
 (deftest rec_contains?
   (is  (tree-contains? '(let [a 1] (let [b 2] (+ a b))) '(+ a b)))
   (is  (tree-contains? '(let [a 1] (+ a 2)) '(+ a 2)) true)
@@ -50,3 +47,6 @@
 (deftest andf-test
   (is ((all-of? map? :a) {:a 1}))
   (is (not ((all-of? map? :b) {:a 1}))))
+
+(deftest but_second
+  (is (= (but-second [1 2 3]) [1 3])))

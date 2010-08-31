@@ -10,7 +10,7 @@
       (pprint node))))
 
 ;; Below stolen from arc
-(defn predicater-by [f]
+(defn- predicater-by [f]
   (fn [& fns] (fn [& args]
       (f identity (map apply fns (repeat args))))))
 
@@ -25,7 +25,7 @@
 (def contains-sub-nodes?
      (any-of? sequential? map? set?))
 
-(defn expand-sub-nodes [tree]
+(defn- expand-sub-nodes [tree]
   (if (map? tree)
     (interleave (keys tree) (vals tree))
     (seq tree)))
@@ -54,10 +54,6 @@
   "Returns the function arguments from a top-level defn node"
   (find-first vector? node))
 
-(defn unique-vec [coll]
-  "Strips all duplicates from coll and forces it into a vector"
-  (vec (distinct coll)))
-
 (defn tree-contains? [coll obj]
   "True if coll contains obj at some level of nesting"
   (some #{obj}
@@ -78,7 +74,7 @@
    (zipmap old new)
    sexp))
 
-(defn expand-args-with-parse1 [args]
+(defn- expand-args-with-parse1 [args]
   "Takes arguments from a function and returns a vector that
   (in a let form) rebinds them by parsing them."
   (->> (mapcat #(list % (list 'parse1 %)) args) vec))
@@ -91,3 +87,7 @@
 
 (defn first= [x y]
   (= (first x) y))
+
+(defn but-second [coll]
+  (->> (first coll)
+       (conj (drop 2 coll))))

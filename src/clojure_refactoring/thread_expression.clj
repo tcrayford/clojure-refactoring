@@ -2,10 +2,6 @@
   (:use [clojure-refactoring.support core parsley]
         [clojure.walk :only [postwalk]]))
 
-(defn but-second [coll]
-  (->> (first coll)
-       (conj (drop 2 coll))))
-
 (defn threading-fns-from-type [type]
   "Returns functions to be used by thread-with-type
 based on what type of threading is going to be"
@@ -19,11 +15,11 @@ based on what type of threading is going to be"
         (threading-fns-from-type thread-type)]
     `(~(position-f node) ~(all-but-position-f node) ~@new-node)))
 
-(defn not-last-threading-node? [node position-f]
+(defn- not-last-threading-node? [node position-f]
   (and (list? (position-f node))
        (list? (position-f (position-f node)))))
 
-(defn thread-with-type [thread-type code]
+(defn- thread-with-type [thread-type code]
   (let [{:keys [position-f all-but-position-f]}
         (threading-fns-from-type thread-type)]
     (loop [node (read-string code) new-node '()]
@@ -32,7 +28,7 @@ based on what type of threading is going to be"
                (conj new-node (all-but-position-f node)))
         (finish-threading node new-node thread-type)))))
 
-(defn construct-threaded [thread-type code]
+(defn- construct-threaded [thread-type code]
   (format-code
    `(~thread-type ~@(thread-with-type thread-type code))))
 
@@ -47,15 +43,15 @@ based on what type of threading is going to be"
 (def threaded?
      (all-of? seq? (comp expression-threaders first)))
 
-(defn expand-threaded [coll]
+(defn- expand-threaded [coll]
   (if (threaded? coll)
     (macroexpand-1 coll)
     coll))
 
-(defn expand-all-threaded [node]
+(defn- expand-all-threaded [node]
   (postwalk expand-threaded node))
 
-(defn any-threaded? [node]
+(defn- any-threaded? [node]
   (some #(tree-contains? node %) expression-threaders))
 
 (defn thread-unthread [code]

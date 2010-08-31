@@ -3,18 +3,18 @@
         clojure-refactoring.support.core
         [clojure.contrib.seq-utils :only (find-first)]))
 
-(defn get-function-definition [defn-form]
+(defn- get-function-definition [defn-form]
   "Gets the function body out of a defn form
 TODO: doesn't work for multiple arity functions"
   (find-first list? defn-form))
 
-(defn add-to-binding [binding-node value var-name]
+(defn- add-to-binding [binding-node value var-name]
   (conj binding-node var-name value))
 
-(defn is-node-the-binding-form? [top-level node]
+(defn- is-node-the-binding-form? [top-level node]
   (= node (bindings top-level)))
 
-(defn modify-existing-let-block [form value var-name]
+(defn- modify-existing-let-block [form value var-name]
   (postwalk
    (fn [node]
      (if (is-node-the-binding-form? form node)
@@ -27,7 +27,7 @@ TODO: doesn't work for multiple arity functions"
     (modify-existing-let-block form value var-name)
     `(~'let [~var-name ~value] ~form)))
 
-(defn wrap-function-body-with-let [defn-form value var-name]
+(defn- wrap-function-body-with-let [defn-form value var-name]
   (let [fn-def (get-function-definition defn-form)]
     (postwalk-replace
      {fn-def (let-wrap fn-def value var-name)} defn-form)))
@@ -36,8 +36,7 @@ TODO: doesn't work for multiple arity functions"
   "TODO: only works for defn nodes"
   (let [top (read-string toplevel)
         value (read-string value)]
-    (format-code
-     (wrap-function-body-with-let
-       (postwalk-replace {value (symbol var-name)} top)
-       value
-       (symbol var-name)))))
+    (-> (wrap-function-body-with-let
+          (postwalk-replace {value (symbol var-name)} top)
+          value (symbol var-name))
+        format-code)))

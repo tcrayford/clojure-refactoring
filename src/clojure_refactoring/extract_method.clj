@@ -4,7 +4,7 @@
         clojure.set
         [clojure.contrib.seq-utils :only [find-first]]))
 
-(defn find-occurences [args node]
+(defn- find-occurences [args node]
   "Looks for any occurence of each element of args in the node"
   (seq (intersection (set args) (set (parsley-sub-nodes node)))))
 
@@ -15,12 +15,12 @@
   "Uses the arguments of a function node to return a call to it."
   (parsley-list `(~(fn-name fn-node) ~@(parsley-bindings fn-node))))
 
-(defn arg-occurences [f-node extracted-node]
+(defn- arg-occurences [f-node extracted-node]
   "Finds the bindings from f-node that are also in the extracted node."
   (-> (find-bindings-above-node f-node extracted-node)
       (find-occurences extracted-node)))
 
-(defn make-fn-node [name args body]
+(defn- make-fn-node [name args body]
   "Creates an ast representing the new function"
   {:tag :list :content
    (list
@@ -34,7 +34,7 @@
    (fn-call extracted)
    toplevel))
 
-(defn nodes-to-string [extract-node fn-node new-fun]
+(defn- nodes-to-string [extract-node fn-node new-fun]
   "Formats the output for extract-method to print"
   (str (parsley-to-string new-fun)
        "\n\n"
