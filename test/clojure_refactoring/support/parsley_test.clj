@@ -14,7 +14,7 @@
 
   (testing "parsley to string for each file in this project"
    (doseq [file (map filename-from-ns (find-ns-in-user-dir))]
-     (let [slurped (slurp file)]
+     (let [slurped (memo-slurp file)]
        (is (= (parsley-to-string (parse slurped))
               slurped))))))
 

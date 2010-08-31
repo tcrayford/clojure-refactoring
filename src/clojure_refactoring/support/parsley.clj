@@ -1,5 +1,5 @@
 (ns clojure-refactoring.support.parsley
-  (:require [net.cgrand.parsley.glr :as core])
+  (:require [net.cgrand.parsley.glr :as glr])
   (:use clojure.walk
         clojure-refactoring.support.core
         net.cgrand.parsley
@@ -90,7 +90,7 @@
      (:content ast)))
 
 (defn parsley-sub-nodes [ast]
-  (tree-seq (orf sequential? composite-tag?)
+  (tree-seq (any-of? sequential? composite-tag?)
             expand-ast-nodes
             ast))
 
@@ -121,15 +121,15 @@
   (str-join "" (:content ast)))
 
 (def parsley-symbol?
-     (andf map? parsley-atom?
+     (all-of? map? parsley-atom?
            (comp symbol? read-string ast-content)))
 
 (def parsley-keyword?
-     (andf parsley-atom?
+     (all-of? parsley-atom?
            #(first= (ast-content %) \:)))
 
 (def ignored-node?
-     (orf string? #(tag= :whitespace %) #(tag= :comment %)))
+     (any-of? string? #(tag= :whitespace %) #(tag= :comment %)))
 
 ;;TODO: needs a better name
 (defn relevant-content [ast]

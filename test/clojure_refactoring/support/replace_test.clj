@@ -36,7 +36,7 @@
 
 (deftest replace_returns_nil_if_it_does_nothing
   (doseq [namespace (find-ns-in-user-dir)]
-    (let [source (slurp (filename-from-ns namespace))]
+    (let [source (memo-slurp (filename-from-ns namespace))]
       (is (nil?
            (build-replacement-map namespace identity))))))
 

@@ -44,9 +44,9 @@
   (is (= (binding-node? (nth '(let [a 1] (let [b 2] (+ a b))) 2)) 'let)))
 
 (deftest orf-test
-  (is ((orf map? :a nil?) {:a 1}))
-  (is ((orf map? :b) {:a 1})))
+  (is ((any-of? map? :a nil?) {:a 1}))
+  (is ((any-of? map? :b) {:a 1})))
 
 (deftest andf-test
-  (is ((andf map? :a) {:a 1}))
-  (is (not ((andf map? :b) {:a 1}))))
+  (is ((all-of? map? :a) {:a 1}))
+  (is (not ((all-of? map? :b) {:a 1}))))

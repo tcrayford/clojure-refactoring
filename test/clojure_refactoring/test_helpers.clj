@@ -5,7 +5,7 @@
   (:require [clojurecheck.core :as cc])
   (:require [clojure.contrib.repl-utils :as repl-utils]))
 
-(def memoized-get-source
+(defonce memoized-get-source
      (memoize repl-utils/get-source))
 
 (def symbol-chars (vec "abcdefghijklmnopqrstuvwxyz"))
@@ -37,6 +37,8 @@
   `(let [intial# @~reference]
      (do ~@exprs)
      (not= @~reference intial#)))
+
+(def memo-slurp (memoize slurp))
 
 (defmacro fact [desc test provided]
   `(expect ~(second provided)

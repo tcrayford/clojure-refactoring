@@ -45,7 +45,7 @@ based on what type of threading is going to be"
 (def expression-threaders '#{->> -> clojure.core/->> clojure.core/->})
 
 (def threaded?
-     (andf seq? (comp expression-threaders first)))
+     (all-of? seq? (comp expression-threaders first)))
 
 (defn expand-threaded [coll]
   (if (threaded? coll)

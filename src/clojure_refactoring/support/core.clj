@@ -1,6 +1,6 @@
 (ns clojure-refactoring.support.core
   (:use [clojure.contrib pprint]
-        [clojure.contrib.seq-utils :only (find-first)]
+        [clojure.contrib.seq-utils :only [find-first]]
         [clojure.walk :only [postwalk-replace]]))
 
 (defn format-code [node]
@@ -10,16 +10,20 @@
       (pprint node))))
 
 ;; Below stolen from arc
-(defn make-predicater [f]
+(defn predicater-by [f]
   (fn [& fns] (fn [& args]
       (f identity (map apply fns (repeat args))))))
 
-(def orf (make-predicater some))
+(def ^{:doc "Returns a function that is true when
+             any of the predicates are true."}
+     any-of? (predicater-by some))
 
-(def andf (make-predicater every?))
+(def all-of? ^{:doc "Returns a function that is true when
+                     all of the predicates are true."}
+     (predicater-by every?))
 
 (def contains-sub-nodes?
-     (orf sequential? map? set?))
+     (any-of? sequential? map? set?))
 
 (defn expand-sub-nodes [tree]
   (if (map? tree)

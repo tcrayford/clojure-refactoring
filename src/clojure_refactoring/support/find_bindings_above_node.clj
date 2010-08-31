@@ -2,7 +2,7 @@
   (:use [clojure-refactoring.support core parsley]))
 
 (def parsley-binding-node?
-     (andf map?
+     (all-of? map?
            #(tag= :list %)
            (comp binding-forms symbol
                  #(apply str %) :content second :content)))
