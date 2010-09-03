@@ -87,7 +87,7 @@
    ast
    lookups))
 
-(defn- add-binding-map [lookups root-ast]
+(defn- add-destructured-maps-to-args [lookups root-ast]
   (let [args (parsley-fn-args root-ast)
         new-args (destructured-binding-vec args lookups)]
     (parsley-tree-replace args new-args root-ast)))
@@ -98,4 +98,4 @@
     (parsley-to-string
      (replace-lookups-with-destructured-symbols
        lookups
-       (add-binding-map lookups root-ast)))))
+       (add-destructured-maps-to-args lookups root-ast)))))

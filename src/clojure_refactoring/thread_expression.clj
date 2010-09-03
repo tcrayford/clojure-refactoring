@@ -29,8 +29,8 @@ based on what type of threading is going to be"
         (finish-threading node new-node thread-type)))))
 
 (defn- construct-threaded [thread-type code]
-  (format-code
-   `(~thread-type ~@(thread-with-type thread-type code))))
+  (apply str (butlast (format-code
+             `(~thread-type ~@(thread-with-type thread-type code))))))
 
 (def thread-last
      (partial construct-threaded '->>))
