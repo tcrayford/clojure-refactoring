@@ -40,7 +40,7 @@
 
 (def binding-forms
      #{'let 'fn 'binding 'for 'doseq 'dotimes 'defn 'loop 'defmacro
-       'if-let 'when-let 'defn-})
+       'if-let 'when-let 'defn- 'defmethod 'defmethod-})
 
 (defn binding-node? [[node-type]]
   "Checks if a node is a binding node"

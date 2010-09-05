@@ -143,7 +143,7 @@
 (defn intersperse [coll item]
   (interleave coll (repeat item)))
 
-(defn- add-whitespace [coll]
+(defn add-whitespace [coll]
   (butlast (intersperse coll parsley-whitespace)))
 
 (defn- coll-fn [tag start end]
