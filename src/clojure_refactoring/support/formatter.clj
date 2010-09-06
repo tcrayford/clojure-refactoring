@@ -1,20 +1,6 @@
 (ns clojure-refactoring.support.formatter
   (:use [clojure-refactoring.support parsley core]))
 
-(def ptag= #(partial tag= %))
-
-(def drop-first-and-last (comp rest butlast))
-
-(def first-content (comp first :content))
-
-(defn first-symbol [ast]
-  (first-content (first (relevant-content  ast))))
-
-(defn replace-content [ast new-content]
-  (assoc ast
-    :content
-    new-content))
-
 (defn after-each [pred elems coll]
   (reduce
    (fn [accum elem]
@@ -28,7 +14,7 @@
   (if (composite-tag? (:tag ast))
     (replace-content ast
                      `(~(first content)
-                       ~@(f (drop-first-and-last (remove (any-of? nil? empty?) content)))
+                       ~@(f (drop-first-and-last content))
                        ~(last content)))
     ast))
 

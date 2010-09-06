@@ -75,7 +75,7 @@
    (replacement-for-composite tag f)
    content))
 
-(defn- replace-content [f ast]
+(defn- walk-replace-content [f ast]
   (let [{tag :tag content :content} ast]
     (assoc ast
       :content
@@ -84,7 +84,7 @@
 (defn parsley-walk [f ast]
   (if (map? ast)
     (f
-     (replace-content f ast))
+     (walk-replace-content f ast))
     (vec (map #(parsley-walk f %) ast))))
 
 (defn- expand-ast-nodes [ast]
@@ -184,4 +184,18 @@
    ast))
 
 (def empty-parsley-list (parsley-list nil))
+
+(def ptag= #(partial tag= %))
+
+(def drop-first-and-last (comp rest butlast))
+
+(def first-content (comp first :content))
+
+(defn first-symbol [ast]
+  (first-content (first (relevant-content  ast))))
+
+(defn replace-content [ast new-content]
+  (assoc ast
+    :content
+    new-content))
 
