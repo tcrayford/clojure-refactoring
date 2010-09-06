@@ -165,3 +165,23 @@
 
 (def parsley-bindings
      (comp relevant-content parsley-fn-args))
+
+(defn content-conj [{content :content :as ast} & xs]
+  (assoc ast
+    :content
+    `(~(first content)
+      ~@xs ~@(butlast (drop 1 content))
+      ~(last content))))
+
+(defn strip-whitespace [ast]
+  (parsley-walk
+   (fn [node]
+     (if (composite-tag? (:tag node))
+       (assoc node
+         :content
+         (remove #(tag= :whitespace %) (:content node)))
+       node))
+   ast))
+
+(def empty-parsley-list (parsley-list nil))
+

@@ -4,19 +4,11 @@
   (:use clojure-refactoring.support.parsley)
   (:use clojure-refactoring.test-helpers))
 
-(defn strip-whitespace [ast]
-  (parsley-walk
-   (fn [node]
-     (when-not (tag= :whitespace node)
-       node))
-   ast))
-
 (defn format-from-sexp [s]
   (->> (sexp->parsley s)
        strip-whitespace
        format-ast
-       parsley-to-string
-       ))
+       parsley-to-string))
 
 (deftest strip-whitespace-test
   (is (= (parsley-to-string
@@ -34,7 +26,9 @@
   (is (= (format-from-sexp '(->> (inc 1) dec inc dec zero?))
          "(->> (inc 1)\n   dec\n   inc\n   dec\n   zero?)"))
   (is (= (format-from-sexp '(->> (:a a) (map zero?) (filter foo?)))
-         "(->> (:a a)\n   (map zero?)\n   (filter foo?))")))
+         "(->> (:a a)\n   (map zero?)\n   (filter foo?))"))
+  (is (= (format-from-sexp '(->> (map #(Integer. %) s)
+                                 (reduce +))))))
 
 (deftest it-formats-threading-first
   (is (= (format-from-sexp '(-> (inc 1) dec inc dec zero?))

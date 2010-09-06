@@ -51,7 +51,8 @@
   (not (or (replaced-in-threading? ast)
            (= ast (last (relevant-content toplevel))))))
 
-(def threading-spacing `(~parsley-newline ~@(repeat 2 parsley-whitespace)))
+(def threading-spacing
+     `(~parsley-newline ~@(repeat 2 parsley-whitespace)))
 
 (defn format-threaded [ast]
   (let [with-whitespace

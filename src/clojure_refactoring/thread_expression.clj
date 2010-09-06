@@ -1,42 +1,7 @@
 (ns clojure-refactoring.thread-expression
   (:use [clojure-refactoring.support core parsley]
-        [clojure.walk :only [postwalk]]))
-
-(defn threading-fns-from-type [type]
-  "Returns functions to be used by thread-with-type
-based on what type of threading is going to be"
-  ({'-> {:position-f second
-         :all-but-position-f but-second}
-    '->> {:position-f last
-          :all-but-position-f butlast}} type))
-
-(defn finish-threading [node new-node thread-type]
-  (let [{:keys [position-f all-but-position-f]}
-        (threading-fns-from-type thread-type)]
-    `(~(position-f node) ~(all-but-position-f node) ~@new-node)))
-
-(defn- not-last-threading-node? [node position-f]
-  (and (list? (position-f node))
-       (list? (position-f (position-f node)))))
-
-(defn- thread-with-type [thread-type code]
-  (let [{:keys [position-f all-but-position-f]}
-        (threading-fns-from-type thread-type)]
-    (loop [node (read-string code) new-node '()]
-      (if (not-last-threading-node? node position-f)
-        (recur (position-f node)
-               (conj new-node (all-but-position-f node)))
-        (finish-threading node new-node thread-type)))))
-
-(defn- construct-threaded [thread-type code]
-  (apply str (butlast (format-code
-             `(~thread-type ~@(thread-with-type thread-type code))))))
-
-(def thread-last
-     (partial construct-threaded '->>))
-
-(def thread-first
-     (partial construct-threaded '->))
+        [clojure.walk :only [postwalk]]
+        clojure-refactoring.support.formatter))
 
 (def expression-threaders '#{->> -> clojure.core/->> clojure.core/->})
 
@@ -62,3 +27,54 @@ based on what type of threading is going to be"
        (recur
         (expand-all-threaded node))
        node))))
+
+;;;;; Threading below here
+(defn threading-fns-from-type [type]
+  "Returns functions to be used by thread-with-type
+based on what type of threading is going to be"
+  ({'-> {:position-f (comp second relevant-content)
+         :all-but-position-f (comp but-second relevant-content)}
+    '->> {:position-f (comp last relevant-content)
+          :all-but-position-f (comp butlast relevant-content)}} type))
+
+(defn last-threading-node? [ast position-f]
+  (let [content (relevant-content ast)]
+    (not
+     (and (tag= :list (position-f  content))
+          (tag= :list (position-f (position-f
+                                   ast)))))))
+
+(defn finish-threading [{content :content :as node}
+                                new-ast thread-type]
+  (let [{:keys [position-f all-but-position-f]}
+        (threading-fns-from-type thread-type)
+        useful-content (relevant-content node)]
+    (content-conj
+     new-ast
+     (position-f node)
+     {:tag :list :content `("(" ~@(all-but-position-f node) ")")})))
+
+(defn thread-with-type [thread-type ast]
+  (let [{:keys [position-f all-but-position-f]}
+        (threading-fns-from-type thread-type)]
+    (loop [node ast new-node empty-parsley-list]
+      (if (last-threading-node? node position-f)
+        (finish-threading node new-node thread-type)
+        (recur (position-f  node)
+               (content-conj new-node (all-but-position-f node)))))))
+
+(defn- parsley-construct-threaded [thread-type code]
+  (parsley-to-string
+   (format-ast
+    {:tag :list :content
+     `("("
+       ~(ast-symbol thread-type)
+       ~@(relevant-content (thread-with-type thread-type
+                             (strip-whitespace (parse1 code))))
+       ")")})))
+
+(def thread-last
+     (partial parsley-construct-threaded '->>))
+
+(def thread-first
+     (partial parsley-construct-threaded '->))
