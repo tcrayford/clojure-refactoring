@@ -37,44 +37,43 @@ based on what type of threading is going to be"
     '->> {:position-f (comp last relevant-content)
           :all-but-position-f (comp butlast relevant-content)}} type))
 
-(defn last-threading-node? [ast position-f]
-  (let [content (relevant-content ast)]
-    (not
-     (and (tag= :list (position-f  content))
-          (tag= :list (position-f (position-f
-                                   ast)))))))
+(defn not-last-threading-node? [ast position-f]
+  (and (tag= :list (position-f ast))
+       (tag= :list (position-f (position-f ast)))))
 
 (defn finish-threading [{content :content :as node}
-                                new-ast thread-type]
+                        new-ast thread-type]
   (let [{:keys [position-f all-but-position-f]}
         (threading-fns-from-type thread-type)
         useful-content (relevant-content node)]
     (content-conj
      new-ast
      (position-f node)
-     {:tag :list :content `("(" ~@(all-but-position-f node) ")")})))
+     (apply list-without-whitespace (all-but-position-f node)))))
 
 (defn thread-with-type [thread-type ast]
   (let [{:keys [position-f all-but-position-f]}
         (threading-fns-from-type thread-type)]
     (loop [node ast new-node empty-parsley-list]
-      (if (last-threading-node? node position-f)
-        (finish-threading node new-node thread-type)
+      (if (not-last-threading-node? node position-f)
         (recur (position-f  node)
-               (content-conj new-node (all-but-position-f node)))))))
+               (content-conj new-node (all-but-position-f node)))
+        (finish-threading node new-node thread-type)))))
 
-(defn- parsley-construct-threaded [thread-type code]
-  (parsley-to-string
-   (format-ast
-    {:tag :list :content
-     `("("
-       ~(ast-symbol thread-type)
-       ~@(relevant-content (thread-with-type thread-type
-                             (strip-whitespace (parse1 code))))
-       ")")})))
+(defn thread-ast [thread-type ast]
+  (apply list-without-whitespace
+         `(~(ast-symbol thread-type)
+           ~@(->> (thread-with-type thread-type ast)
+                  relevant-content))))
 
-(def thread-last
-     (partial parsley-construct-threaded '->>))
+(defn- construct-threaded [thread-type code]
+  (->> (strip-whitespace (parse1 code))
+       (thread-ast thread-type)
+       format-ast
+       parsley-to-string))
 
-(def thread-first
-     (partial parsley-construct-threaded '->))
+(defn thread-last [code]
+     (construct-threaded '->> code))
+
+(defn thread-first [code]
+     (construct-threaded '-> code))

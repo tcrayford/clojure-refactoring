@@ -199,3 +199,5 @@
     :content
     new-content))
 
+(defn list-without-whitespace [& elems]
+  {:tag :list :content `("(" ~@elems ")")})

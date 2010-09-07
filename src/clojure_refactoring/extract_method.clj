@@ -1,5 +1,5 @@
 (ns clojure-refactoring.extract-method
-  (:use [clojure-refactoring.support core
+  (:use [clojure-refactoring.support core formatter
          find-bindings-above-node parsley]
         clojure.set
         [clojure.contrib.seq-utils :only [find-first]]))
@@ -22,11 +22,12 @@
 
 (defn- make-fn-node [name args body]
   "Creates an ast representing the new function"
-  {:tag :list :content
-   (list
-    "(" (ast-symbol 'defn) (parse1 " ") name
-    (parse1 " ") (parsley-vector args) (parse "\n  ")
-    body ")")})
+  (format-ast
+   (list-without-whitespace
+    (ast-symbol 'defn)
+    name
+    (parsley-vector args)
+    (strip-whitespace body))))
 
 (defn call-extracted [body toplevel extracted]
   (parsley-tree-replace
