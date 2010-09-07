@@ -1,16 +1,7 @@
 (ns clojure-refactoring.support.formatter
   (:use [clojure-refactoring.support parsley core]))
 
-(defn after-each [pred elems coll]
-  (reduce
-   (fn [accum elem]
-     (if (pred elem)
-       `(~@accum ~elem ~elems)
-       `(~@accum ~elem)))
-   ()
-   coll))
-
-(defn replace-content-by [{content :content :as ast} f]
+(defn replace-content-by [f {content :content :as ast}]
   (if (composite-tag? (:tag ast))
     (replace-content ast
                      `(~(first content)
@@ -18,36 +9,33 @@
                        ~(last content)))
     ast))
 
-(defmulti format-ast first-symbol)
+(defn add-whitespace-to-lists [ast]
+  (parsley-walk
+   #(replace-content-by add-whitespace %)
+   ast))
 
-(defn or= [obj & xs]
-  (some #{obj} xs))
-
-(defn replaced-in-threading? [node]
-  (or (or= (first-content node) "->>" "->")
+(defn not-replaced-in-threading? [node]
+  (or (some #{(first-content node)} ["->>" "->"])
       (tag= :whitespace node)
       (string? node)))
 
-(defn add-whitespace-to-lists [ast]
-  (parsley-walk
-   #(replace-content-by % add-whitespace)
-   ast))
-
 (defn replace-this-when-threading [ast toplevel]
-  (not (or (replaced-in-threading? ast)
+  (not (or (not-replaced-in-threading? ast)
            (= ast (last (relevant-content toplevel))))))
 
 (def threading-spacing
-     `(~parsley-newline ~@(repeat 2 parsley-whitespace)))
+     [parsley-newline parsley-whitespace parsley-whitespace])
 
 (defn format-threaded [ast]
   (let [with-whitespace
         (add-whitespace-to-lists ast)]
     (replace-content
-     with-whitespace
+      with-whitespace
      (after-each #(replace-this-when-threading % with-whitespace)
                  threading-spacing
                  (:content with-whitespace)))))
+
+(defmulti format-ast first-symbol)
 
 (defmethod format-ast "->" [ast]
            (format-threaded ast))
@@ -62,5 +50,10 @@
                         (drop-last threading-spacing)
                         (:content (add-whitespace-to-lists ast)))))
 
+(defn format-sub-nodes [ast]
+  (replace-content-by #(add-whitespace (map format-ast %)) ast))
+
 (defmethod format-ast :default [ast]
-           (add-whitespace-to-lists ast))
+           (if (some composite-tag? (relevant-content ast))
+             (format-sub-nodes ast)
+             (add-whitespace-to-lists ast)))

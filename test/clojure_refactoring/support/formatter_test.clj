@@ -35,3 +35,7 @@
          "(-> (inc 1)\n   dec\n   inc\n   dec\n   zero?)"))
 (is (= (format-from-sexp '(-> (:a a) (map zero?) (filter foo?)))
          "(-> (:a a)\n   (map zero?)\n   (filter foo?))")))
+
+(deftest format-threaded-inside-another-form
+  (is (= (format-from-sexp '(inc (-> (inc 1) dec)))
+         "(inc (-> (inc 1)\n   dec))")))

@@ -91,3 +91,14 @@
 (defn but-second [coll]
   (->> (first coll)
        (conj (drop 2 coll))))
+
+(defn after-each [pred elems coll]
+  "After each item in coll that matches predicate
+   add elems."
+  (reduce
+   (fn [accum elem]
+     (if (pred elem)
+       `(~@accum ~elem ~elems)
+       `(~@accum ~elem)))
+   ()
+   coll))
