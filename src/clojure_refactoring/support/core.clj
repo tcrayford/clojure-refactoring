@@ -10,29 +10,21 @@
       (pprint node))))
 
 ;; Below stolen from arc
-(defn- predicater-by [f]
+(defn- predicater-by [f] ;; used to build any-of and all-of
   (fn [& fns] (fn [& args]
-      (f identity (map apply fns (repeat args))))))
+                (f identity (map apply fns (repeat args))))))
 
-(def ^{:doc "Returns a function that is true when
-             any of the predicates are true."}
-     any-of? (predicater-by some))
+(def any-of? ^{:doc "Takes predicates and returns a function
+              that returns true if any of the predicates are true"}
+     (predicater-by some))
 
-(def all-of? ^{:doc "Returns a function that is true when
-                     all of the predicates are true."}
+(def all-of? ^{:doc "Takes predicates and returns a function
+              that returns true if all of the predicates are true"}
      (predicater-by every?))
 
-(def contains-sub-nodes?
-     (any-of? sequential? map? set?))
-
-(defn- expand-sub-nodes [tree]
-  (if (map? tree)
-    (interleave (keys tree) (vals tree))
-    (seq tree)))
-
 (defn sub-nodes [tree]
-  (tree-seq contains-sub-nodes?
-            expand-sub-nodes tree))
+  (tree-seq (any-of? sequential? map? set?)
+            seq tree))
 
 (defn count= [seq n]
   "Checks if the count of seq is equal to n"
@@ -42,37 +34,19 @@
      #{'let 'fn 'binding 'for 'doseq 'dotimes 'defn 'loop 'defmacro
        'if-let 'when-let 'defn- 'defmethod 'defmethod-})
 
-(defn binding-node? [[node-type]]
-  "Checks if a node is a binding node"
-  (binding-forms node-type))
-
 (defn evens [coll]
   "Returns every other item of coll"
   (take-nth 2 coll))
 
-(defn bindings [node]
-  "Returns the function arguments from a top-level defn node"
-  (find-first vector? node))
-
 (defn tree-contains? [coll obj]
   "True if coll contains obj at some level of nesting"
-  (some #{obj}
-        (sub-nodes coll)))
-
-(defn call-when [pred f obj]
-  (if (pred obj)
-    (f obj)
-    obj))
+  (some #{obj} (sub-nodes coll)))
 
 (defn replace-when [pred f coll]
   "Replaces each element of coll if pred returns true on it."
-  (map #(call-when pred f %) coll))
-
-(defn replace-in-sexp [old new sexp]
-  "Walks over sexp, replacing each element from old with its corresponding element in new."
-  (postwalk-replace
-   (zipmap old new)
-   sexp))
+  (map
+   (fn [elem]
+     (if (pred elem) (f elem) elem)) coll))
 
 (defn- expand-args-with-parse1 [args]
   "Takes arguments from a function and returns a vector that
