@@ -1,11 +1,7 @@
 (ns clojure-refactoring.support.find-bindings-above-node
   (:use [clojure-refactoring.support core parsley]))
 
-(def parsley-binding-node?
-     (all-of? map?
-           #(tag= :list %)
-           (comp binding-forms symbol
-                 #(apply str %) :content second :content)))
+
 
 (defn extract-binding-syms [ast]
   (if (#{"defmacro" "fn" "defn"}

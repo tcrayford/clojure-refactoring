@@ -89,8 +89,8 @@
 
 (defn- expand-ast-nodes [ast]
   (if (sequential? ast)
-     (seq ast)
-     (:content ast)))
+    (seq ast)
+    (:content ast)))
 
 (defn parsley-sub-nodes [ast]
   (tree-seq (any-of? sequential? composite-tag?)
@@ -120,18 +120,18 @@
   (= (:tag ast) x))
 
 (defn- parsley-atom? [ast]
-     (tag= :atom ast))
+  (tag= :atom ast))
 
 (defn- ast-content [ast]
   (str-join "" (:content ast)))
 
 (def parsley-symbol?
      (all-of? map? parsley-atom?
-           (comp symbol? read-string ast-content)))
+              (comp symbol? read-string ast-content)))
 
 (def parsley-keyword?
      (all-of? parsley-atom?
-           #(first= (ast-content %) \:)))
+              #(first= (ast-content %) \:)))
 
 (def ignored-node?
      (any-of? string? #(tag= :whitespace %) #(tag= :comment %)))
@@ -201,3 +201,12 @@
 
 (defn list-without-whitespace [& elems]
   {:tag :list :content `("(" ~@elems ")")})
+
+(defn vector-without-whitespace [& elems]
+  {:tag :list :content `("[" ~@elems "]")})
+
+(def parsley-binding-node?
+     (all-of? map?
+           #(tag= :list %)
+           (comp binding-forms symbol
+                 #(apply str %) :content second :content)))

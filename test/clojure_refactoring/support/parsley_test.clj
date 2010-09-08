@@ -76,3 +76,6 @@
   (is (= (parsley-vector [1 2 3])
 '{:tag :vector, :content ("[" 1 {:tag :whitespace, :content (" ")} 2 {:tag :whitespace, :content (" ")} 3 "]")})))
 
+(deftest parsley_binding_node?
+  (is (parsley-binding-node? (first (parse "(let [a 1] a)")))))
+

@@ -1,42 +1,55 @@
 (ns clojure-refactoring.local-binding
   (:use clojure.walk
-        clojure-refactoring.support.core
+        [clojure-refactoring.support core parsley formatter]
         [clojure.contrib.seq-utils :only (find-first)]))
 
-(defn- get-function-definition [defn-form]
-  "Gets the function body out of a defn form
-TODO: doesn't work for multiple arity functions"
-  (find-first list? defn-form))
+(defn- get-function-definition [defn-ast]
+  (find-first #(tag= :list %) (:content defn-ast)))
 
-(defn- add-to-binding [binding-node value var-name]
-  (conj binding-node var-name value))
+(defn- add-to-binding [{content :content :as binding-node}
+                       value var-name]
+  (assoc binding-node
+    :content
+    `(~(first content)
+      ~@(butlast (drop 1 content))
+      ~parsley-whitespace
+      ~var-name
+      ~parsley-whitespace
+      ~value
+      ~(last content))))
 
-(defn- is-node-the-binding-form? [top-level node]
-  (= node (bindings top-level)))
+(defn is-node-the-binding-form [top-level ast]
+  (= ast (parsley-fn-args top-level)))
 
 (defn- modify-existing-let-block [form value var-name]
-  (postwalk
-   (fn [node]
-     (if (is-node-the-binding-form? form node)
-       (add-to-binding node value var-name)
-       node))
+  (parsley-walk
+   (fn [ast]
+     (if (is-node-the-binding-form form ast)
+       (add-to-binding ast value var-name)
+       ast))
    form))
 
 (defn let-wrap [form value var-name]
-  (if (binding-node? form)
+  (if (parsley-binding-node? form)
     (modify-existing-let-block form value var-name)
-    `(~'let [~var-name ~value] ~form)))
+    {:tag :list :content
+     `("(" ~(ast-symbol 'let)
+       ~parsley-whitespace
+       ~(parsley-vector
+         [var-name value])
+       ~parsley-whitespace
+       ~form ")")}))
 
 (defn- wrap-function-body-with-let [defn-form value var-name]
   (let [fn-def (get-function-definition defn-form)]
-    (postwalk-replace
-     {fn-def (let-wrap fn-def value var-name)} defn-form)))
+    (parsley-tree-replace
+     fn-def (let-wrap fn-def value var-name)
+     defn-form)))
 
-(defn local-wrap [toplevel value var-name]
-  "TODO: only works for defn nodes"
-  (let [top (read-string toplevel)
-        value (read-string value)]
-    (-> (wrap-function-body-with-let
-          (postwalk-replace {value (symbol var-name)} top)
-          value (symbol var-name))
-        format-code)))
+(defparsed-fn local-wrap [top value var-name]
+  "Extracts a value as a local variable inside top"
+  (-> (wrap-function-body-with-let
+        (parsley-tree-replace
+         value var-name top)
+        value var-name)
+      parsley-to-string))

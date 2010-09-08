@@ -12,9 +12,6 @@
        (map (comp symbol first :content))
        vec))
 
-(deftest parsley_binding_node?
-  (is (parsley-binding-node? (first (parse "(let [a 1] a)")))))
-
 (deftest find_bindings
   (is (= (find-bindings-above-sexp
           '(defn myfn [a] (+ 1 a)) '(+ 1 a))
