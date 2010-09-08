@@ -15,7 +15,11 @@
   (is (= (local-wrap "(defn a [b] (let [c 1] (+ b (/ b c))))"
                      "(/ b c)"
                      "d")
-         "(defn a [b] (let [c 1 d (/ b c)] (+ b d)))")))
+         "(defn a [b] (let [c 1 d (/ b c)] (+ b d)))"))
+  (is (= (local-wrap "(defn a [b] (let [c 1 z 3] (+ z c)))"
+                     "(+ z c)"
+                     "y")
+         "(defn a [b] (let [c 1 z 3 y (+ z c)] y))")))
 
 (defn parsley->sexp [ast]
   (read-string (parsley-to-string ast)))
