@@ -4,12 +4,11 @@
         [clojure.contrib.seq-utils :only (find-first)]))
 
 (defn- get-function-definition [defn-ast]
-  (find-first #(tag= :list %) (:content defn-ast)))
+  (find-first (tag= :list) (:content defn-ast)))
 
 (defn- add-to-binding [{content :content :as binding-node}
                        value var-name]
-  (assoc binding-node
-    :content
+  (replace-content binding-node
     `(~(first content)
       ~@(butlast (drop 1 content))
       ~parsley-whitespace
@@ -32,13 +31,13 @@
 (defn let-wrap [form value var-name]
   (if (parsley-binding-node? form)
     (modify-existing-let-block form value var-name)
-    {:tag :list :content
-     `("(" ~(ast-symbol 'let)
-       ~parsley-whitespace
-       ~(parsley-vector
-         [var-name value])
-       ~parsley-whitespace
-       ~form ")")}))
+    (list-without-whitespace
+     (ast-symbol 'let)
+      parsley-whitespace
+      (parsley-vector
+       [var-name value])
+      parsley-whitespace
+      form)))
 
 (defn- wrap-function-body-with-let [defn-form value var-name]
   (let [fn-def (get-function-definition defn-form)]

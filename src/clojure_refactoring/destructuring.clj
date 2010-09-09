@@ -11,8 +11,7 @@
          (count= content 2))))
 
 (defn parsley-key->sym [kw-node]
-  (assoc kw-node
-    :content
+  (replace-content kw-node
     (list
      (str-join ""
             (drop 1 (first (:content kw-node)))))))
@@ -30,9 +29,7 @@
      (:content ast))))
 
 (defn- parsley-swap-first-with-last [ast]
-  (assoc
-      ast
-    :content
+  (replace-content ast
     (swap-first-with-last ast)))
 
 (defn parsley-lookup-to-canoninical-form [lookup-ast]
@@ -44,8 +41,7 @@
 (defn add-to-parsley-map [m key val]
   "Adds key and value (which should be parsley nodes
   to m, which represents a parsley map."
-  (assoc m
-    :content
+  (replace-content m
     `("{"
       ~key
       ~parsley-whitespace

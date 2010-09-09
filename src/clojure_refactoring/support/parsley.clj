@@ -51,16 +51,23 @@
 
 (def parse1 (comp first parse)) ;;parses one node
 
+(defn make-node [tag content]
+  {:tag tag :content content})
+
 (defn ast-symbol [sym]
-  {:tag :atom, :content (list (name sym))})
+  (make-node :atom (list (name sym))))
 
-(def parsley-empty-map {:tag :map :content (list "{" "}") })
+(def parsley-empty-map (make-node :map (list "{" "}")))
 
-(def parsley-whitespace
-     '{:tag :whitespace :content (" ")})
+(def parsley-whitespace (make-node :whitespace '(" ")))
 
 (def composite-tag? (complement
                      #{:atom :regex :space :var :char :string}))
+
+(defn replace-content [ast new-content]
+  (assoc ast
+    :content
+    new-content))
 
 (declare parsley-walk)
 
@@ -77,9 +84,9 @@
 
 (defn- walk-replace-content [f ast]
   (let [{tag :tag content :content} ast]
-    (assoc ast
-      :content
-      (replacement-for-content tag f content))))
+    (replace-content
+     ast
+     (replacement-for-content tag f content))))
 
 (defn parsley-walk [f ast]
   (if (map? ast)
@@ -116,76 +123,89 @@
 (defn- parsley-get-first-node [ast]
   (if (map? ast) ast (first ast)))
 
-(defn tag= [x ast]
-  (= (:tag ast) x))
+(defn tag=
+  ([x] #(tag= x %)) ;;Curried
+  ([x ast]
+     (= (:tag ast) x)))
 
+;; atom?
 (defn- parsley-atom? [ast]
   (tag= :atom ast))
 
+;;content->str
 (defn- ast-content [ast]
   (str-join "" (:content ast)))
 
+;;symbol?
 (def parsley-symbol?
      (all-of? map? parsley-atom?
               (comp symbol? read-string ast-content)))
 
+;;keyword?
 (def parsley-keyword?
      (all-of? parsley-atom?
               #(first= (ast-content %) \:)))
 
 (def ignored-node?
-     (any-of? string? #(tag= :whitespace %) #(tag= :comment %)))
+     (any-of? string? (tag= :whitespace) (tag= :comment)))
 
 ;;TODO: needs a better name
 (defn relevant-content [ast]
   (remove ignored-node? (:content ast)))
 
 (defn intersperse [coll item]
+  "After every element in coll, add item."
   (interleave coll (repeat item)))
 
 (defn add-whitespace [coll]
   (butlast (intersperse coll parsley-whitespace)))
 
-(defn- coll-fn [tag start end]
-  (fn [coll]
-    {:tag tag :content `(~start ~@(add-whitespace coll) ~end)}))
+(defn- coll-fn [tag start end elems]
+  (make-node tag `(~start ~@elems ~end)))
 
-(def parsley-list (coll-fn :list "(" ")"))
+;; list
+(defn parsley-list [coll]
+  (coll-fn :list "(" ")" (add-whitespace coll)))
 
-(def parsley-vector (coll-fn :vector "[" "]"))
+;;vector
+(defn parsley-vector [coll]
+  (coll-fn :vector "[" "]" (add-whitespace coll)))
 
-(def parsley-newline {:tag :whitespace :content '("\n")})
+(defn list-without-whitespace [& elems]
+  (coll-fn :list "(" ")" elems))
+
+(defn vector-without-whitespace [& elems]
+  (coll-fn :vector "[" "]" elems))
+
+;;newline
+(def parsley-newline (make-node :whitespace '("\n")))
 
 (defn first-vector [ast]
-  (first (filter #(tag= :vector %) (:content ast))))
+  (find-first (tag= :vector) (:content ast)))
 
 (defn parsley-fn-args [ast]
-  (first-vector
-   (parsley-get-first-node ast)))
+  (first-vector (parsley-get-first-node ast)))
 
 (def parsley-bindings
      (comp relevant-content parsley-fn-args))
 
+;; conj
 (defn content-conj [{content :content :as ast} & xs]
-  (assoc ast
-    :content
-    `(~(first content)
-      ~@xs ~@(butlast (drop 1 content))
-      ~(last content))))
+  (replace-content ast
+                   `(~(first content)
+                     ~@xs ~@(butlast (drop 1 content))
+                     ~(last content))))
 
 (defn strip-whitespace [ast]
   (parsley-walk
    (fn [node]
      (if (composite-tag? (:tag node))
-       (assoc node
-         :content
-         (remove #(tag= :whitespace %) (:content node)))
+       (replace-content node
+                        (remove (tag= :whitespace) (:content node)))
        node))
    ast))
 
 (def empty-parsley-list (parsley-list nil))
-
-(def ptag= #(partial tag= %))
 
 (def drop-first-and-last (comp rest butlast))
 
@@ -194,19 +214,8 @@
 (defn first-symbol [ast]
   (first-content (first (relevant-content  ast))))
 
-(defn replace-content [ast new-content]
-  (assoc ast
-    :content
-    new-content))
-
-(defn list-without-whitespace [& elems]
-  {:tag :list :content `("(" ~@elems ")")})
-
-(defn vector-without-whitespace [& elems]
-  {:tag :list :content `("[" ~@elems "]")})
-
 (def parsley-binding-node?
      (all-of? map?
-           #(tag= :list %)
-           (comp binding-forms symbol
-                 #(apply str %) :content second :content)))
+              (tag= :list)
+              (comp binding-forms symbol
+                    #(apply str %) :content second :content)))
