@@ -1,6 +1,5 @@
 (ns clojure-refactoring.local-binding-test
   (:use clojure.test)
-  (:use clojure-refactoring.support.parsley)
   (:use clojure-refactoring.local-binding :reload))
 
 (use-fixtures :once #(time (%)))

@@ -1,18 +1,18 @@
 (ns clojure-refactoring.support.formatter-test
   (:use clojure-refactoring.support.formatter :reload)
   (:use clojure.test)
-  (:use clojure-refactoring.support.parsley)
+  (:require [clojure-refactoring.support.parsley :as ast])
   (:use clojure-refactoring.test-helpers))
 
 (defn format-from-sexp [s]
-  (->> (sexp->parsley s)
-       strip-whitespace
+  (->> (ast/sexp->parsley s)
+       ast/strip-whitespace
        format-ast
-       parsley-to-string))
+       ast/parsley-to-string))
 
 (deftest strip-whitespace-test
-  (is (= (parsley-to-string
-          (strip-whitespace (sexp->parsley '(+ 1 2))))
+  (is (= (ast/parsley-to-string
+          (ast/strip-whitespace (ast/sexp->parsley '(+ 1 2))))
          "(+12)")))
 
 (deftest it-adds-whitespace-to-a-one-line-sexp

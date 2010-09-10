@@ -1,8 +1,7 @@
 (ns clojure-refactoring.support.replace
   (:use [clojure-refactoring.support
-         source core paths]
-        [clojure-refactoring.support.parsley
-         :only [parsley-to-string]]))
+         source core paths])
+  (:require [clojure-refactoring.support.parsley :as ast]))
 
 (defn map-to-alist [m]
   "Converts a clojure map to an alist suitable for emacs"
@@ -16,7 +15,7 @@
     (if (= (parsley-from-cache ns) replacement)
       nil
      {:file (filename-from-ns ns)
-      :new-source (parsley-to-string
+      :new-source (ast/parsley-to-string
                    replacement)})))
 
 (defn replace-namespaces [namespaces f]

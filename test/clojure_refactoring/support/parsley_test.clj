@@ -1,5 +1,5 @@
 (ns clojure-refactoring.support.parsley-test
-  (:use clojure-refactoring.support.parsley :reload)
+  (:require [clojure-refactoring.support.parsley :as ast] :reload)
   (:use clojure-refactoring.test-helpers
         clojure.test
         [clojure-refactoring.support core source paths])
@@ -8,23 +8,23 @@
 (use-fixtures :once #(time (%)))
 
 (deftest parlsey_keyword
-  (is (parsley-keyword? (first (parser/parse ":a")))))
+  (is (ast/parsley-keyword? (first (parser/parse ":a")))))
 
 (deftest parsley_to_string
   (prop "parsley to string composed with parse is identity"
         [s random-sexp-from-core]
-        (is (= (parsley-to-string (parser/parse s))
+        (is (= (ast/parsley-to-string (parser/parse s))
                s)))
 
   (testing "parsley to string for each file in this project"
    (doseq [file (map filename-from-ns (find-ns-in-user-dir))]
      (let [slurped (memo-slurp file)]
-       (is (= (parsley-to-string (parser/parse slurped))
+       (is (= (ast/parsley-to-string (parser/parse slurped))
               slurped))))))
 
 (defn parsley-rec-contains [obj ast]
   "Works out if a parsley-ast contains a sexp object"
-  (-> (parsley-to-string ast)
+  (-> (ast/parsley-to-string ast)
       read-string
       (tree-contains? obj)))
 
@@ -37,14 +37,14 @@
               old (first (read-string s))]
           (is (not
                (->>
-                (replace-symbol-in-ast-node old new parsed)
+                (ast/replace-symbol-in-ast-node old new parsed)
                 (parsley-rec-contains old))))))
 
   (prop "replacing a symbol with itself is identity on an ast"
         [s random-sexp-from-core]
         (let [parsed (parser/parse s)
               sym (first (read-string s))]
-          (is (= (replace-symbol-in-ast-node sym sym parsed)
+          (is (= (ast/replace-symbol-in-ast-node sym sym parsed)
                  parsed))))
 
   (prop "replacing a symbol with another one, then replacing the new one with the original produces the same node"
@@ -53,12 +53,12 @@
         (let [parsed (parser/parse s)
               old (first (read-string s))]
           (is (= (->> parsed
-                      (replace-symbol-in-ast-node old new)
-                      (replace-symbol-in-ast-node new old))
+                      (ast/replace-symbol-in-ast-node old new)
+                      (ast/replace-symbol-in-ast-node new old))
                  parsed))))
 
-  (is (= (parsley-to-string
-          (replace-symbol-in-ast-node 'a 'z
+  (is (= (ast/parsley-to-string
+          (ast/replace-symbol-in-ast-node 'a 'z
                                       (parser/parse "(defn b [c] (a 1 2))")))
          "(defn b [c] (z 1 2))")))
 
@@ -66,17 +66,17 @@
   (prop "parsley-walk with identity returns the same ast it was passe"
         [s random-sexp-from-core]
         (let [parsed (parser/parse s)]
-          (is (= (parsley-walk identity parsed)
+          (is (= (ast/parsley-walk identity parsed)
                  parsed)))))
 
 (deftest parsley_list
-  (is (= (parsley-list [1 2 3])
+  (is (= (ast/parsley-list [1 2 3])
 '{:tag :list, :content ("(" 1 {:tag :whitespace, :content (" ")} 2 {:tag :whitespace, :content (" ")} 3 ")")})))
 
 (deftest parsley_vector
-  (is (= (parsley-vector [1 2 3])
+  (is (= (ast/parsley-vector [1 2 3])
 '{:tag :vector, :content ("[" 1 {:tag :whitespace, :content (" ")} 2 {:tag :whitespace, :content (" ")} 3 "]")})))
 
 (deftest parsley_binding_node?
-  (is (parsley-binding-node? (first (parser/parse "(let [a 1] a)")))))
+  (is (ast/parsley-binding-node? (parser/parse1 "(let [a 1] a)"))))
 

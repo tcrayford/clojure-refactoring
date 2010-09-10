@@ -1,13 +1,14 @@
 (ns clojure-refactoring.destructuring-test
   (:use clojure-refactoring.destructuring :reload)
-  (:use clojure-refactoring.support.parsley
-        clojure.test)
+  (:use clojure.test)
+  (:use [clojure-refactoring.support.parsley :only [defparsed-fn]])
+  (:require [clojure-refactoring.support.parsley :as ast])
   (:require [clojure-refactoring.support.parser :as parser]))
 
 (use-fixtures :once #(time (%)))
 
 (deftest removing-whitespace
-  (is (empty? (remove ignored-node?
+  (is (empty? (remove ast/ignored-node?
                       (parser/parse " ")))))
 
 (deftest parsley_map_lookup
@@ -27,17 +28,17 @@
          '{:tag :atom :content ("a")})))
 
 (deftest parsley_find_map_lookups
-  (is (= (map parsley-to-string
+  (is (= (map ast/parsley-to-string
               (parsley-find-lookups (parser/parse "(defn a [b] (:a b))")))
          '("(:a b)"))))
 
 (deftest parsley_lookup_to_proper_form
-  (is (= (parsley-to-string (parsley-lookup-to-canoninical-form
+  (is (= (ast/parsley-to-string (parsley-lookup-to-canoninical-form
                              (first (parser/parse "(a :a)"))))
          "(:a a)")))
 
 (deftest add_to_parsley_map
-  (is (= (parsley-to-string
+  (is (= (ast/parsley-to-string
           (add-to-parsley-map '{:tag :map :content ("{" "}")}
                               '{:tag :atom :content ("a")}
                               '{:tag :atom :content ("b")})))))

@@ -1,6 +1,6 @@
 (ns clojure-refactoring.support.source
   (:use [clojure.contrib.find-namespaces :only [find-namespaces-in-dir]]
-        [clojure-refactoring.support core paths parsley])
+        [clojure-refactoring.support core paths])
   (:import java.io.File)
   (require [clojure-refactoring.support.parser :as parser]))
 

@@ -1,7 +1,7 @@
 (ns clojure-refactoring.rename-test
   (:use clojure.test
         clojure.contrib.mock)
-  (:require [clojure-refactoring.support.parsley :as parsley])
+  (:require [clojure-refactoring.support.parsley :as ast])
   (:require [clojure-refactoring.support.parser :as parser])
   (:use clojure-refactoring.rename :reload))
 
@@ -21,7 +21,7 @@
 
 (deftest renaming_fn
   (testing "it replaces occurences of the var name"
-    (is (= (parsley/parsley-to-string
+    (is (= (ast/parsley-to-string
             ((renaming-fn #'a 'z)
              (parser/parse
               "(defn b [c] (a 1 2))")))

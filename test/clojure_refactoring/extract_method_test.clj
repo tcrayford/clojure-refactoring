@@ -1,17 +1,17 @@
 (ns clojure-refactoring.extract-method-test
   (:use clojure-refactoring.extract-method :reload)
   (:use clojure.test
-        [clojure-refactoring.support find-bindings-above-node
-         parsley])
+        clojure-refactoring.support.find-bindings-above-node)
+  (:require [clojure-refactoring.support.parsley :as ast])
   (:require [clojure-refactoring.support.parser :as parser]))
 
 (use-fixtures :once #(time (%)))
 
 (defn fn-call-sexp [sexp]
-  (read-string (parsley-to-string (fn-call (sexp->parsley sexp)))))
+  (read-string (ast/parsley-to-string (fn-call (ast/sexp->parsley sexp)))))
 
 (defn fn-name-sexp [sexp]
-         (symbol (first (:content (fn-name (sexp->parsley sexp))))))
+         (symbol (first (:content (fn-name (ast/sexp->parsley sexp))))))
 
 (deftest fn_name
   (is (= (fn-name-sexp '(defn a [c] c)) 'a)))
@@ -20,7 +20,7 @@
   (is (= (fn-call-sexp '(defn a [b] (+ 1 2))) '(a b))))
 
 (defn remove-extracted-function-sexp [extracted toplevel new-fn]
-  (parsley-to-string
+  (ast/parsley-to-string
    (call-extracted
     (parser/parse1 extracted)
     (parser/parse1 toplevel)
