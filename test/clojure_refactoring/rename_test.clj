@@ -2,6 +2,7 @@
   (:use clojure.test
         clojure.contrib.mock)
   (:require [clojure-refactoring.support.parsley :as parsley])
+  (:require [clojure-refactoring.support.parser :as parser])
   (:use clojure-refactoring.rename :reload))
 
 (use-fixtures :once #(time (%)))
@@ -22,7 +23,7 @@
   (testing "it replaces occurences of the var name"
     (is (= (parsley/parsley-to-string
             ((renaming-fn #'a 'z)
-             (parsley/parse
+             (parser/parse
               "(defn b [c] (a 1 2))")))
 
            "(defn b [c] (z 1 2))")))) ;;eventually, this should only

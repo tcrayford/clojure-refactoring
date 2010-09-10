@@ -4,12 +4,13 @@
          paths]
         clojure.test
         clojure-refactoring.test-helpers
-        clojure.contrib.mock))
+        clojure.contrib.mock)
+  (:require [clojure-refactoring.support.parser :as parser]))
 
 (use-fixtures :once #(time (%)))
 
 (defn replace-test-fn [top-level-node]
-  (parse "a"))
+  (parser/parse "a"))
 
 (deftest map_to_alist
   (testing "empty map gives an empty alist"
@@ -22,7 +23,7 @@
 
 (deftest build_replacement_map
   (testing "populates the attributes correctly"
-    (expect [parsley-from-cache (returns (parse "(+ a 1)"))
+    (expect [parsley-from-cache (returns (parser/parse "(+ a 1)"))
              filename-from-ns (returns "foo")]
             (is (= (:new-source (replacement-map-for-tests)) "a"))
             (is (= (:file (replacement-map-for-tests)) "foo")))))

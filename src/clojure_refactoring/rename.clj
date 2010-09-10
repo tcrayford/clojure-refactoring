@@ -1,9 +1,10 @@
 (ns clojure-refactoring.rename
   (:use [clojure-refactoring.support replace parsley]
-        clojure.walk))
+        clojure.walk)
+  (:require [clojure-refactoring.support.parser :as parser]))
 
 (defn rename [node old-name new-name]
-  (let [ast (parse node)
+  (let [ast (parser/parse node)
         old (symbol old-name)
         new (symbol new-name)]
     (parsley-to-string

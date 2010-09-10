@@ -1,19 +1,19 @@
 (ns clojure-refactoring.support.source-test
   (:use clojure-refactoring.support.source :reload)
   (:import clojure-refactoring.support.source.NameSpaceCacheEntry)
-  (:use [clojure-refactoring.support.parsley :only [parse]]
-        clojure-refactoring.test-helpers
+  (:use clojure-refactoring.test-helpers
         clojure-refactoring.support.paths
         clojure.test
         clojure.contrib.mock)
-  (:require [clojure-refactoring.support replace replace-test]))
+  (:require [clojure-refactoring.support replace replace-test])
+  (:require [clojure-refactoring.support.parser :as parser]))
 
 (use-fixtures :once #(time (%)))
 
 (def a nil) ;; used to test does-ns-refer-to-var? below.
 
 (def cache-with-one-entry (atom {'a
-                                 (NameSpaceCacheEntry. 0 (parse "(+ 1 2)") 'a)}))
+                                 (NameSpaceCacheEntry. 0 (parser/parse "(+ 1 2)") 'a)}))
 
 (defn test-entry-from-cache []
   (parsley-from-cache 'a))

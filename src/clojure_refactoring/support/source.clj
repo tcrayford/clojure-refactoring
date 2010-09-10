@@ -1,7 +1,8 @@
 (ns clojure-refactoring.support.source
   (:use [clojure.contrib.find-namespaces :only [find-namespaces-in-dir]]
         [clojure-refactoring.support core paths parsley])
-  (:import java.io.File))
+  (:import java.io.File)
+  (require [clojure-refactoring.support.parser :as parser]))
 
 (defn- find-and-load [namespace]
   (when-not (find-ns namespace)
@@ -25,7 +26,7 @@
 
 (defn new-ns-entry [namespace]
   (let [f (filename-from-ns namespace)
-        parsed (parse (slurp f))]
+        parsed (parser/parse (slurp f))]
     (NameSpaceCacheEntry. (last-modified namespace)
                           parsed
                           namespace)))

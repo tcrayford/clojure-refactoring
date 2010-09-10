@@ -1,7 +1,8 @@
 (ns clojure-refactoring.thread-expression
   (:use [clojure-refactoring.support core parsley]
         [clojure.walk :only [postwalk]]
-        clojure-refactoring.support.formatter))
+        clojure-refactoring.support.formatter)
+  (:require [clojure-refactoring.support.parser :as parser]))
 
 (def expression-threaders '#{->> -> clojure.core/->> clojure.core/->})
 
@@ -67,7 +68,7 @@ based on what type of threading is going to be"
                   relevant-content))))
 
 (defn- construct-threaded [thread-type code]
-  (->> (strip-whitespace (parse1 code))
+  (->> (strip-whitespace (parser/parse1 code))
        (thread-ast thread-type)
        format-ast
        parsley-to-string))

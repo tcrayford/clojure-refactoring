@@ -1,21 +1,22 @@
 (ns clojure-refactoring.destructuring-test
   (:use clojure-refactoring.destructuring :reload)
   (:use clojure-refactoring.support.parsley
-        clojure.test))
+        clojure.test)
+  (:require [clojure-refactoring.support.parser :as parser]))
 
 (use-fixtures :once #(time (%)))
 
 (deftest removing-whitespace
   (is (empty? (remove ignored-node?
-                      (parse " ")))))
+                      (parser/parse " ")))))
 
 (deftest parsley_map_lookup
   (testing "map lookups"
-    (are [s] (parsley-map-lookup? (first (parse s)))
+    (are [s] (parsley-map-lookup? (first (parser/parse s)))
          "(:a a)"
          "(b :foo)"))
 
-  (are [s] (not (parsley-map-lookup? (first (parse s))))
+  (are [s] (not (parsley-map-lookup? (first (parser/parse s))))
        "(a (:a a))"
        "(:a a a)"
        "(:foo :bar)"
@@ -27,12 +28,12 @@
 
 (deftest parsley_find_map_lookups
   (is (= (map parsley-to-string
-              (parsley-find-lookups (parse "(defn a [b] (:a b))")))
+              (parsley-find-lookups (parser/parse "(defn a [b] (:a b))")))
          '("(:a b)"))))
 
 (deftest parsley_lookup_to_proper_form
   (is (= (parsley-to-string (parsley-lookup-to-canoninical-form
-                             (first (parse "(a :a)"))))
+                             (first (parser/parse "(a :a)"))))
          "(:a a)")))
 
 (deftest add_to_parsley_map
@@ -42,7 +43,7 @@
                               '{:tag :atom :content ("b")})))))
 
 (deftest parsley_lookups_to_binding_map
-  (is ((lookups-to-binding-map (parsley-find-lookups (parse "(defn a [b] (:a b))")))
+  (is ((lookups-to-binding-map (parsley-find-lookups (parser/parse "(defn a [b] (:a b))")))
            '{:tag :atom :content ("b")})))
 
 ;;Integration level tests below here.

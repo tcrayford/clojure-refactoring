@@ -5,51 +5,8 @@
         net.cgrand.parsley
         [clojure.contrib.def :only [defonce-]]
         [clojure.contrib.seq-utils :only [find-first]]
-        [clojure.contrib.str-utils :only [str-join]]))
-
-(defonce- sexp
-  (memoize
-   (parser {:space [#{:whitespace :comment :discard}:*]
-            :main :expr*}
-           :expr- #{:atom :list :vector :set :map :string :regex
-                    :meta :deprecated-meta :quote
-                    :unquote :syntax-quote :unquote-splicing
-                    :deref :var :fn :char}
-           :atom1st- #{{\a \z \A \Z \0 \9} (any-of "!$%&*+-./:<=>?_")}
-           :atom (token :atom1st #{:atom1st \#}:* (?! #{:atom1st \#}))
-           :string (token \" #{(none-of \\ \") [\\ any-char]}:* \")
-           :char (token \\ #{any-char "newline" "space" "tab" "backspace"
-                             "formfeed" "return"
-                             (into [\u] (repeat 4 {\0 \9 \a \f \A \F}))
-                             [\u :hex :hex :hex :hex]
-                             [\o {\0 \7}]
-                             [\o {\0 \7} {\0 \7}]
-                             [\o {\0 \3} {\0 \7} {\0 \7}]}
-                        (?! #{:atom1st \#}))
-           :regex (token \# \" #{(none-of \\ \") [\\ any-char]}:* \")
-           :list ["(" :expr* ")"]
-           :vector ["[" :expr* "]"]
-           :set ["#{" :expr* "}"]
-           :map ["{" :expr* "}"]
-           :discard ["#_" :expr]
-           :meta ["^" :expr :expr]
-           :quote [\' :expr]
-           :syntax-quote [\` :expr]
-           :tilda- [\~ (?! \@)]
-           :unquote [:tilda :expr]
-           :unquote-splicing ["~@" :expr]
-           :deprecated-meta ["#^" :expr :expr]
-           :deref [\@ :expr]
-           :var ["#'" :expr]
-           :fn ["#(" :expr* ")"]
-
-           :comment (token #{"#!" ";"} (none-of \newline):* (?! (none-of \newline)))
-
-           :whitespace (token #{\space \tab \newline \,}:+ (?! #{\space \tab \newline \,})))))
-
-(def parse (comp second first sexp))
-
-(def parse1 (comp first parse)) ;;parses one node
+        [clojure.contrib.str-utils :only [str-join]])
+  (:require [clojure-refactoring.support.parser :as parser]))
 
 (defn make-node [tag content]
   {:tag tag :content content})
@@ -110,7 +67,7 @@
 (defn parsley-to-string [ast]
   (str-join "" (filter string? (parsley-sub-nodes ast))))
 
-(def sexp->parsley (comp parse1 format-code))
+(def sexp->parsley (comp parser/parse1 format-code))
 
 (defn parsley-tree-replace [old new ast]
   (parsley-walk
@@ -219,3 +176,14 @@
               (tag= :list)
               (comp binding-forms symbol
                     #(apply str %) :content second :content)))
+
+(defn- expand-args-with-parse1 [args]
+  "Takes arguments from a function and returns a vector that
+  (in a let form) rebinds them by parsing them."
+  (->> (mapcat #(list % (list 'clojure-refactoring.support.parser/parse1 %)) args) vec))
+
+(defmacro defparsed-fn [name args docstring & body]
+  "Defines a function in which all of the args are rebound by parsing them using parse1."
+  `(defn ~name ~args ~docstring
+     (let ~(expand-args-with-parse1 args)
+       ~@body)))

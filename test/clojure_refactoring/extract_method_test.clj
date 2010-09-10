@@ -2,7 +2,8 @@
   (:use clojure-refactoring.extract-method :reload)
   (:use clojure.test
         [clojure-refactoring.support find-bindings-above-node
-         parsley]))
+         parsley])
+  (:require [clojure-refactoring.support.parser :as parser]))
 
 (use-fixtures :once #(time (%)))
 
@@ -21,9 +22,9 @@
 (defn remove-extracted-function-sexp [extracted toplevel new-fn]
   (parsley-to-string
    (call-extracted
-    (parse1 extracted)
-    (parse1 toplevel)
-    (parse1 new-fn))))
+    (parser/parse1 extracted)
+    (parser/parse1 toplevel)
+    (parser/parse1 new-fn))))
 
 (deftest remove_extracted_function
   (is (= (remove-extracted-function-sexp

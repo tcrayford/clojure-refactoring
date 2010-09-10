@@ -20,6 +20,3 @@
                      "(+ z c)"
                      "y")
          "(defn a [b] (let [c 1 z 3 y (+ z c)] y))")))
-
-(defn parsley->sexp [ast]
-  (read-string (parsley-to-string ast)))
