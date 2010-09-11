@@ -8,7 +8,7 @@
   (let [ast (parser/parse node)
         old (symbol old-name)
         new (symbol new-name)]
-    (ast/parsley-to-string
+    (ast/ast->string
      (ast/replace-symbol-in-ast-node
       old
       new

@@ -10,15 +10,15 @@
 
 (defn extract-symbols-from-binding-node [ast]
   (->> (extract-binding-syms ast)
-       ast/parsley-sub-nodes
-       (filter ast/parsley-symbol?)))
+       ast/sub-nodes
+       (filter ast/symbol?)))
 
 (defn binding-node-that-contains? [node expr]
-     (and (ast/parsley-binding-node? node)
-          (ast/parsley-tree-contains node expr)))
+     (and (ast/binding-node? node)
+          (ast/tree-contains node expr)))
 
 (defn find-bindings-above-node [node expr]
-  (->> (ast/parsley-sub-nodes node)
+  (->> (ast/sub-nodes node)
        (filter #(binding-node-that-contains? % expr))
        (mapcat extract-symbols-from-binding-node)
        distinct))

@@ -21,7 +21,7 @@
 
 (deftest renaming_fn
   (testing "it replaces occurences of the var name"
-    (is (= (ast/parsley-to-string
+    (is (= (ast/ast->string
             ((renaming-fn #'a 'z)
              (parser/parse
               "(defn b [c] (a 1 2))")))

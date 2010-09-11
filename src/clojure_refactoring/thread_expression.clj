@@ -48,7 +48,7 @@ based on what type of threading is going to be"
   (let [{:keys [position-f all-but-position-f]}
         (threading-fns-from-type thread-type)
         useful-content (ast/relevant-content node)]
-    (ast/content-conj
+    (ast/conj
      new-ast
      (position-f node)
      (apply ast/list-without-whitespace (all-but-position-f node)))))
@@ -56,10 +56,10 @@ based on what type of threading is going to be"
 (defn thread-with-type [thread-type ast]
   (let [{:keys [position-f all-but-position-f]}
         (threading-fns-from-type thread-type)]
-    (loop [node ast new-node ast/empty-parsley-list]
+    (loop [node ast new-node ast/empty-list]
       (if (not-last-threading-node? node position-f)
         (recur (position-f  node)
-               (ast/content-conj new-node (all-but-position-f node)))
+               (ast/conj new-node (all-but-position-f node)))
         (finish-threading node new-node thread-type)))))
 
 (defn thread-ast [thread-type ast]
@@ -72,7 +72,7 @@ based on what type of threading is going to be"
   (->> (ast/strip-whitespace (parser/parse1 code))
        (thread-ast thread-type)
        format-ast
-       ast/parsley-to-string))
+       ast/ast->string))
 
 (defn thread-last [code]
      (construct-threaded '->> code))

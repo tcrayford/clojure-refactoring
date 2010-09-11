@@ -8,14 +8,14 @@
 
 (defn- find-occurences [args node]
   "Looks for any occurence of each element of args in the node"
-  (seq (intersection (set args) (set (ast/parsley-sub-nodes node)))))
+  (seq (intersection (set args) (set (ast/sub-nodes node)))))
 
 (defn fn-name [fn-node]
   (second (ast/relevant-content fn-node)))
 
 (defn fn-call [fn-node]
   "Uses the arguments of a function node to return a call to it."
-  (ast/parsley-list `(~(fn-name fn-node) ~@(ast/parsley-bindings fn-node))))
+  (ast/list `(~(fn-name fn-node) ~@(ast/parsley-bindings fn-node))))
 
 (defn- arg-occurences [f-node extracted-node]
   "Finds the bindings from f-node that are also in the extracted node."
@@ -28,20 +28,20 @@
    (ast/list-without-whitespace
     (ast/symbol 'defn)
     name
-    (ast/parsley-vector args)
+    (ast/vector args)
     (ast/strip-whitespace body))))
 
 (defn call-extracted [body toplevel extracted]
-  (ast/parsley-tree-replace
+  (ast/tree-replace
    body
    (fn-call extracted)
    toplevel))
 
 (defn- nodes-to-string [extract-node fn-node new-fun]
   "Formats the output for extract-method to print"
-  (str (ast/parsley-to-string new-fun)
+  (str (ast/ast->string new-fun)
        "\n\n"
-       (ast/parsley-to-string
+       (ast/ast->string
         (call-extracted extract-node fn-node new-fun))))
 
 (defparsed-fn extract-method [function-node extract-node new-name]

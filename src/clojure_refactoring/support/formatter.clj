@@ -11,7 +11,7 @@
     ast))
 
 (defn add-whitespace-to-lists [ast]
-  (ast/parsley-walk
+  (ast/walk
    #(replace-content-by ast/add-whitespace %)
    ast))
 
@@ -25,7 +25,7 @@
            (= ast (last (ast/relevant-content toplevel))))))
 
 (def threading-spacing
-     [ast/parsley-newline ast/parsley-whitespace ast/parsley-whitespace])
+     [ast/newline ast/whitespace ast/whitespace])
 
 (defn format-threaded [ast]
   (let [with-whitespace

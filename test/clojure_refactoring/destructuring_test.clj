@@ -28,17 +28,17 @@
          '{:tag :atom :content ("a")})))
 
 (deftest parsley_find_map_lookups
-  (is (= (map ast/parsley-to-string
+  (is (= (map ast/ast->string
               (parsley-find-lookups (parser/parse "(defn a [b] (:a b))")))
          '("(:a b)"))))
 
 (deftest parsley_lookup_to_proper_form
-  (is (= (ast/parsley-to-string (parsley-lookup-to-canoninical-form
+  (is (= (ast/ast->string (parsley-lookup-to-canoninical-form
                              (first (parser/parse "(a :a)"))))
          "(:a a)")))
 
 (deftest add_to_parsley_map
-  (is (= (ast/parsley-to-string
+  (is (= (ast/ast->string
           (add-to-parsley-map '{:tag :map :content ("{" "}")}
                               '{:tag :atom :content ("a")}
                               '{:tag :atom :content ("b")})))))

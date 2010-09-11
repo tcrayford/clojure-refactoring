@@ -8,7 +8,7 @@
 (use-fixtures :once #(time (%)))
 
 (defn fn-call-sexp [sexp]
-  (read-string (ast/parsley-to-string (fn-call (ast/sexp->parsley sexp)))))
+  (read-string (ast/ast->string (fn-call (ast/sexp->parsley sexp)))))
 
 (defn fn-name-sexp [sexp]
          (symbol (first (:content (fn-name (ast/sexp->parsley sexp))))))
@@ -20,7 +20,7 @@
   (is (= (fn-call-sexp '(defn a [b] (+ 1 2))) '(a b))))
 
 (defn remove-extracted-function-sexp [extracted toplevel new-fn]
-  (ast/parsley-to-string
+  (ast/ast->string
    (call-extracted
     (parser/parse1 extracted)
     (parser/parse1 toplevel)

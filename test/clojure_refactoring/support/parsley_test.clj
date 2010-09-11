@@ -8,23 +8,23 @@
 (use-fixtures :once #(time (%)))
 
 (deftest parlsey_keyword
-  (is (ast/parsley-keyword? (first (parser/parse ":a")))))
+  (is (ast/keyword? (first (parser/parse ":a")))))
 
 (deftest parsley_to_string
   (prop "parsley to string composed with parse is identity"
         [s random-sexp-from-core]
-        (is (= (ast/parsley-to-string (parser/parse s))
+        (is (= (ast/ast->string (parser/parse s))
                s)))
 
   (testing "parsley to string for each file in this project"
    (doseq [file (map filename-from-ns (find-ns-in-user-dir))]
      (let [slurped (memo-slurp file)]
-       (is (= (ast/parsley-to-string (parser/parse slurped))
+       (is (= (ast/ast->string (parser/parse slurped))
               slurped))))))
 
 (defn parsley-rec-contains [obj ast]
   "Works out if a parsley-ast contains a sexp object"
-  (-> (ast/parsley-to-string ast)
+  (-> (ast/ast->string ast)
       read-string
       (tree-contains? obj)))
 
@@ -57,26 +57,26 @@
                       (ast/replace-symbol-in-ast-node new old))
                  parsed))))
 
-  (is (= (ast/parsley-to-string
+  (is (= (ast/ast->string
           (ast/replace-symbol-in-ast-node 'a 'z
                                       (parser/parse "(defn b [c] (a 1 2))")))
          "(defn b [c] (z 1 2))")))
 
 (deftest parsley_walk
-  (prop "parsley-walk with identity returns the same ast it was passe"
+  (prop "ast/walk with identity returns the same ast it was passe"
         [s random-sexp-from-core]
         (let [parsed (parser/parse s)]
-          (is (= (ast/parsley-walk identity parsed)
+          (is (= (ast/walk identity parsed)
                  parsed)))))
 
 (deftest parsley_list
-  (is (= (ast/parsley-list [1 2 3])
+  (is (= (ast/list [1 2 3])
 '{:tag :list, :content ("(" 1 {:tag :whitespace, :content (" ")} 2 {:tag :whitespace, :content (" ")} 3 ")")})))
 
 (deftest parsley_vector
-  (is (= (ast/parsley-vector [1 2 3])
+  (is (= (ast/vector [1 2 3])
 '{:tag :vector, :content ("[" 1 {:tag :whitespace, :content (" ")} 2 {:tag :whitespace, :content (" ")} 3 "]")})))
 
 (deftest parsley_binding_node?
-  (is (ast/parsley-binding-node? (parser/parse1 "(let [a 1] a)"))))
+  (is (ast/binding-node? (parser/parse1 "(let [a 1] a)"))))
 

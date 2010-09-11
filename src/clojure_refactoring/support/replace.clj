@@ -15,7 +15,7 @@
     (if (= (parsley-from-cache ns) replacement)
       nil
      {:file (filename-from-ns ns)
-      :new-source (ast/parsley-to-string
+      :new-source (ast/ast->string
                    replacement)})))
 
 (defn replace-namespaces [namespaces f]

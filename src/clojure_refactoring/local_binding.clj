@@ -13,9 +13,9 @@
   (ast/replace-content binding-node
     `(~(first content)
       ~@(butlast (drop 1 content))
-      ~ast/parsley-whitespace
+      ~ast/whitespace
       ~var-name
-      ~ast/parsley-whitespace
+      ~ast/whitespace
       ~value
       ~(last content))))
 
@@ -23,7 +23,7 @@
   (= ast (ast/parsley-fn-args top-level)))
 
 (defn- modify-existing-let-block [form value var-name]
-  (ast/parsley-walk
+  (ast/walk
    (fn [ast]
      (if (is-node-the-binding-form form ast)
        (add-to-binding ast value var-name)
@@ -31,26 +31,26 @@
    form))
 
 (defn let-wrap [form value var-name]
-  (if (ast/parsley-binding-node? form)
+  (if (ast/binding-node? form)
     (modify-existing-let-block form value var-name)
     (ast/list-without-whitespace
      (ast/symbol 'let)
-      ast/parsley-whitespace
-      (ast/parsley-vector
+      ast/whitespace
+      (ast/vector
        [var-name value])
-      ast/parsley-whitespace
+      ast/whitespace
       form)))
 
 (defn- wrap-function-body-with-let [defn-form value var-name]
   (let [fn-def (get-function-definition defn-form)]
-    (ast/parsley-tree-replace
+    (ast/tree-replace
      fn-def (let-wrap fn-def value var-name)
      defn-form)))
 
 (defparsed-fn local-wrap [top value var-name]
   "Extracts a value as a local variable inside top"
   (-> (wrap-function-body-with-let
-        (ast/parsley-tree-replace
+        (ast/tree-replace
          value var-name top)
         value var-name)
-      ast/parsley-to-string))
+      ast/ast->string))

@@ -9,7 +9,7 @@
 (defn parsley-map-lookup? [ast]
   (let [content (ast/relevant-content ast)]
     (and (ast/tag= :list ast)
-         (count= (filter ast/parsley-keyword? content) 1)
+         (count= (filter ast/keyword? content) 1)
          (count= content 2))))
 
 (defn parsley-key->sym [kw-node]
@@ -20,7 +20,7 @@
 
 (defn parsley-find-lookups [node]
   "Returns all the map lookups in a node as a set of parsley asts"
-  (->> (ast/parsley-sub-nodes node)
+  (->> (ast/sub-nodes node)
        (filter parsley-map-lookup?)
        set))
 
@@ -36,7 +36,7 @@
 
 (defn parsley-lookup-to-canoninical-form [lookup-ast]
   (let [[maybe-keyword] (ast/relevant-content lookup-ast)]
-    (if (ast/parsley-keyword? maybe-keyword)
+    (if (ast/keyword? maybe-keyword)
       lookup-ast
       (parsley-swap-first-with-last lookup-ast))))
 
@@ -46,9 +46,9 @@
   (ast/replace-content m
     `("{"
       ~key
-      ~ast/parsley-whitespace
+      ~ast/whitespace
       ~val
-      ~ast/parsley-whitespace
+      ~ast/whitespace
       ~@(drop 1 (:content m)))))
 
 (def relevant-content-from-canoninical-form
@@ -59,7 +59,7 @@
   (let [[key m] (relevant-content-from-canoninical-form lookup)]
     (assoc binding-map m
            (add-to-parsley-map
-            (get binding-map m ast/parsley-empty-map)
+            (get binding-map m ast/empty-map)
             (parsley-key->sym key) key))))
 
 (defn lookups-to-binding-map [lookups]
@@ -78,7 +78,7 @@
   ;;replacing stuff all over the place
   (reduce
    (fn [new-ast lookup]
-     (ast/parsley-tree-replace
+     (ast/tree-replace
       lookup
       (parsley-key->sym (first (ast/relevant-content (parsley-lookup-to-canoninical-form lookup))))
       new-ast))
@@ -88,12 +88,12 @@
 (defn- add-destructured-maps-to-args [lookups root-ast]
   (let [args (ast/parsley-fn-args root-ast)
         new-args (destructured-binding-vec args lookups)]
-    (ast/parsley-tree-replace args new-args root-ast)))
+    (ast/tree-replace args new-args root-ast)))
 
 (defparsed-fn destructure-map [root-ast]
   "Destructures all calls to maps"
   (let [lookups (parsley-find-lookups root-ast)]
-    (ast/parsley-to-string
+    (ast/ast->string
      (replace-lookups-with-destructured-symbols
        lookups
        (add-destructured-maps-to-args lookups root-ast)))))

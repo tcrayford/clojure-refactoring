@@ -8,10 +8,10 @@
   (->> (ast/sexp->parsley s)
        ast/strip-whitespace
        format-ast
-       ast/parsley-to-string))
+       ast/ast->string))
 
 (deftest strip-whitespace-test
-  (is (= (ast/parsley-to-string
+  (is (= (ast/ast->string
           (ast/strip-whitespace (ast/sexp->parsley '(+ 1 2))))
          "(+12)")))
 
