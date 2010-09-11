@@ -26,7 +26,7 @@
   "Creates an ast representing the new function"
   (format-ast
    (ast/list-without-whitespace
-    (ast/ast-symbol 'defn)
+    (ast/symbol 'defn)
     name
     (ast/parsley-vector args)
     (ast/strip-whitespace body))))

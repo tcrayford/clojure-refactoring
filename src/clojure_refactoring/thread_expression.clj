@@ -64,7 +64,7 @@ based on what type of threading is going to be"
 
 (defn thread-ast [thread-type ast]
   (apply ast/list-without-whitespace
-         `(~(ast/ast-symbol thread-type)
+         `(~(ast/symbol thread-type)
            ~@(->> (thread-with-type thread-type ast)
                   ast/relevant-content))))
 

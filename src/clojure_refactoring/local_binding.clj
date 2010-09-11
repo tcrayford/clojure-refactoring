@@ -1,6 +1,6 @@
 (ns clojure-refactoring.local-binding
   (:use clojure.walk
-        [clojure-refactoring.support core parsley formatter]
+        [clojure-refactoring.support core formatter]
         [clojure.contrib.seq-utils :only (find-first)]
         [clojure-refactoring.support.parsley :only [defparsed-fn]])
   (:require [clojure-refactoring.support.parsley :as ast]))
@@ -34,7 +34,7 @@
   (if (ast/parsley-binding-node? form)
     (modify-existing-let-block form value var-name)
     (ast/list-without-whitespace
-     (ast/ast-symbol 'let)
+     (ast/symbol 'let)
       ast/parsley-whitespace
       (ast/parsley-vector
        [var-name value])

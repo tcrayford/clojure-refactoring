@@ -6,12 +6,14 @@
         [clojure.contrib.def :only [defonce-]]
         [clojure.contrib.seq-utils :only [find-first]]
         [clojure.contrib.str-utils :only [str-join]])
+  (:refer-clojure :exclude [symbol])
+  (:require [clojure.core :as core])
   (:require [clojure-refactoring.support.parser :as parser]))
 
 (defn make-node [tag content]
   {:tag tag :content content})
 
-(defn ast-symbol [sym]
+(defn symbol [sym]
   (make-node :atom (list (name sym))))
 
 (def parsley-empty-map (make-node :map (list "{" "}")))
@@ -75,7 +77,7 @@
    ast))
 
 (defn replace-symbol-in-ast-node [old new ast]
-  (parsley-tree-replace (ast-symbol old) (ast-symbol new) ast))
+  (parsley-tree-replace (symbol old) (symbol new) ast))
 
 (defn- parsley-get-first-node [ast]
   (if (map? ast) ast (first ast)))
@@ -174,7 +176,7 @@
 (def parsley-binding-node?
      (all-of? map?
               (tag= :list)
-              (comp binding-forms symbol
+              (comp binding-forms core/symbol
                     #(apply str %) :content second :content)))
 
 (defn- expand-args-with-parse1 [args]
