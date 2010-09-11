@@ -1,8 +1,7 @@
 (ns clojure-refactoring.destructuring-test
   (:use clojure-refactoring.destructuring :reload)
   (:use clojure.test)
-  (:use [clojure-refactoring.support.parsley :only [defparsed-fn]])
-  (:require [clojure-refactoring.support.parsley :as ast])
+  (:require [clojure-refactoring.ast :as ast])
   (:require [clojure-refactoring.support.parser :as parser]))
 
 (use-fixtures :once #(time (%)))

@@ -3,8 +3,8 @@
         [clojure-refactoring.support core]
         [clojure.contrib.seq-utils :only [find-first]]
         [clojure.contrib.str-utils :only [str-join]]
-        [clojure-refactoring.support.parsley :only [defparsed-fn]])
-  (:require [clojure-refactoring.support.parsley :as ast]))
+        [clojure-refactoring.ast :only [defparsed-fn]])
+  (:require [clojure-refactoring.ast :as ast]))
 
 (defn parsley-map-lookup? [ast]
   (let [content (ast/relevant-content ast)]

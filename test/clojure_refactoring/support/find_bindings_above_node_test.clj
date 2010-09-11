@@ -1,6 +1,6 @@
 (ns clojure-refactoring.support.find-bindings-above-node-test
   (:use clojure-refactoring.support.find-bindings-above-node :reload)
-  (:require [clojure-refactoring.support.parsley :as ast])
+  (:require [clojure-refactoring.ast :as ast])
   (:use clojure.test))
 
 (use-fixtures :once #(time (%)))

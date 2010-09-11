@@ -1,10 +1,10 @@
 (ns clojure-refactoring.extract-method
   (:use [clojure-refactoring.support core formatter
          find-bindings-above-node]
-        [clojure-refactoring.support.parsley :only [defparsed-fn]]
+        [clojure-refactoring.ast :only [defparsed-fn]]
         clojure.set
         [clojure.contrib.seq-utils :only [find-first]])
-  (:require [clojure-refactoring.support.parsley :as ast]))
+  (:require [clojure-refactoring.ast :as ast]))
 
 (defn- find-occurences [args node]
   "Looks for any occurence of each element of args in the node"

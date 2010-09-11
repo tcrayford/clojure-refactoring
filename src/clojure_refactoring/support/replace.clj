@@ -1,7 +1,7 @@
 (ns clojure-refactoring.support.replace
   (:use [clojure-refactoring.support
          source core paths])
-  (:require [clojure-refactoring.support.parsley :as ast]))
+  (:require [clojure-refactoring.ast :as ast]))
 
 (defn map-to-alist [m]
   "Converts a clojure map to an alist suitable for emacs"

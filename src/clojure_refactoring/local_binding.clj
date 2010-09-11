@@ -2,8 +2,8 @@
   (:use clojure.walk
         [clojure-refactoring.support core formatter]
         [clojure.contrib.seq-utils :only (find-first)]
-        [clojure-refactoring.support.parsley :only [defparsed-fn]])
-  (:require [clojure-refactoring.support.parsley :as ast]))
+        [clojure-refactoring.ast :only [defparsed-fn]])
+  (:require [clojure-refactoring.ast :as ast]))
 
 (defn- get-function-definition [defn-ast]
   (find-first (ast/tag= :list) (:content defn-ast)))

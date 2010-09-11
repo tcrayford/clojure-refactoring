@@ -1,6 +1,6 @@
 (ns clojure-refactoring.support.formatter
   (:use [clojure-refactoring.support core])
-  (:require [clojure-refactoring.support.parsley :as ast]))
+  (:require [clojure-refactoring.ast :as ast]))
 
 (defn replace-content-by [f {content :content :as ast}]
   (if (ast/composite-tag? (:tag ast))

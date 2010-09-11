@@ -1,8 +1,5 @@
-(ns clojure-refactoring.support.parsley
-  (:require [net.cgrand.parsley.glr :as glr])
-  (:use net.cgrand.parsley
-        [clojure.contrib.def :only [defonce-]]
-        [clojure.contrib.seq-utils :only [find-first]]
+(ns clojure-refactoring.ast
+  (:use [clojure.contrib.seq-utils :only [find-first]]
         [clojure.contrib.str-utils :only [str-join]])
   (:refer-clojure
    :exclude [symbol symbol? keyword? list vector newline conj])

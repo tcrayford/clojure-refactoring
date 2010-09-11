@@ -1,5 +1,5 @@
-(ns clojure-refactoring.support.parsley-test
-  (:require [clojure-refactoring.support.parsley :as ast] :reload)
+(ns clojure-refactoring.ast-test
+  (:require [clojure-refactoring.ast :as ast] :reload)
   (:use clojure-refactoring.test-helpers
         clojure.test
         [clojure-refactoring.support core source paths])
@@ -79,4 +79,3 @@
 
 (deftest parsley_binding_node?
   (is (ast/binding-node? (parser/parse1 "(let [a 1] a)"))))
-

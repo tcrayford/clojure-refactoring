@@ -1,7 +1,7 @@
 (ns clojure-refactoring.support.formatter-test
   (:use clojure-refactoring.support.formatter :reload)
   (:use clojure.test)
-  (:require [clojure-refactoring.support.parsley :as ast])
+  (:require [clojure-refactoring.ast :as ast])
   (:use clojure-refactoring.test-helpers))
 
 (defn format-from-sexp [s]

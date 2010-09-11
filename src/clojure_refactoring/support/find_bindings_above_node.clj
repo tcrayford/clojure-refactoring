@@ -1,6 +1,6 @@
 (ns clojure-refactoring.support.find-bindings-above-node
   (:use [clojure-refactoring.support core])
-  (:require [clojure-refactoring.support.parsley :as ast]))
+  (:require [clojure-refactoring.ast :as ast]))
 
 (defn extract-binding-syms [ast]
   (if (#{"defmacro" "fn" "defn"}

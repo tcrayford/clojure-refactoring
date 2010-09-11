@@ -2,7 +2,7 @@
   (:use [clojure-refactoring.support replace]
         clojure.walk)
   (:require [clojure-refactoring.support.parser :as parser])
-  (:require [clojure-refactoring.support.parsley :as ast]))
+  (:require [clojure-refactoring.ast :as ast]))
 
 (defn rename [node old-name new-name]
   (let [ast (parser/parse node)

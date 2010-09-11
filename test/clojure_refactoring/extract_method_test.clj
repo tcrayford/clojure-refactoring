@@ -2,7 +2,7 @@
   (:use clojure-refactoring.extract-method :reload)
   (:use clojure.test
         clojure-refactoring.support.find-bindings-above-node)
-  (:require [clojure-refactoring.support.parsley :as ast])
+  (:require [clojure-refactoring.ast :as ast])
   (:require [clojure-refactoring.support.parser :as parser]))
 
 (use-fixtures :once #(time (%)))

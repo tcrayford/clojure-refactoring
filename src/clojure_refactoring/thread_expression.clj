@@ -3,7 +3,7 @@
         [clojure.walk :only [postwalk]]
         clojure-refactoring.support.formatter)
   (:require [clojure-refactoring.support.parser :as parser])
-  (:require [clojure-refactoring.support.parsley :as ast]))
+  (:require [clojure-refactoring.ast :as ast]))
 
 (def expression-threaders '#{->> -> clojure.core/->> clojure.core/->})
 
