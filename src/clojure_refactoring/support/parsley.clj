@@ -4,9 +4,11 @@
         [clojure.contrib.def :only [defonce-]]
         [clojure.contrib.seq-utils :only [find-first]]
         [clojure.contrib.str-utils :only [str-join]])
-  (:refer-clojure :exclude [symbol symbol? keyword? list vector newline conj])
+  (:refer-clojure
+   :exclude [symbol symbol? keyword? list vector newline conj])
   (:require [clojure.core :as core])
-  (:use [clojure-refactoring.support.core :exclude [sub-nodes tree-contains?]])
+  (:use [clojure-refactoring.support.core
+         :exclude [sub-nodes tree-contains?]])
   (:require [clojure-refactoring.support.parser :as parser]))
 
 (defn make-node [tag content]
@@ -175,7 +177,9 @@
 (defn- expand-args-with-parse1 [args]
   "Takes arguments from a function and returns a vector that
   (in a let form) rebinds them by parsing them."
-  (->> (mapcat #(core/list % (core/list 'clojure-refactoring.support.parser/parse1 %)) args) vec))
+  (->> args
+       (mapcat (fn [arg] `(~arg (parser/parse1 ~arg))))
+       vec))
 
 (defmacro defparsed-fn [name args docstring & body]
   "Defines a function in which all of the args are rebound by parsing them using parse1."
