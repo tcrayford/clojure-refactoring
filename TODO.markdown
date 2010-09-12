@@ -1,6 +1,7 @@
 0.5 or later
 ---
 Inline function.
+Use clojure.zip to simplify tree walking.
 
 
 Ideas:
@@ -8,13 +9,13 @@ Fix multiple defn bodies problem (map over defn bodies)
 
 Watch files for reloading (using something like lazytest's watcher)
 
-0.4.1
+0.4.1 DONE
 ---
 
 Threading and extract as local to use parsley. Rework API for parsley.
 
 
-0.4
+0.4 DONE
 ---
 
 New cache layout: map namespaces to parsley called on that namespace.
