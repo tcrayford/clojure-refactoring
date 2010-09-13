@@ -152,7 +152,8 @@
           (new-name (read-from-minibuffer "New name: ")))
       (beginning-of-defun)
       (mark-sexp)
-      (let ((body (buffer-substring-no-properties (mark t) (point))))
+      (let ((body (escape-string-literals
+                   (buffer-substring-no-properties (mark t) (point)))))
         (forward-kill-sexp)
         (clojure-refactoring-insert-sexp
          (clojure-refactoring-call-with-string-args
