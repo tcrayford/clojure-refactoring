@@ -17,7 +17,8 @@
       zip/path))
 
 (defn zip-walk [zipper f]
-  "Performs a depth first walk over zipper, calling f on each sub-node."
+  "Performs a depth first walk over zipper, calling a function
+   on each sub-node."
   (loop [loc zipper]
     (if (zip/end? loc)
       (zip/root loc)

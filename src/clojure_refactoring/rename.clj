@@ -20,11 +20,11 @@
      (rename-in-ast ast old new))))
 
 (defn rename-node [loc new-name]
-  (if ((bindings-above-loc loc) (zip/node loc))
+  (if ((bindings-above loc) (zip/node loc))
     loc
     (zip/replace loc (ast/symbol new-name))))
 
-(defn rename-non-shadowed-in-ast [new-sym node old-name]
+(defn rename-non-shadowed [new-sym node old-name]
   (zip-walk (ast-zip node)
             #(if (= (zip/node %) (ast/symbol old-name))
                (rename-node % new-sym) %)))
@@ -32,7 +32,7 @@
 (defn renaming-fn [old-var new-sym]
   "Returns a function for renaming nodes"
   (fn [node]
-    (rename-non-shadowed-in-ast new-sym node (.sym old-var))))
+    (rename-non-shadowed new-sym node (.sym old-var))))
 
 (defn global-rename [ns old-name new-name]
   "Sends a list of alists to emacs for processing as renames."

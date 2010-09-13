@@ -15,7 +15,7 @@
        ast/sub-nodes
        (filter ast/symbol?)))
 
-(defn bindings-above-loc [loc]
+(defn bindings-above [loc]
   (->> (zip/path loc)
        (filter ast/binding-node?)
        (mapcat extract-symbols-from-binding-node)
@@ -23,4 +23,4 @@
 
 (defn find-bindings-above-node [node expr]
   (->> (find-node (ast-zip node) expr)
-       bindings-above-loc))
+       bindings-above))
