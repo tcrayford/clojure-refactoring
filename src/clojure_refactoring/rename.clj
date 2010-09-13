@@ -24,20 +24,17 @@
     loc
     (zip/replace loc (ast/symbol new-name))))
 
+(defn rename-non-shadowed-in-ast [new-sym node old-name]
+  (zip-walk (ast-zip node)
+            #(if (= (zip/node %) (ast/symbol old-name))
+               (rename-node % new-sym) %)))
+
 (defn renaming-fn [old-var new-sym]
   "Returns a function for renaming nodes"
   (fn [node]
-    (loop [loc (ast-zip node)]
-      (cond (zip/end? loc)
-            (zip/root loc)
-
-            (= (zip/node loc) (ast/symbol (.sym old-var)))
-            (recur (zip/next (rename-node loc new-sym)))
-
-            :else
-            (recur (zip/next loc))))))
+    (rename-non-shadowed-in-ast new-sym node (.sym old-var))))
 
 (defn global-rename [ns old-name new-name]
-  "Sends a list of alists to emacs for processing as renames"
+  "Sends a list of alists to emacs for processing as renames."
   (let [old-var (ns-resolve ns old-name)]
     (replace-callers old-var (renaming-fn old-var new-name))))

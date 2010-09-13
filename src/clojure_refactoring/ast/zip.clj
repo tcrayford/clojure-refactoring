@@ -16,3 +16,9 @@
   (-> (find-node (ast-zip ast) expr)
       zip/path))
 
+(defn zip-walk [zipper f]
+  "Performs a depth first walk over zipper, calling f on each sub-node."
+  (loop [loc zipper]
+    (if (zip/end? loc)
+      (zip/root loc)
+      (recur (zip/next (f loc))))))
