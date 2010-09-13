@@ -1,13 +1,18 @@
-0.5 or later
+0.6 or later
 ---
 Inline function.
-Use clojure.zip to simplify tree walking.
 
 
 Ideas:
 Fix multiple defn bodies problem (map over defn bodies)
 
 Watch files for reloading (using something like lazytest's watcher)
+
+0.5
+---
+
+Rename not to rename shadowed var names.
+Use clojure.zip for tree walking.
 
 0.4.1 DONE
 ---
