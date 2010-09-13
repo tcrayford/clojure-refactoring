@@ -1,6 +1,7 @@
 (ns clojure-refactoring.support.find-bindings-above-node
   (:use [clojure-refactoring.support core]
         clojure-refactoring.ast.zip)
+  (:require [clojure.zip :as zip])
   (:require [clojure-refactoring.ast :as ast]))
 
 (defn extract-binding-syms [ast]
@@ -14,7 +15,12 @@
        ast/sub-nodes
        (filter ast/symbol?)))
 
+(defn bindings-above-loc [loc]
+  (->> (zip/path loc)
+       (filter ast/binding-node?)
+       (mapcat extract-symbols-from-binding-node)
+       set))
+
 (defn find-bindings-above-node [node expr]
-    (->> (nodes-leading-to node expr)
-         (filter ast/binding-node?)
-         (mapcat extract-symbols-from-binding-node)))
+  (->> (find-node (ast-zip node) expr)
+       bindings-above-loc))

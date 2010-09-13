@@ -56,7 +56,6 @@
 
 (defn- reload [ns]
   (add-to-ns-cache! ns)
-  (require ns :reload)
   ns)
 
 (defn require-and-return [ns]

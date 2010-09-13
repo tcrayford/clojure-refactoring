@@ -18,13 +18,16 @@
 
 (def whitespace (make-node :whitespace '(" ")))
 
-(def composite-tag? (complement
-                     #{:atom :regex :space :var :char :string}))
+(def composite-tag?
+     ^{:doc "Returns true if tag is from a composite node"}
+     (complement #{:atom :regex :space :var :char :string}))
 
 (defn replace-content [ast new-content]
+  "Replaces the content of an ast with new content."
   (assoc ast
     :content
     new-content))
+
 (declare walk)
 
 (defn- replacement-for-composite [tag f]
@@ -45,6 +48,7 @@
      (replacement-for-content tag f content))))
 
 (defn walk [f ast]
+  "Walks over ast, applying f to each node."
   (if (map? ast)
     (f
      (walk-replace-content f ast))
@@ -56,17 +60,13 @@
     (:content ast)))
 
 (defn sub-nodes [ast]
+  "Returns a lazy sequence of all the sub-nodes of an ast."
   (tree-seq (any-of? sequential? composite-tag?)
             expand-nodes
             ast))
 
 (defn tree-contains [ast obj]
   (some #{obj} (sub-nodes ast)))
-
-(defn ast->string [ast]
-  (str-join "" (filter string? (sub-nodes ast))))
-
-(def sexp->parsley (comp parser/parse1 format-code))
 
 (defn tree-replace [old new ast]
   (walk
@@ -76,6 +76,11 @@
 (defn replace-symbol-in-ast-node [old new ast]
   (tree-replace (symbol old) (symbol new) ast))
 
+(defn ast->string [ast]
+  (str-join "" (filter string? (sub-nodes ast))))
+
+(def sexp->parsley (comp parser/parse1 format-code))
+
 (defn- parsley-get-first-node [ast]
   (if (map? ast) ast (first ast)))
 
@@ -84,11 +89,9 @@
   ([x ast]
      (= (:tag ast) x)))
 
-;; atom?
 (defn- parsley-atom? [ast]
   (tag= :atom ast))
 
-;;content->str
 (defn- ast-content [ast]
   (str-join "" (:content ast)))
 
@@ -96,7 +99,6 @@
      (all-of? map? parsley-atom?
               (comp core/symbol? read-string ast-content)))
 
-;;keyword?
 (def keyword?
      (all-of? parsley-atom?
               #(first= (ast-content %) \:)))
@@ -106,6 +108,7 @@
 
 ;;TODO: needs a better name
 (defn relevant-content [ast]
+  "Removes whitespace and comments from the content an ast."
   (remove ignored-node? (:content ast)))
 
 (defn intersperse [coll item]
