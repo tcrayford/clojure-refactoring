@@ -8,7 +8,7 @@ Fix multiple defn bodies problem (map over defn bodies)
 
 Watch files for reloading (using something like lazytest's watcher)
 
-0.5
+0.5 DONE
 ---
 
 Rename not to rename shadowed var names.

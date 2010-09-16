@@ -12,27 +12,27 @@
 
 (deftest parsley_map_lookup
   (testing "map lookups"
-    (are [s] (parsley-map-lookup? (first (parser/parse s)))
+    (are [s] (map-lookup? (first (parser/parse s)))
          "(:a a)"
          "(b :foo)"))
 
-  (are [s] (not (parsley-map-lookup? (first (parser/parse s))))
+  (are [s] (not (map-lookup? (first (parser/parse s))))
        "(a (:a a))"
        "(:a a a)"
        "(:foo :bar)"
        "(:foo a :bar b)"))
 
 (deftest parsley_key_to_sym
-  (is (= (parsley-key->sym '{:tag :atom :content (":a")})
+  (is (= (key->sym '{:tag :atom :content (":a")})
          '{:tag :atom :content ("a")})))
 
 (deftest parsley_find_map_lookups
   (is (= (map ast/ast->string
-              (parsley-find-lookups (parser/parse "(defn a [b] (:a b))")))
+              (find-lookups (parser/parse "(defn a [b] (:a b))")))
          '("(:a b)"))))
 
 (deftest parsley_lookup_to_proper_form
-  (is (= (ast/ast->string (parsley-lookup-to-canoninical-form
+  (is (= (ast/ast->string (lookup->canoninical-form
                              (first (parser/parse "(a :a)"))))
          "(:a a)")))
 
@@ -43,7 +43,7 @@
                               '{:tag :atom :content ("b")})))))
 
 (deftest parsley_lookups_to_binding_map
-  (is ((lookups-to-binding-map (parsley-find-lookups (parser/parse "(defn a [b] (:a b))")))
+  (is ((lookups-to-binding-map (find-lookups (parser/parse "(defn a [b] (:a b))")))
            '{:tag :atom :content ("b")})))
 
 ;;Integration level tests below here.
